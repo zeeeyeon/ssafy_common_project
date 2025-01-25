@@ -1,11 +1,18 @@
 package com.project.backend.user.entity;
+import com.project.backend.record.entity.Record;
+import com.project.backend.userclimb.entity.UserClimb;
+import com.project.backend.video.entity.Video;
 import jakarta.persistence.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "user_id")
     private Long id;
 
     private String email;
@@ -31,4 +38,11 @@ public class User {
 
     // tier
     private UserTierEnum tier;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private List<UserClimb> userClimbList = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private List<Video> userVideoList  = new ArrayList<>();
+
 }
