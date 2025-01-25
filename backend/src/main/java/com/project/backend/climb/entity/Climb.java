@@ -1,16 +1,19 @@
 package com.project.backend.climb.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import com.project.backend.climbinfo.entity.ClimbInfo;
+import com.project.backend.hold.entity.Hold;
+import com.project.backend.userclimb.entity.UserClimb;
+import jakarta.persistence.*;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 public class Climb {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "climb_id")
     private Long id;
 
     private String name;
@@ -26,4 +29,16 @@ public class Climb {
     private String open;
 
     private String number;
+
+
+
+    @OneToMany(mappedBy = "climb", cascade = CascadeType.ALL)
+    private List<UserClimb> userClimbList = new ArrayList<>();
+
+    @OneToMany(mappedBy = "climb", cascade = CascadeType.ALL)
+    private List<ClimbInfo> climbInfoList = new ArrayList<>();
+
+    @OneToMany(mappedBy = "climb", cascade = CascadeType.ALL)
+    private List<Hold> holdList = new ArrayList<>();
+
 }
