@@ -1,7 +1,6 @@
 package com.project.backend.user.entity;
 import com.project.backend.record.entity.Record;
-import com.project.backend.userclimb.entity.UserClimb;
-import com.project.backend.video.entity.Video;
+import com.project.backend.userclimbground.entity.userClimbGround;
 import jakarta.persistence.*;
 
 import java.util.ArrayList;
@@ -40,9 +39,11 @@ public class User {
     private UserTierEnum tier;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-    private List<UserClimb> userClimbList = new ArrayList<>();
+    private List<userClimbGround> userClimbGroundList = new ArrayList<>();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-    private List<Video> userVideoList  = new ArrayList<>();
+    private List<Record> userRecordList  = new ArrayList<>();
+
+
 
 }
