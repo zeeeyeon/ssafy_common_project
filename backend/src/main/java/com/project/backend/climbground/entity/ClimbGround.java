@@ -9,7 +9,9 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Getter
@@ -50,10 +52,10 @@ public class ClimbGround {
     @OneToMany(mappedBy = "climbGround", cascade = CascadeType.ALL)
     private List<userClimbGround> userClimbGroundList = new ArrayList<>();
 
-    @OneToMany(mappedBy = "climbGround", cascade = CascadeType.ALL)
-    private List<ClimbGroundInfo> climbGroundInfoList = new ArrayList<>();
+    @OneToMany(mappedBy = "climbGround", cascade = CascadeType.ALL , fetch = FetchType.LAZY)
+    private Set<ClimbGroundInfo> climbGroundInfoList = new HashSet<>();
 
-    @OneToMany(mappedBy = "climbGround", cascade = CascadeType.ALL ,fetch = FetchType.EAGER) //즉시 로딩이 설정되어 있어야 오류가 안남
-    private List<Hold> holdList = new ArrayList<>();
+    @OneToMany(mappedBy = "climbGround", cascade = CascadeType.ALL ,fetch = FetchType.LAZY)
+    private Set<Hold> holdList = new HashSet<>();
 
 }

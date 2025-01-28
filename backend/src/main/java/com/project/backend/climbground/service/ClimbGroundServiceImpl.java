@@ -21,16 +21,9 @@ public class ClimbGroundServiceImpl implements ClimbGroundService {
     }
 
     // 클라이밍장 상세 조회
-
-
-    // 클라이밍 장별 시설정보 조회 메서드
-//    public ClimbGround getClimbWithInfos(Long climb_id) {
-//        return  climbGroundRepository.findClimbWithInfosById(climb_id);
-//    }
-
     @Override
     public Optional<ClimbGround> findClimbGroundById(Long id) {
-        return climbGroundRepository.findById(id);
+        return climbGroundRepository.findClimbWithInfosById(id);
     }
 
 }
