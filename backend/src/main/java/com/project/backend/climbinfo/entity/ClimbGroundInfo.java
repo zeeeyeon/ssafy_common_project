@@ -1,22 +1,22 @@
 package com.project.backend.climbinfo.entity;
 
-import com.project.backend.climb.entity.Climb;
+import com.project.backend.climbground.entity.ClimbGround;
 import com.project.backend.info.entity.Info;
 import jakarta.persistence.*;
-
-import java.util.ArrayList;
-import java.util.List;
+import lombok.Getter;
 
 @Entity
-public class ClimbInfo {
+@Getter
+@Table(name = "climbground_info")
+public class ClimbGroundInfo {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "climb_info_id")
+    @Column(name = "climbground_info_id")
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "climb_id")
-    private Climb climb;
+    @JoinColumn(name = "climbground_id")
+    private ClimbGround climbGround;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "info_id")
