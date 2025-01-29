@@ -1,13 +1,13 @@
 package com.project.backend.climbground.service;
 
-import com.project.backend.climbground.entity.ClimbGround;
-
+import com.project.backend.climbground.dto.responseDTO.ClimbGroundAllResponseDTO;
+import com.project.backend.climbground.dto.responseDTO.ClimbGroundDetailResponseDTO;
 import java.util.List;
 import java.util.Optional;
 
 public interface ClimbGroundService {
 
-    List<ClimbGround> findAllClimbGround();
+    List<ClimbGroundAllResponseDTO> findAllClimbGround();
 
-    Optional<ClimbGround> findClimbGroundById(Long id);
+    Optional<ClimbGroundDetailResponseDTO> findClimbGroundDetailById(Long id);
 }

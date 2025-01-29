@@ -11,7 +11,11 @@ public class Hold {
     @GeneratedValue( strategy = GenerationType.IDENTITY)
     @Column(name = "hold_id")
     private Long id;
+
+    @Enumerated(EnumType.STRING)
     private HoldLevelEnum level;
+
+    @Enumerated(EnumType.STRING)
     private HoldColorEnum color;
 
 
