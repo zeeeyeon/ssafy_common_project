@@ -1,4 +1,4 @@
-package com.project.backend.climbinfo.entity;
+package com.project.backend.climbgroundinfo.entity;
 
 import com.project.backend.climbground.entity.ClimbGround;
 import com.project.backend.info.entity.Info;

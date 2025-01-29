@@ -1,6 +1,6 @@
 package com.project.backend.info.entity;
 
-import com.project.backend.climbinfo.entity.ClimbGroundInfo;
+import com.project.backend.climbgroundinfo.entity.ClimbGroundInfo;
 import jakarta.persistence.*;
 import lombok.Getter;
 

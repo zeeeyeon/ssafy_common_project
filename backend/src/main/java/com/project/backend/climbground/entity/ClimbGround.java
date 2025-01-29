@@ -1,6 +1,6 @@
 package com.project.backend.climbground.entity;
 
-import com.project.backend.climbinfo.entity.ClimbGroundInfo;
+import com.project.backend.climbgroundinfo.entity.ClimbGroundInfo;
 import com.project.backend.hold.entity.Hold;
 import com.project.backend.userclimbground.entity.userClimbGround;
 import jakarta.persistence.*;
@@ -53,9 +53,9 @@ public class ClimbGround {
     private List<userClimbGround> userClimbGroundList = new ArrayList<>();
 
     @OneToMany(mappedBy = "climbGround", cascade = CascadeType.ALL , fetch = FetchType.LAZY)
-    private Set<ClimbGroundInfo> climbGroundInfoList = new HashSet<>();
+    private List<ClimbGroundInfo> climbGroundInfoList = new ArrayList<>();
 
     @OneToMany(mappedBy = "climbGround", cascade = CascadeType.ALL ,fetch = FetchType.LAZY)
-    private Set<Hold> holdList = new HashSet<>();
+    private List<Hold> holdList = new ArrayList<>();
 
 }

@@ -9,11 +9,11 @@ import java.util.Optional;
 
 public interface ClimbGroundRepository extends JpaRepository<ClimbGround, Long> {
 
-    @Query("SELECT c from ClimbGround c " +
-            "left join fetch c.holdList " + // 필요하다면 홀드도 함께 가져옵니다
-            "left join fetch c.climbGroundInfoList ci " +
-            "left join fetch ci.info " +
-            "where c.id = :climbground_id")
-    Optional<ClimbGround> findClimbWithInfosById(@Param("climbground_id") Long climbground_id);
+    Optional<ClimbGround> findClimbGroundWithHoldById(Long climbground_id);
+
+//    @Query("SELECT c from ClimbGround c " +
+//            "left join fetch c.holdList " +
+//            "where c.id = :climbground_id")
+//    Optional<ClimbGround> findClimbGroundWithHoldById(@Param("climbground_id") Long climbground_id);
 
 }
