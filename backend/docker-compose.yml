@@ -1,12 +1,31 @@
 services:
   mysql:
     image: mysql:latest
+    container_name: mysql
     environment:
-      MYSQL_ROOT_PASSWORD: 1234
-      MYSQL_DATABASE: login
+      - MYSQL_ROOT_PASSWORD=1234
+      - MYSQL_DATABASE=login
+      - MYSQL_ROOT_HOST=%
+    networks:
+      - app-network
+
   redis:
     image: redis:latest
-  api:
-    build: .
+    container_name: redis
+    networks:
+      - app-network
+
+  springboot:
+    image: ${DOCKER_REPO}/${DOCKER_PROJECT}
+    container_name: springboot
     ports:
       - "8080:8080"
+    depends_on:
+      - mysql
+      - redis
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
