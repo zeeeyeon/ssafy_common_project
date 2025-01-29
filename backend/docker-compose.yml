@@ -15,9 +15,9 @@ services:
     networks:
       - app-network
 
-  springboot:
+  api:
     image: ${DOCKER_REPO}/${DOCKER_PROJECT}
-    container_name: springboot
+    container_name: ssafy_orai_api_1
     ports:
       - "8080:8080"
     depends_on:
