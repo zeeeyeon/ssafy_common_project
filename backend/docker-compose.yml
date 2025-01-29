@@ -1,0 +1,12 @@
+services:
+  mysql:
+    image: mysql:latest
+    environment:
+      MYSQL_ROOT_PASSWORD: 1234
+      MYSQL_DATABASE: login
+  redis:
+    image: redis:latest
+  api:
+    build: .
+    ports:
+      - "8080:8080"
