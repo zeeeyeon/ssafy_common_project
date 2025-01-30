@@ -55,7 +55,7 @@ class _SplashScreenState extends State<SplashScreen>
       await _controller.forward();
       await Future.delayed(const Duration(milliseconds: 500));
       if (mounted) {
-        context.go('/calendar');
+        context.go('/login');
       }
     } catch (e) {
       debugPrint('Animation or navigation error: $e');
