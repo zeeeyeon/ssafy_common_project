@@ -5,15 +5,18 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface ClimbGroundRepository extends JpaRepository<ClimbGround, Long> {
 
     Optional<ClimbGround> findClimbGroundWithHoldById(Long climbground_id);
 
-//    @Query("SELECT c from ClimbGround c " +
-//            "left join fetch c.holdList " +
-//            "where c.id = :climbground_id")
-//    Optional<ClimbGround> findClimbGroundWithHoldById(@Param("climbground_id") Long climbground_id);
+
+//    c.address or c.name에 문자열이 포함되어 있는 record 찾기
+    @Query("SELECT c from ClimbGround c " +
+            "WHERE LOWER(c.address) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
+            "OR LOWER(c.name) LIKE LOWER(CONCAT('%', :keyword, '%'))")
+    List<ClimbGround> searchClimbGround(@Param("keyword") String keyword);
 
 }

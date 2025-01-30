@@ -69,4 +69,27 @@ public class ClimbGroundServiceImpl implements ClimbGroundService {
 
         return Optional.of(response);
     }
+
+    @Override
+    public List<ClimbGroundAllResponseDTO> searchClimbGroundByKeyword(String keyword) {
+        //검색결과가 나올수도 안나올수도 여러 개일수도 한개 일수도 있음
+        List<ClimbGround> climbGrounds = climbGroundRepository.searchClimbGround(keyword);
+
+        // 검색 결과 없으면 빈리스트 주기
+        if (climbGrounds.isEmpty()) {
+            return List.of();
+        }
+
+        List<ClimbGroundAllResponseDTO> resultList = climbGrounds.stream()
+                .map(climbGround -> new ClimbGroundAllResponseDTO(climbGround.getId(),climbGround.getName(),climbGround.getImage(),climbGround.getAddress()))
+                .collect(Collectors.toList());
+
+        return resultList;
+
+
+
+
+    }
+
+
 }
