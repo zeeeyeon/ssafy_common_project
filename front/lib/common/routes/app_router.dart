@@ -40,6 +40,7 @@ final router = GoRouter(
       path: '/register',
       builder: (context, state) => const RegisterScreen(),
     ),
+
     // 메인 레이아웃을 포함하는 Shell Route
     ShellRoute(
       navigatorKey: _shellNavigatorKey,
@@ -48,6 +49,15 @@ final router = GoRouter(
         GoRoute(
           path: '/calendar',
           builder: (context, state) => const CalendarScreen(),
+          routes: [
+            GoRoute(
+              path: 'detail/:date',
+              builder: (context, state) {
+                final date = state.pathParameters['date']!;
+                return CalendarDetailScreen(date: date);
+              },
+            ),
+          ],
         ),
         GoRoute(
           path: '/challenge',
@@ -71,12 +81,7 @@ final router = GoRouter(
     GoRoute(
       path: '/camera',
       builder: (context, state) => const CameraScreen(),
-    ),
-    GoRoute(
-      path: '/calendar/detail/:date',
-      builder: (context, state) => CalendarDetailScreen(
-        date: state.pathParameters['date']!,
-      ),
+      parentNavigatorKey: _rootNavigatorKey,
     ),
   ],
 );
