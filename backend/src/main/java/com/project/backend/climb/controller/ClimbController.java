@@ -1,7 +1,7 @@
-package com.project.backend.climb.controller;
+package com.project.backend.climb.center.controller;
 
-import com.project.backend.climb.dto.responseDTO.ClimbResponseDTO;
-import com.project.backend.climb.service.ClimbServiceImpl;
+import com.project.backend.climb.center.dto.responseDTO.ClimbResponseDTO;
+import com.project.backend.climb.center.service.ClimbServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;

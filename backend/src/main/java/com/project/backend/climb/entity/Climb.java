@@ -1,4 +1,4 @@
-package com.project.backend.climb.entity;
+package com.project.backend.climb.center.entity;
 
 import com.project.backend.climbinfo.entity.ClimbInfo;
 import com.project.backend.hold.entity.Hold;
@@ -7,7 +7,6 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 

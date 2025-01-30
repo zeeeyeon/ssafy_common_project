@@ -1,11 +1,8 @@
-package com.project.backend.climbinfo.entity;
+package com.project.backend.climb_info.entity;
 
 import com.project.backend.climb.entity.Climb;
 import com.project.backend.info.entity.Info;
 import jakarta.persistence.*;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
 public class ClimbInfo {
