@@ -1,7 +1,7 @@
 package com.project.backend.date.entity;
 
 import com.project.backend.record.entity.Record;
-import com.project.backend.userclimb.entity.UserClimb;
+import com.project.backend.userground.entity.UserGround;
 import jakarta.persistence.*;
 
 import java.util.ArrayList;
@@ -16,8 +16,8 @@ public class Date {
 
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_climb_id")
-    private UserClimb userClimb;
+    @JoinColumn(name = "user_ground_id")
+    private UserGround userGround;
 
     @OneToMany(mappedBy = "date", cascade = CascadeType.ALL)
     private List<Record> recordList = new ArrayList<>();

@@ -1,4 +1,4 @@
-package com.project.backend.climb_info.entity;
+package com.project.backend.climbinfo.entity;
 
 import com.project.backend.climb.entity.Climb;
 import com.project.backend.info.entity.Info;

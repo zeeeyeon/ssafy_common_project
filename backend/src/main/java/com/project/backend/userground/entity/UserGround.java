@@ -9,10 +9,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-public class UserClimb {
+public class UserGround {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "user_climb_id")
+    @Column(name = "user_ground_id")
     private Long id;
 
     private UserClimbMedalEnum medal;
@@ -25,7 +25,7 @@ public class UserClimb {
     @JoinColumn(name = "climb_id")
     private Climb climb;
 
-    @OneToMany(mappedBy = "userClimb", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "userGround", cascade = CascadeType.ALL)
     private List<Date> dateList = new ArrayList<>();
 
 }
