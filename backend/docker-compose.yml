@@ -25,7 +25,7 @@ services:
       - app-network
 
   api:
-    image: ${DOCKER_REPO}/${DOCKER_PROJECT}
+    build: .
     container_name: ssafy_orai_api_1
     ports:
       - "8080:8080"
