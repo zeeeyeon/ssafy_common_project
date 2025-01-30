@@ -1,6 +1,7 @@
 package com.project.backend.oauth.controller;
 
-import com.project.backend.oauth.common.ApiResponse;
+import com.project.backend.common.ApiResponse;
+import com.project.backend.common.ApiResponseHeader;
 import com.project.backend.oauth.dto.AuthReqDto;
 import com.project.backend.oauth.entity.UserPrincipal;
 import com.project.backend.oauth.token.AuthToken;
