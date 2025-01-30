@@ -23,7 +23,7 @@ public class RecordController {
     @GetMapping("/api/record2")
     public String hello2(){
         List<ClimbGround> listAll = climbGroundRepository.findAll();
-        System.out.println("1111111");
+        System.out.println("11111111");
         return listAll.toString();
     }
 }
