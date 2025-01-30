@@ -65,18 +65,18 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     }
 
     private User createUser(OAuth2UserInfo userInfo, UserProviderEnum providerType, String email) {
-        LocalDateTime now = LocalDateTime.now();
-        User user = new User(
-                userInfo.getName(),
-                userInfo.getNickName(),
-                email,
-                "Y",
-                userInfo.getImageUrl(),
-                providerType,
-                UserRoleEnum.USER,
-                now,
-                now
-        );
+
+        User user = User.builder()
+                .username(userInfo.getName())
+                .nickname(userInfo.getNickName())
+                .email(email)
+                .emailVerifiedYn("Y")
+                .profileImageUrl(userInfo.getImageUrl())
+                .providerType(providerType)
+                .roleType(UserRoleEnum.USER)
+                .createDate(LocalDateTime.now())
+                .updateDate(LocalDateTime.now())
+                .build();
 
         return userRepository.saveAndFlush(user);
     }

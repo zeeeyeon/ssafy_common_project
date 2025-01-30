@@ -51,17 +51,18 @@ public class AuthTokenProvider {
               .collect(Collectors.toList());
 
       log.debug("claims subject := [{}]", claims.getSubject());
-      User principal = new User(
-              claims.getSubject(),  // userId
-              "Unknown",           // username
-              "NO_EMAIL",         // email
-              "N",               // emailVerifiedYn
-              "",               // profileImageUrl
-              UserProviderEnum.GOOGLE, // providerType
-              UserRoleEnum.USER,     // roleType
-              LocalDateTime.now(),              // createdAt
-              LocalDateTime.now()              // modifiedAt
-      );
+
+      User principal = User.builder()
+              .username(claims.getSubject())
+              .nickname("Unknown")
+              .email("NO_EMAIL")
+              .emailVerifiedYn("N")
+              .profileImageUrl("")
+              .providerType(UserProviderEnum.GOOGLE)
+              .roleType(UserRoleEnum.USER)
+              .createDate(LocalDateTime.now())
+              .updateDate(LocalDateTime.now())
+              .build();
 
       return new UsernamePasswordAuthenticationToken(principal, authToken, authorities);
     } else {

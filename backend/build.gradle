@@ -33,6 +33,10 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
 	implementation 'org.springframework.boot:spring-boot-starter-log4j2'
 	implementation 'org.springframework.boot:spring-boot-configuration-processor'
+	implementation 'net.nurigo:sdk:4.3.2'
+	implementation 'org.springframework.boot:spring-boot-starter-websocket'
+
+
 	implementation 'io.jsonwebtoken:jjwt-impl:0.11.2'
 	implementation 'io.jsonwebtoken:jjwt-jackson:0.11.2'
 	implementation 'com.fasterxml.jackson.core:jackson-databind'

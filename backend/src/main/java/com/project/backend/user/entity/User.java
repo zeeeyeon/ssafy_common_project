@@ -46,6 +46,19 @@ public class User {
 //    @NotNull
     private String phone;
 
+    //    @NotNull
+    @Column(unique = true)
+    private String nickname;
+
+    private String profile;
+
+    private float height;
+
+    private float reach;
+
+    private LocalDateTime createDate;
+    private LocalDateTime updateDate;
+
     @Column(length = 1)
 //    @NotNull
     @Size(min = 1, max = 1)
@@ -66,17 +79,7 @@ public class User {
     private UserProviderEnum providerType;
 
 //    @NotNull
-    @Column(unique = true)
-    private String nickname;
-
-//    @NotNull
     private int score;
-
-    private String profile;
-
-    private float height;
-
-    private float reach;
 
     // tier
     private UserTierEnum tier;
@@ -99,9 +102,5 @@ public class User {
         this.providerType = provider;
         this.nickname = nickname;
         this.score = score;
-    }
-
-    public User(String subject, String unknown, String noEmail, String n, String s, UserProviderEnum userProviderEnum, UserRoleEnum userRoleEnum, LocalDateTime now, LocalDateTime now1) {
-
     }
 }
