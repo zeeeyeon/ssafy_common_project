@@ -17,7 +17,7 @@ public class RecordController {
 
     @GetMapping("/api/record")
     public String hello(){
-        return "Hello, test code #12";
+        return "Hello, test code #1";
     }
 
     @GetMapping("/api/record2")
