@@ -1,4 +1,4 @@
-package com.project.backend.climb.dto.responseDTO;
+package com.project.backend.climb.center.dto.responseDTO;
 
 import lombok.Getter;
 import lombok.Setter;

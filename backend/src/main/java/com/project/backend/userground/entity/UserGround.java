@@ -1,4 +1,4 @@
-package com.project.backend.userclimb.entity;
+package com.project.backend.userground.entity;
 
 import com.project.backend.climb.entity.Climb;
 import com.project.backend.date.entity.Date;

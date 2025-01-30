@@ -1,7 +1,7 @@
-package com.project.backend.climb.service;
+package com.project.backend.climb.center.service;
 
-import com.project.backend.climb.entity.Climb;
-import com.project.backend.climb.repository.ClimbRepository;
+import com.project.backend.climb.center.entity.Climb;
+import com.project.backend.climb.center.repository.ClimbRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
