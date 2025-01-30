@@ -1,4 +1,4 @@
-package com.project.backend.userclimb.entity;
+package com.project.backend.userground.entity;
 
 public enum UserClimbMedalEnum {
     GOLD, SILVER, BRONZE

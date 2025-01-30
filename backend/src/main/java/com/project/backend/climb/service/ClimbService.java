@@ -1,6 +1,6 @@
-package com.project.backend.climb.center.service;
+package com.project.backend.climb.service;
 
-import com.project.backend.climb.center.entity.Climb;
+import com.project.backend.climb.entity.Climb;
 
 import java.util.List;
 import java.util.Optional;

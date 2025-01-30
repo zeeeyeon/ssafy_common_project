@@ -1,32 +1,76 @@
 package com.project.backend.user.entity;
-import com.project.backend.record.entity.Record;
-import com.project.backend.userclimb.entity.UserClimb;
+import com.project.backend.userground.entity.UserGround;
 import com.project.backend.video.entity.Video;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+import lombok.*;
+import net.minidev.json.annotate.JsonIgnore;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
+@Builder
+@Table(name = "user",
+        uniqueConstraints = {
+                @UniqueConstraint(name = "UK_USER_EMAIL", columnNames = "email"),
+                @UniqueConstraint(name = "UK_USER_NICKNAME", columnNames = "nickname")
+        }
+)
 public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
+    @JsonIgnore
     private Long id;
 
+    @NotNull
+    @Column(unique = true)
     private String email;
 
+    @JsonIgnore
     private String password;
 
-    private String name;
+    @Column(length = 100)
+//    @NotNull
+    @Size(max = 100)
+    private String username;
 
+//    @NotNull
     private String phone;
 
-    // role
-    private UserRoleEnum role;
+    @Column(length = 1)
+//    @NotNull
+    @Size(min = 1, max = 1)
+    private String emailVerifiedYn;
 
+    @Column(length = 512)
+//    @NotNull
+    @Size(max = 512)
+    private String profileImageUrl;
+
+//    @NotNull
+    @Column(length = 20)
+    // USER
+    private UserRoleEnum roleType;
+
+//    @NotNull
+    @Column(length = 20)
+    private UserProviderEnum providerType;
+
+//    @NotNull
+    @Column(unique = true)
     private String nickname;
+
+//    @NotNull
+    private int score;
 
     private String profile;
 
@@ -34,15 +78,30 @@ public class User {
 
     private float reach;
 
-    private int score;
-
     // tier
     private UserTierEnum tier;
 
+    @Builder.Default
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-    private List<UserClimb> userClimbList = new ArrayList<>();
+    private List<UserGround> userClimbList = new ArrayList<>();
 
+    @Builder.Default
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Video> userVideoList  = new ArrayList<>();
 
+
+    @Builder
+    public User(Long id, String username, String email, UserRoleEnum role, UserProviderEnum provider, String nickname, int score) {
+        this.id = id;
+        this.username = username;
+        this.email = email;
+        this.roleType = role;
+        this.providerType = provider;
+        this.nickname = nickname;
+        this.score = score;
+    }
+
+    public User(String subject, String unknown, String noEmail, String n, String s, UserProviderEnum userProviderEnum, UserRoleEnum userRoleEnum, LocalDateTime now, LocalDateTime now1) {
+
+    }
 }

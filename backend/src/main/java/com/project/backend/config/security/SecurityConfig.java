@@ -1,4 +1,4 @@
-package com.project.backend.config;
+package com.project.backend.config.security;
 
 import com.project.backend.config.properties.AppProperties;
 import com.project.backend.config.properties.CorsProperties;
@@ -12,12 +12,13 @@ import com.project.backend.oauth.service.CustomOAuth2UserService;
 import com.project.backend.oauth.service.CustomUserDetailsService;
 import com.project.backend.oauth.token.AuthTokenProvider;
 import com.project.backend.user.entity.UserRoleEnum;
-import com.project.backend.user.repository.UserRefreshTokenRepository;
-import com.project.backend.user.repository.UserRepository;
+import com.project.backend.user.repository.redis.UserRefreshTokenRepository;
+import com.project.backend.user.repository.jpa.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;

@@ -1,4 +1,4 @@
-package com.project.backend.climb.center.dto.requsetDTO;
+package com.project.backend.climb.dto.requsetDTO;
 
 public class ClimbRequestDTO {
 }
