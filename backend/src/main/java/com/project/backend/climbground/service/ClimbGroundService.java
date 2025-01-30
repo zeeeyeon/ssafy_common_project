@@ -2,13 +2,15 @@ package com.project.backend.climbground.service;
 
 import com.project.backend.climbground.dto.responseDTO.ClimbGroundAllResponseDTO;
 import com.project.backend.climbground.dto.responseDTO.ClimbGroundDetailResponseDTO;
+
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
 public interface ClimbGroundService {
 
     // 클라이밍장 전체조회
-    List<ClimbGroundAllResponseDTO> findAllClimbGround();
+    List<ClimbGroundAllResponseDTO> findAllClimbGround(BigDecimal latitude, BigDecimal longitude);
 
     // 클라이밍장 상세페이지
     Optional<ClimbGroundDetailResponseDTO> findClimbGroundDetailById(Long id);

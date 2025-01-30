@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -27,10 +28,12 @@ public class ClimbGroundServiceImpl implements ClimbGroundService {
 
     // 클라이밍장 전체 조회
     @Override
-    public List<ClimbGroundAllResponseDTO> findAllClimbGround() {
+    public List<ClimbGroundAllResponseDTO> findAllClimbGround(BigDecimal latitude, BigDecimal longitude) {
         List<ClimbGround> climbGrounds = climbGroundRepository.findAll();
         List<ClimbGroundAllResponseDTO> responseList = climbGrounds.stream().map(climb -> new ClimbGroundAllResponseDTO(climb.getId(), climb.getName(), climb.getImage(), climb.getAddress()))
                 .collect(Collectors.toList());
+
+
         return responseList;
     }
 

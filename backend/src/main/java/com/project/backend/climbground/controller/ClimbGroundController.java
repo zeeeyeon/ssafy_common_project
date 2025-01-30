@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.Comparator;
 import java.util.List;
 import java.util.TreeSet;
@@ -25,14 +26,9 @@ public class ClimbGroundController {
     private ClimbGroundServiceImpl ClimbGroundService;
 
     // 클라이밍장 리스트 조회
-//    @GetMapping("/all/user-location")
-//    public List<ClimbGroundAllResponseDTO> getALlCLimbs() {
-//        return ClimbGroundService.findAllClimbGround();
-//    }
-
     @GetMapping("/all/user-location")
-    public ResponseEntity<?> getAllCLimbs() {
-        List<ClimbGroundAllResponseDTO> climbGrounds = ClimbGroundService.findAllClimbGround();
+    public ResponseEntity<?> getAllCLimbs(@RequestParam("latitude")BigDecimal latitude, @RequestParam("longitude")BigDecimal longitude) {
+        List<ClimbGroundAllResponseDTO> climbGrounds = ClimbGroundService.findAllClimbGround(latitude,longitude);
         if (climbGrounds.isEmpty()) {
             return ResponseEntity.noContent().build();
         }
