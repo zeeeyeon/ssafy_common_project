@@ -1,47 +1,17 @@
+version: '3.8'
+
 services:
-  mysql:
-    image: mysql:latest
-    container_name: mysql
-    ports:
-      - "3306:3306"
-    environment:
-      - MYSQL_ROOT_PASSWORD=1234
-      - MYSQL_DATABASE=login
-      - MYSQL_ROOT_HOST=%
-    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p1234"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
-    networks:
-      - app-network
-
-  redis:
-    image: redis:latest
-    container_name: redis
-    networks:
-      - app-network
-
   api:
     build: .
     container_name: ssafy_orai_api_1
     ports:
       - "8080:8080"
-    environment:
-      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/login?useSSL=false&allowPublicKeyRetrieval=true&characterEncoding=UTF-8
-      - SPRING_DATASOURCE_USERNAME=root
-      - SPRING_DATASOURCE_PASSWORD=1234
-    depends_on:
-      mysql:
-        condition: service_healthy
-      redis:
-        condition: service_started
     networks:
-      - app-network
-
+      - mynetwork  # ✅ 기존 네트워크 사용
 
 networks:
-  app-network:
-    driver: bridge
+  mynetwork:
+    external: true  # ✅ MySQL, Redis와 같은 네트워크 사용
+
+
+
