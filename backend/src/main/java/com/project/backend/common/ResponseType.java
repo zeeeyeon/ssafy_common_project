@@ -23,7 +23,8 @@ public enum ResponseType {
   EXISTED_USER_PHONE(200, "EUP", "Existed User Phone"),
 
 
-  NO_MATCHING_CLIMBING_GYM(204, "NMCG", "No matching climbing gym found.");
+  NO_MATCHING_CLIMBING_GYM(204, "NMCG", "No matching climbing gym found."),
+  NOT_FOUND_404(404, "NF", "Not Found");
 
   private final int httpStatus;  // HTTP 상태 코드 혹은 기타 숫자 코드
   private final String code;     // 비즈니스 로직에서 쓸 고유 식별 코드 (ex: "SU", "EUE")
