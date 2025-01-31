@@ -117,44 +117,9 @@ class SignupForm extends StatelessWidget {
                 _usernameController
               ),
               SizedBox(height: 16),
-              Row(
-                children: [
-                  Flexible(
-                    flex: 8,  // 9:1 비율로 크기 조정
-                    child: TextForm(
+              TextForm(
                       '전화번호',
                       _phoneController,
-                    ),
-                  ),
-                  SizedBox(width: 10),  // 간격을 두기 위해 SizedBox 추가
-                  Flexible(
-                    flex: 2,  // 9:1 비율로 크기 조정
-                    child: TextButtonForm(
-                      '전송',
-                      _submitCode,
-                    ),
-                  ),
-                ],
-              ),
-              SizedBox(height: 16),
-              Row(
-                children: [
-                  Flexible(
-                    flex: 8,  // 9:1 비율로 크기 조정
-                    child: TextForm(
-                      '해당 전화번호로 발송된 코드',
-                      _authCodeController,
-                    ),
-                  ),
-                  SizedBox(width: 10),  // 간격을 두기 위해 SizedBox 추가
-                  Flexible(
-                    flex: 2,  // 9:1 비율로 크기 조정
-                    child: TextButtonForm(
-                      '확인',
-                      _checkTelCode,
-                    ),
-                  ),
-                ],
               ),
               SizedBox(height: 16),
               Row(

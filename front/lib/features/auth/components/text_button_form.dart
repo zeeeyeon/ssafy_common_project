@@ -8,7 +8,8 @@ class TextButtonForm extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: double.infinity, 
+      width: double.infinity,
+      height: 48.0,
       child: TextButton(
         onPressed: onPressed,
         child: Text(
@@ -16,6 +17,7 @@ class TextButtonForm extends StatelessWidget {
           style: TextStyle(
             fontWeight: FontWeight.bold,
             color: Colors.white,
+            fontSize: 16,
           ),
         ),
         style: TextButton.styleFrom(
@@ -25,6 +27,7 @@ class TextButtonForm extends StatelessWidget {
           ),
           padding: EdgeInsets.symmetric(vertical: 16), 
         ),
+        
       ),
     );
   }
