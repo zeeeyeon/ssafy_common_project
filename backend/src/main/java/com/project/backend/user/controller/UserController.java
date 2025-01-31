@@ -95,13 +95,23 @@ public class UserController {
   public ApiResponse<Boolean> emailDuplicationCheck(@RequestParam(name = "email") String email) {
     boolean isDuplicated = userService.checkEmailDuplication(email);
     if(isDuplicated) {
-      return ApiResponse.existUserEmail();
+      return ApiResponse.existedUserEmail();
     }
     else {
-      return ApiResponse.success();
+      return ApiResponse.noExistedUserEmail();
     }
   }
 
-
+  // 닉네임 중복 체크
+  @GetMapping("/nickname-check")
+  public ApiResponse<Boolean> nicknameDuplicationCheck(@RequestParam(name = "nickname") String nickname) {
+    boolean isDuplicated = userService.checkNicknameDuplication(nickname);
+    if(isDuplicated) {
+      return ApiResponse.existedUserNickname();
+    }
+    else {
+      return ApiResponse.noExistedUserNickname();
+    }
+  }
 
 }
