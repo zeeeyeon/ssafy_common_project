@@ -1,8 +1,8 @@
 package com.project.backend.record.entity;
 
 import com.project.backend.user.entity.User;
-import com.project.backend.userdate.entity.userDate;
 import com.project.backend.hold.entity.Hold;
+import com.project.backend.userdate.entity.UserDate;
 import com.project.backend.video.entity.Video;
 import jakarta.persistence.*;
 
@@ -17,7 +17,7 @@ public class Record {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_date_id")
-    private userDate userDate;
+    private UserDate userDate;
 
     @OneToOne(mappedBy = "record", cascade = CascadeType.ALL)
     private Video video;

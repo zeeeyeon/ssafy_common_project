@@ -1,8 +1,8 @@
 package com.project.backend.userclimbground.entity;
 
 import com.project.backend.climbground.entity.ClimbGround;
-import com.project.backend.userdate.entity.userDate;
 import com.project.backend.user.entity.User;
+import com.project.backend.userdate.entity.UserDate;
 import jakarta.persistence.*;
 
 import java.util.ArrayList;
@@ -10,7 +10,7 @@ import java.util.List;
 
 @Entity
 @Table(name = "user_climbground")
-public class userClimbGround {
+public class UserClimbGround {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_climbground_id")
@@ -27,6 +27,6 @@ public class userClimbGround {
     private ClimbGround climbGround;
 
     @OneToMany(mappedBy = "userClimbGround", cascade = CascadeType.ALL)
-    private List<userDate> userDateList = new ArrayList<>();
+    private List<UserDate> userDateList = new ArrayList<>();
 
 }
