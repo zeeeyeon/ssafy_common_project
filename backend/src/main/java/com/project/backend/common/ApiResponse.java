@@ -55,18 +55,27 @@ public class ApiResponse<T> {
   }
 
   public static ApiResponse<Boolean> existedUserEmail() {
-    return new ApiResponse<>(new ApiResponseHeader(ResponseType.EXISTED_USER_EMAIL), "exiested user email", null);
+    return new ApiResponse<>(new ApiResponseHeader(ResponseType.EXISTED_USER_EMAIL), null);
   }
 
   public static ApiResponse<Boolean> noExistedUserEmail() {
-    return new ApiResponse<>(new ApiResponseHeader(ResponseType.NO_EXISTED_USER_EMAIL), "no exiested user nickname", null);
+    return new ApiResponse<>(new ApiResponseHeader(ResponseType.NO_EXISTED_USER_EMAIL), null);
   }
 
   public static ApiResponse<Boolean> existedUserNickname() {
-    return new ApiResponse<>(new ApiResponseHeader(ResponseType.EXISTED_USER_NICKNAME), "exiested user nickname", null);
+    return new ApiResponse<>(new ApiResponseHeader(ResponseType.EXISTED_USER_NICKNAME), null);
   }
 
   public static ApiResponse<Boolean> noExistedUserNickname() {
-    return new ApiResponse<>(new ApiResponseHeader(ResponseType.NO_EXISTED_USER_NICKNAME), "no exiested user nickname", null);
+    return new ApiResponse<>(new ApiResponseHeader(ResponseType.NO_EXISTED_USER_NICKNAME), null);
+  }
+
+  // 클라이밍장 조회시 일치 내역 없음
+  public static <T> ApiResponse<T> notMatchedClimbGround() {
+    return new ApiResponse<>(new ApiResponseHeader(ResponseType.NO_MATCHING_CLIMBING_GYM),null);
+  }
+
+  public static <T> ApiResponse<T> notFound() {
+    return new ApiResponse<>(new ApiResponseHeader(ResponseType.NOT_FOUND_404),null);
   }
 }
