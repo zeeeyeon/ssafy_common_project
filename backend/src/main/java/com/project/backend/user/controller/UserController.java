@@ -36,10 +36,14 @@ public class UserController {
       return ApiResponse.success("user", user);
     } else if (principal instanceof User user) {
       return ApiResponse.success("user", user);
+    } else if (principal instanceof String username) { // principal이 String인 경우 처리
+      User user = userService.getUserByUserName(username); // username 기반으로 User 조회
+      return ApiResponse.success("user", user);
     }
 
     throw new RuntimeException("Unexpected principal type: " + principal.getClass());
   }
+
 
 
   @Value("${solapi.api.key}") // solapi 에서 발급받은 key
