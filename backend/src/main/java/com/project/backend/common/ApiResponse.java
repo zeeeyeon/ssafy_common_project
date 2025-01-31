@@ -62,4 +62,8 @@ public class ApiResponse<T> {
   public static <T> ApiResponse<T> notMatchedClimbGround() {
     return new ApiResponse<>(new ApiResponseHeader(ResponseType.NO_MATCHING_CLIMBING_GYM),null);
   }
+
+  public static <T> ApiResponse<T> notFound() {
+    return new ApiResponse<>(new ApiResponseHeader(ResponseType.NOT_FOUND_404),null);
+  }
 }
