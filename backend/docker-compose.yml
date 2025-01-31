@@ -2,7 +2,9 @@ version: '3.8'
 
 services:
   api:
-    build: .
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
     container_name: ssafy_orai_api_1
     ports:
       - "8080:8080"
