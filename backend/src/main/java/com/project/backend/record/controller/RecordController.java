@@ -20,7 +20,7 @@ public class RecordController {
 
     @GetMapping("/record")
     public String hello(){
-        return "Hello, ";
+        return "Hello,~ ";
     }
 
     @GetMapping("/record2")
