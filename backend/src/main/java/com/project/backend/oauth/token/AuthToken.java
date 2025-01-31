@@ -23,7 +23,7 @@ public class AuthToken {
 
   public AuthToken(String token, Key key) {
       this.token = token;
-      this.key = Keys.secretKeyFor(SignatureAlgorithm.HS512);
+      this.key = key;
   }
 
   AuthToken(String id, Date expiry, Key key) {
