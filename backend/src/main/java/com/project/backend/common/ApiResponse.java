@@ -42,4 +42,9 @@ public class ApiResponse<T> {
   public static <T> ApiResponse<T> notExpiredTokenYet() {
     return new ApiResponse<>(new ApiResponseHeader(ResponseType.NOT_EXPIRED_TOKEN_YET), null);
   }
+
+  // 클라이밍장 조회시 일치 내역 없음
+  public static <T> ApiResponse<T> notMatchedClimbGround() {
+    return new ApiResponse<>(new ApiResponseHeader(ResponseType.NO_MATCHING_CLIMBING_GYM),null);
+  }
 }

@@ -20,7 +20,10 @@ public enum ResponseType {
   NO_EXISTED_USER_EMAIL(200, "NEUE", "No Existed User Email"),
   EXISTED_USER_NICKNAME(200, "EUN", "Existed User Nickname"),
   NO_EXISTED_USER_NICKNAME(200, "NEUN", "No Existed User Nickname"),
-  EXISTED_USER_PHONE(200, "EUP", "Existed User Phone");
+  EXISTED_USER_PHONE(200, "EUP", "Existed User Phone"),
+
+
+  NO_MATCHING_CLIMBING_GYM(204, "NMCG", "No matching climbing gym found.");
 
   private final int httpStatus;  // HTTP 상태 코드 혹은 기타 숫자 코드
   private final String code;     // 비즈니스 로직에서 쓸 고유 식별 코드 (ex: "SU", "EUE")
