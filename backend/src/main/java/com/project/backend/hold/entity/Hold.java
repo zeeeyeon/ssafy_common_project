@@ -1,16 +1,18 @@
 package com.project.backend.hold.entity;
 
 import com.project.backend.climbground.entity.ClimbGround;
+import com.project.backend.common.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
 
 @Entity
 @Getter
-public class Hold {
-    @Id
-    @GeneratedValue( strategy = GenerationType.IDENTITY)
-    @Column(name = "hold_id")
-    private Long id;
+@AttributeOverride(name="Id", column=@Column(name="hold_id"))
+public class Hold extends BaseEntity {
+//    @Id
+//    @GeneratedValue( strategy = GenerationType.IDENTITY)
+//    @Column(name = "hold_id")
+//    private Long id;
 
     @Enumerated(EnumType.STRING)
     private HoldLevelEnum level;

@@ -1,20 +1,24 @@
 package com.project.backend.userclimbground.entity;
 
 import com.project.backend.climbground.entity.ClimbGround;
+import com.project.backend.common.entity.BaseEntity;
 import com.project.backend.user.entity.User;
 import com.project.backend.userdate.entity.UserDate;
 import jakarta.persistence.*;
+import lombok.Getter;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
+@Getter
 @Table(name = "user_climbground")
-public class UserClimbGround {
+@AttributeOverride(name="Id", column=@Column(name="user_climbground_id"))
+public class UserClimbGround extends BaseEntity {
 
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "user_climbground_id")
-    private Long id;
+//    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+//    @Column(name = "user_climbground_id")
+//    private Long id;
 
     private UserClimbGroundMedalEnum medal;
 
