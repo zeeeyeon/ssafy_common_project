@@ -18,22 +18,22 @@ public class RecordController {
 
     private final ClimbGroundRepository climbGroundRepository;
 
-    @GetMapping("/record")
-    public String hello(){
-        return "Hello, ";
-    }
-
-    @GetMapping("/record2")
-    public String hello2() {
-        List<ClimbGround> listAll = climbGroundRepository.findAll();
-        if (listAll.isEmpty()) {
-            return "No Data Found";
-        }
-        return Optional.ofNullable(listAll.get(1).getName()).orElse("Name is Null");
-    }
-
-    @GetMapping("/records")
-    public List<ClimbGround> getAllClimbGrounds() {
-        return climbGroundRepository.findAll();
-    }
+//    @GetMapping("/record")
+//    public String hello(){
+//        return "Hello, ";
+//    }
+//
+//    @GetMapping("/record2")
+//    public String hello2() {
+//        List<ClimbGround> listAll = climbGroundRepository.findAll();
+//        if (listAll.isEmpty()) {
+//            return "No Data Found";
+//        }
+//        return Optional.ofNullable(listAll.get(1).getName()).orElse("Name is Null");
+//    }
+//
+//    @GetMapping("/records")
+//    public List<ClimbGround> getAllClimbGrounds() {
+//        return climbGroundRepository.findAll();
+//    }
 }
