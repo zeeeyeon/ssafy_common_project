@@ -58,4 +58,8 @@ public class UserServiceImpl implements UserService {
   public boolean checkEmailDuplication(String email) {
     return userRepository.existsByEmail(email);
   }
+
+  public boolean checkNicknameDuplication(String nickname) {
+    return userRepository.existsByNickname(nickname);
+  }
 }

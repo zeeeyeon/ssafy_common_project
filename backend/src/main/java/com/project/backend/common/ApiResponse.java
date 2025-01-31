@@ -54,7 +54,19 @@ public class ApiResponse<T> {
     return new ApiResponse<>(new ApiResponseHeader(ResponseType.NOT_EXPIRED_TOKEN_YET), null);
   }
 
-  public static ApiResponse<Boolean> existUserEmail() {
-    return new ApiResponse<>(new ApiResponseHeader(ResponseType.EXISTED_USER_EMAIL), "existed user email", null);
+  public static ApiResponse<Boolean> existedUserEmail() {
+    return new ApiResponse<>(new ApiResponseHeader(ResponseType.EXISTED_USER_EMAIL), "exiested user email", null);
+  }
+
+  public static ApiResponse<Boolean> noExistedUserEmail() {
+    return new ApiResponse<>(new ApiResponseHeader(ResponseType.NO_EXISTED_USER_EMAIL), "no exiested user nickname", null);
+  }
+
+  public static ApiResponse<Boolean> existedUserNickname() {
+    return new ApiResponse<>(new ApiResponseHeader(ResponseType.EXISTED_USER_NICKNAME), "exiested user nickname", null);
+  }
+
+  public static ApiResponse<Boolean> noExistedUserNickname() {
+    return new ApiResponse<>(new ApiResponseHeader(ResponseType.NO_EXISTED_USER_NICKNAME), "no exiested user nickname", null);
   }
 }
