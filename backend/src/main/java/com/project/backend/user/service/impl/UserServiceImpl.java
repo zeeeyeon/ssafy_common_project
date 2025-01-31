@@ -54,4 +54,8 @@ public class UserServiceImpl implements UserService {
             .build());
     return SignUpResponseDto.success();
   }
+
+  public boolean checkEmailDuplication(String email) {
+    return userRepository.existsByEmail(email);
+  }
 }
