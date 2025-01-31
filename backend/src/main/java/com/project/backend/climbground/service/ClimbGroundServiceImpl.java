@@ -26,17 +26,6 @@ public class ClimbGroundServiceImpl implements ClimbGroundService {
     @Autowired
     private ClimbGroundInfoRepository climbGroundInfoRepository;
 
-    // 클라이밍장 전체 조회
-    @Override
-    public List<ClimbGroundAllResponseDTO> findAllClimbGround(BigDecimal latitude, BigDecimal longitude) {
-        List<ClimbGround> climbGrounds = climbGroundRepository.findAll();
-        List<ClimbGroundAllResponseDTO> responseList = climbGrounds.stream().map(climb -> new ClimbGroundAllResponseDTO(climb.getId(), climb.getName(), climb.getImage(), climb.getAddress()))
-                .collect(Collectors.toList());
-
-
-        return responseList;
-    }
-
     //클라이밍장 상세 페이지
     @Override
     @Transactional
@@ -74,7 +63,7 @@ public class ClimbGroundServiceImpl implements ClimbGroundService {
     }
 
     @Override
-    public List<ClimbGroundAllResponseDTO> searchClimbGroundByKeyword(String keyword) {
+    public List<ClimbGroundAllResponseDTO> searchClimbGroundByKeyword(String keyword, BigDecimal latitude, BigDecimal longitude) {
         //검색결과가 나올수도 안나올수도 여러 개일수도 한개 일수도 있음
         List<ClimbGround> climbGrounds = climbGroundRepository.searchClimbGround(keyword);
 
@@ -82,17 +71,58 @@ public class ClimbGroundServiceImpl implements ClimbGroundService {
         if (climbGrounds.isEmpty()) {
             return List.of();
         }
+        List<ClimbGroundAllResponseDTO> responseList = climbGrounds.stream().map(climb -> {
 
-        List<ClimbGroundAllResponseDTO> resultList = climbGrounds.stream()
-                .map(climbGround -> new ClimbGroundAllResponseDTO(climbGround.getId(),climbGround.getName(),climbGround.getImage(),climbGround.getAddress()))
-                .collect(Collectors.toList());
+            double distance = calculateDistance(latitude,longitude,climb.getLatitude(),climb.getLongitude());
 
-        return resultList;
+            return new ClimbGroundAllResponseDTO(
+                    climb.getId(),
+                    climb.getName(),
+                    climb.getImage(),
+                    climb.getAddress(),
+                    distance
+            );
+        }).sorted(Comparator.comparing(ClimbGroundAllResponseDTO::getDistance)).collect(Collectors.toList());
 
 
-
+        return responseList;
 
     }
 
+    // 클라이밍장 전체 조회 (거리별 정렬)
+    @Override
+    public List<ClimbGroundAllResponseDTO> findAllClimbGround(BigDecimal latitude, BigDecimal longitude) {
+        List<ClimbGround> climbGrounds = climbGroundRepository.findAll();
+        List<ClimbGroundAllResponseDTO> responseList = climbGrounds.stream().map(climb -> {
+
+            double distance = calculateDistance(latitude,longitude,climb.getLatitude(),climb.getLongitude());
+
+            return new ClimbGroundAllResponseDTO(
+                    climb.getId(),
+                    climb.getName(),
+                    climb.getImage(),
+                    climb.getAddress(),
+                    distance
+            );
+        }).sorted(Comparator.comparing(ClimbGroundAllResponseDTO::getDistance)).collect(Collectors.toList());
+
+        return responseList;
+    }
+    // 클라이밍장별 거리 계산
+    public double calculateDistance(BigDecimal lat1, BigDecimal lon1, BigDecimal lat2, BigDecimal lon2){
+        final int EARTH_RADIUS = 6371; // 지구 반지름 (km)
+
+        double latDistance = Math.toRadians(lat2.doubleValue() - lat1.doubleValue());
+        double lonDistance = Math.toRadians(lon2.doubleValue() - lon1.doubleValue());
+
+        double a = Math.sin(latDistance / 2) * Math.sin(latDistance / 2)
+                + Math.cos(Math.toRadians(lat1.doubleValue())) * Math.cos(Math.toRadians(lat2.doubleValue()))
+                * Math.sin(lonDistance / 2) * Math.sin(lonDistance / 2);
+
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        double distance = EARTH_RADIUS * c; // 거리(km)
+
+        return Math.round(distance * 100.0) / 100.0; // 소수점 둘째 자리까지 반올림
+    };
 
 }
