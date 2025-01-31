@@ -4,6 +4,7 @@ import com.project.backend.common.ApiResponse;
 import com.project.backend.oauth.entity.UserPrincipal;
 import com.project.backend.user.dto.request.SendOneRequestDto;
 import com.project.backend.user.dto.request.SignUpRequestDto;
+import com.project.backend.user.dto.response.SignUpResDto;
 import com.project.backend.user.entity.User;
 import com.project.backend.user.service.UserService;
 import jakarta.annotation.PostConstruct;
@@ -33,12 +34,15 @@ public class UserController {
 
     if (principal instanceof UserPrincipal userPrincipal) {
       User user = userService.getUserByUserName(userPrincipal.getUsername());
-      return ApiResponse.success("user", user);
+      SignUpResDto signUpResDto = new SignUpResDto(user);
+      return ApiResponse.success(signUpResDto);
     } else if (principal instanceof User user) {
-      return ApiResponse.success("user", user);
+      SignUpResDto signUpResDto = new SignUpResDto(user);
+      return ApiResponse.success(signUpResDto);
     } else if (principal instanceof String username) { // principal이 String인 경우 처리
       User user = userService.getUserByUserName(username); // username 기반으로 User 조회
-      return ApiResponse.success("user", user);
+      SignUpResDto signUpResDto = new SignUpResDto(user);
+      return ApiResponse.success(signUpResDto);
     }
 
     throw new RuntimeException("Unexpected principal type: " + principal.getClass());
