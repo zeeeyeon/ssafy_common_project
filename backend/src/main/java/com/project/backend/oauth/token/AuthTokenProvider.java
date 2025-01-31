@@ -12,6 +12,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
+import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.time.LocalDateTime;
 import java.util.Arrays;
@@ -26,7 +27,7 @@ public class AuthTokenProvider {
   private static final String AUTHORITIES_KEY = "role";
 
   public AuthTokenProvider(String secret) {
-    this.key = Keys.hmacShaKeyFor(secret.getBytes());
+    this.key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
   }
 
   public AuthToken createAuthToken(String id, Date expiry) {
