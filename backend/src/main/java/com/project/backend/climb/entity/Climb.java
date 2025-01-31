@@ -2,7 +2,6 @@ package com.project.backend.climb.entity;
 
 import com.project.backend.climbinfo.entity.ClimbInfo;
 import com.project.backend.hold.entity.Hold;
-import com.project.backend.userground.entity.UserGround;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -44,9 +43,6 @@ public class Climb {
     @Lob
     @Column(columnDefinition = "LONGTEXT")
     private String sns_url;
-
-    @OneToMany(mappedBy = "climb", cascade = CascadeType.ALL)
-    private List<UserGround> userClimbList = new ArrayList<>();
 
     @OneToMany(mappedBy = "climb", cascade = CascadeType.ALL)
     private List<ClimbInfo> climbInfoList = new ArrayList<>();

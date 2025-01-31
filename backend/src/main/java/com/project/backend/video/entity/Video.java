@@ -1,6 +1,5 @@
 package com.project.backend.video.entity;
 
-import com.project.backend.date.entity.Date;
 import com.project.backend.record.entity.Record;
 import com.project.backend.user.entity.User;
 import jakarta.persistence.*;
@@ -20,7 +19,4 @@ public class Video {
     @JoinColumn(name = "record_id")
     private Record record;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
-    private User user;
 }

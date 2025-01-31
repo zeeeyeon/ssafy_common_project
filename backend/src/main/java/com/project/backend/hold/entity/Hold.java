@@ -1,9 +1,11 @@
 package com.project.backend.hold.entity;
 
-import com.project.backend.climb.entity.Climb;
+import com.project.backend.climbground.entity.ClimbGround;
 import jakarta.persistence.*;
+import lombok.Getter;
 
 @Entity
+@Getter
 public class Hold {
     @Id
     @GeneratedValue( strategy = GenerationType.IDENTITY)
@@ -14,7 +16,7 @@ public class Hold {
 
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "climb_id")
-    private Climb climb;
+    @JoinColumn(name = "climbground_id")
+    private ClimbGround climbGround;
 }
 

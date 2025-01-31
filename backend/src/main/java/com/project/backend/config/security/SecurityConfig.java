@@ -63,9 +63,9 @@ public class SecurityConfig {
                         .accessDeniedHandler(tokenAccessDeniedHandler))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(CorsUtils::isPreFlightRequest).permitAll()
-                        .requestMatchers("/oauth2/**", "/api/v1/users/sign-up/**", "/login/**").permitAll()
-                        .requestMatchers("/api/**").hasAnyAuthority(UserRoleEnum.USER.getCode())
-                        .anyRequest().authenticated())
+//                        .requestMatchers("/oauth2/**", "/api/v1/users/sign-up/**", "/login/**").permitAll()
+//                        .requestMatchers("/api/**").hasAnyAuthority(UserRoleEnum.USER.getCode())
+                        .anyRequest().permitAll())
                 .oauth2Login(oauth2 -> oauth2
                         .authorizationEndpoint(authorization -> authorization
                                 .baseUri("/oauth2/authorization")
