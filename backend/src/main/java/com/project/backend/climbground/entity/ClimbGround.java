@@ -1,8 +1,8 @@
 package com.project.backend.climbground.entity;
 
-import com.project.backend.climbinfo.entity.ClimbInfo;
+import com.project.backend.climbgroundinfo.entity.ClimbGroundInfo;
 import com.project.backend.hold.entity.Hold;
-import com.project.backend.userclimbground.entity.userClimbGround;
+import com.project.backend.userclimbground.entity.UserClimbGround;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -48,12 +48,12 @@ public class ClimbGround {
     private String sns_url;
 
     @OneToMany(mappedBy = "climbGround", cascade = CascadeType.ALL)
-    private List<userClimbGround> userClimbGroundList = new ArrayList<>();
+    private List<UserClimbGround> userClimbGroundList = new ArrayList<>();
 
-    @OneToMany(mappedBy = "climbGround", cascade = CascadeType.ALL)
-    private List<ClimbInfo> climbGroundInfoList = new ArrayList<>();
+    @OneToMany(mappedBy = "climbGround", cascade = CascadeType.ALL , fetch = FetchType.LAZY)
+    private List<ClimbGroundInfo> climbGroundInfoList = new ArrayList<>();
 
-    @OneToMany(mappedBy = "climbGround", cascade = CascadeType.ALL ,fetch = FetchType.EAGER) //즉시 로딩이 설정되어 있어야 오류가 안남
+    @OneToMany(mappedBy = "climbGround", cascade = CascadeType.ALL ,fetch = FetchType.LAZY)
     private List<Hold> holdList = new ArrayList<>();
 
 }

@@ -2,6 +2,7 @@ package com.project.backend.oauth.token;
 
 import com.project.backend.user.entity.UserProviderEnum;
 import io.jsonwebtoken.*;
+import io.jsonwebtoken.security.Keys;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -11,7 +12,6 @@ import java.security.Key;
 import java.util.Date;
 
 @Slf4j
-@RequiredArgsConstructor
 public class AuthToken {
 
   @Getter
@@ -20,6 +20,11 @@ public class AuthToken {
 
   private static final String AUTHORITIES_KEY = "role";
   private static final String PROVIDER_TYPE_KEY = "provider";
+
+  public AuthToken(String token, Key key) {
+      this.token = token;
+      this.key = Keys.secretKeyFor(SignatureAlgorithm.HS512);
+  }
 
   AuthToken(String id, Date expiry, Key key) {
     this.key = key;
@@ -39,7 +44,7 @@ public class AuthToken {
   private String createAuthToken(String id, Date expiry) {
     return Jwts.builder()
             .setSubject(id)
-            .signWith(key, SignatureAlgorithm.HS256)
+            .signWith(key, SignatureAlgorithm.HS512)
             .setExpiration(expiry)
             .compact();
   }
@@ -48,7 +53,7 @@ public class AuthToken {
     return Jwts.builder()
             .setSubject(id)
             .claim(AUTHORITIES_KEY, role)
-            .signWith(key, SignatureAlgorithm.HS256)
+            .signWith(key, SignatureAlgorithm.HS512)
             .setExpiration(expiry)
             .compact();
   }
@@ -62,7 +67,7 @@ public class AuthToken {
             .claim("email", userInfo.getEmail())
             .claim("email_verified", userInfo.getEmailVerifiedYn())
             .claim("profile_image", userInfo.getProfileImageUrl())
-            .signWith(key, SignatureAlgorithm.HS256)
+            .signWith(key, SignatureAlgorithm.HS512)
             .setExpiration(expiry)
             .compact();
   }
