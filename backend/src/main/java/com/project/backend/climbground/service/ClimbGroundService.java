@@ -16,5 +16,6 @@ public interface ClimbGroundService {
     Optional<ClimbGroundDetailResponseDTO> findClimbGroundDetailById(Long id);
 
     // 클라이밍장 검색 조회
-    List<ClimbGroundAllResponseDTO> searchClimbGroundByKeyword(String keyword);
+    List<ClimbGroundAllResponseDTO> searchClimbGroundByKeyword(String keyword,BigDecimal latitude, BigDecimal longitude);
+
 }
