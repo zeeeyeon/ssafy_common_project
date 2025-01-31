@@ -2,16 +2,14 @@ package com.project.backend.climbground.entity;
 
 import com.project.backend.climbgroundinfo.entity.ClimbGroundInfo;
 import com.project.backend.hold.entity.Hold;
-import com.project.backend.userclimbground.entity.userClimbGround;
+import com.project.backend.userclimbground.entity.UserClimbGround;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 @Entity
 @Getter
@@ -50,7 +48,7 @@ public class ClimbGround {
     private String sns_url;
 
     @OneToMany(mappedBy = "climbGround", cascade = CascadeType.ALL)
-    private List<userClimbGround> userClimbGroundList = new ArrayList<>();
+    private List<UserClimbGround> userClimbGroundList = new ArrayList<>();
 
     @OneToMany(mappedBy = "climbGround", cascade = CascadeType.ALL , fetch = FetchType.LAZY)
     private List<ClimbGroundInfo> climbGroundInfoList = new ArrayList<>();
