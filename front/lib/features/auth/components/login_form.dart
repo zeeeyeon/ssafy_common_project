@@ -6,7 +6,6 @@ import 'package:kkulkkulk/features/auth/components/text_form.dart';
 import 'package:kkulkkulk/features/auth/data/models/user_login_model.dart';
 import 'package:kkulkkulk/features/auth/view_models/auth_view_model.dart';
 import 'package:sign_button/sign_button.dart';
-
 class LoginForm extends StatelessWidget{
   final _formKey = GlobalKey<FormState>();
 
@@ -52,7 +51,7 @@ class LoginForm extends StatelessWidget{
           Text(
             '계정이 없으신가요?',
             style: TextStyle(
-              color: Colors.black,
+              color: Color(0xFF2C3540),
               fontWeight: FontWeight.bold,
             ),
           ),
