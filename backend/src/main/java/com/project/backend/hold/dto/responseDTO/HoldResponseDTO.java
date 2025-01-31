@@ -13,8 +13,8 @@ public class HoldResponseDTO {
     private HoldLevelEnum level;
     private HoldColorEnum color;
 
-    public HoldResponseDTO(Long ID, HoldLevelEnum level, HoldColorEnum color) {
-        this.Id = ID;
+    public HoldResponseDTO(Long Id, HoldLevelEnum level, HoldColorEnum color) {
+        this.Id = Id;
         this.level = level;
         this.color = color;
     }
