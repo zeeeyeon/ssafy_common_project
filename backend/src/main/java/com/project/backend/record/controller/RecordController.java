@@ -21,11 +21,17 @@ public class RecordController {
         return "Hello, test code #1";
     }
 
+    @GetMapping("/api/record2")
     public String hello2() {
         List<ClimbGround> listAll = climbGroundRepository.findAll();
         if (listAll.isEmpty()) {
             return "No Data Found";
         }
         return Optional.ofNullable(listAll.get(1).getName()).orElse("Name is Null");
+    }
+
+    @GetMapping("/api/records")
+    public List<ClimbGround> getAllClimbGrounds() {
+        return climbGroundRepository.findAll();
     }
 }
