@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:kkulkkulk/common/network/dio_client.dart';
 import 'package:kkulkkulk/features/auth/data/models/user_check_phone_code_model.dart';
 import 'package:kkulkkulk/features/auth/data/models/user_duplicated_email_model.dart';
 import 'package:kkulkkulk/features/auth/data/models/user_duplicated_nickname_model.dart';
@@ -7,7 +8,7 @@ import 'package:kkulkkulk/features/auth/data/models/user_signup_model.dart';
 import 'package:kkulkkulk/features/auth/data/models/user_submit_phone_code_model.dart';
 
 class AuthRepository {
-  final Dio _dio = Dio();
+  final Dio _dio = DioClient().dio;
 
   // 로그인
   Future<Response> login(UserLoginModel userLoginModel) async {
@@ -111,20 +112,14 @@ class AuthRepository {
 
   // 회원가입
   Future<Response> signup(UserSignupModel UserSignupModel) async {
-    final String url = 'http://localhost:8080/api/user/sign-up';
-
     try {
       final response = await _dio.post(
-        url,
+        '/users/sign-up',
         data: UserSignupModel.toJson(),
-        options: Options(
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        ),
       );
       return response;
     } catch(e) {
+      print(e);
       rethrow;
     }
   }

@@ -11,7 +11,7 @@ class DioClient {
   DioClient._internal() {
     dio = Dio(
       BaseOptions(
-        baseUrl: 'https://api.kkulkkulk.com', // API 서버 URL
+        baseUrl: 'http://192.168.30.158:8080/api/v1', // API 서버 URL
         connectTimeout: const Duration(seconds: 5),
         receiveTimeout: const Duration(seconds: 3),
         headers: {

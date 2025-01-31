@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:kkulkkulk/features/auth/components/text_button_form.dart';
 import 'package:kkulkkulk/features/auth/components/text_form.dart';
+import 'package:kkulkkulk/features/auth/data/models/user_signup_model.dart';
+import 'package:kkulkkulk/features/auth/data/repositories/auth_repository.dart';
 
 class SignupForm extends StatelessWidget {
   final _formKey = GlobalKey<FormState>();
@@ -8,10 +10,12 @@ class SignupForm extends StatelessWidget {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _checkPasswordController = TextEditingController();
-  final TextEditingController _nameController = TextEditingController();
-  final TextEditingController _telController = TextEditingController();
+  final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _authCodeController = TextEditingController();
   final TextEditingController _nicknameController = TextEditingController();
+
+  final AuthRepository _authRepository = AuthRepository();
 
   void _duplicatedEmail() {
     String email = _emailController.text;
@@ -20,9 +24,9 @@ class SignupForm extends StatelessWidget {
   }
 
   void _submitCode() {
-    String tel = _telController.text;
+    String phone = _phoneController.text;
     print('전송 버튼 클릭');
-    print('tel: $tel');
+    print('tel: $phone');
   }
 
   void _checkTelCode() {
@@ -36,13 +40,37 @@ class SignupForm extends StatelessWidget {
     print('nickname: $nickname');
   }
 
-  void _signup() {
+  void _signup() async {
     String email = _emailController.text;
     String password = _passwordController.text;
-    String name = _nameController.text;
-    String tel = _telController.text;
+    String username = _usernameController.text;
+    String phone = _phoneController.text;
     String nickname = _nicknameController.text;
-    print('email : $email / password: $password / name: $name / tel: $tel / nickname: $nickname');
+    print('email : $email / password: $password / username: $username / phone: $phone / nickname: $nickname');
+
+    UserSignupModel signupModel = UserSignupModel(
+      email: email, 
+      password: password, 
+      username: username,
+      phone: phone, 
+      nickname: nickname
+    );
+
+    try {
+      print("실행실행");
+      // 회원가입 API 호출
+      var response = await _authRepository.signup(signupModel);
+      if (response.statusCode == 200) {
+        // 회원가입 성공
+        print('회원가입 성공: ${response.data}');
+      } else {
+        // 실패 시 처리
+        print('회원가입 실패: ${response.data}');
+      }
+    } catch (e) {
+      // 에러 처리
+      print('회원가입 중 에러 발생: $e');
+    }
   }
 
   @override
@@ -86,7 +114,7 @@ class SignupForm extends StatelessWidget {
               SizedBox(height: 16),
               TextForm(
                 '이름',
-                _nameController
+                _usernameController
               ),
               SizedBox(height: 16),
               Row(
@@ -95,7 +123,7 @@ class SignupForm extends StatelessWidget {
                     flex: 8,  // 9:1 비율로 크기 조정
                     child: TextForm(
                       '전화번호',
-                      _telController,
+                      _phoneController,
                     ),
                   ),
                   SizedBox(width: 10),  // 간격을 두기 위해 SizedBox 추가

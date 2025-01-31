@@ -5,6 +5,7 @@ import 'package:kkulkkulk/features/auth/components/text_button_form.dart';
 import 'package:kkulkkulk/features/auth/components/text_form.dart';
 import 'package:kkulkkulk/features/auth/data/models/user_login_model.dart';
 import 'package:kkulkkulk/features/auth/view_models/auth_view_model.dart';
+import 'package:sign_button/sign_button.dart';
 
 class LoginForm extends StatelessWidget{
   final _formKey = GlobalKey<FormState>();
@@ -60,101 +61,13 @@ class LoginForm extends StatelessWidget{
             () => _signup(context),
           ),
           SizedBox(height: 30),
-          SizedBox(
+          SignInButton(
+            buttonType: ButtonType.google,
+            buttonSize: ButtonSize.large,
             width: double.infinity,
-            child: ElevatedButton(
-              onPressed: () {}, 
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  // Image.asset(
-                  //   'assets/oauth/kakao_logo.png',
-                  //   width: 24,
-                  //   height: 24,
-                  // ),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 8.0), // 이미지와 텍스트 간격 조정
-                    child: Text(
-                      '카카오 로그인',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Color(0xFFFFEE00),
-                foregroundColor: Colors.black,
-                padding: EdgeInsets.symmetric(vertical: 15),
-              ),
-            ),
-          ),
-          SizedBox(height: 10),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: () {}, 
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  // Image.asset(
-                  //   'assets/oauth/kakao_logo.png',
-                  //   width: 24,
-                  //   height: 24,
-                  // ),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 8.0), // 이미지와 텍스트 간격 조정
-                    child: Text(
-                      '네이버 로그인',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Color(0xFF2DB400),
-                foregroundColor: Colors.white,
-                padding: EdgeInsets.symmetric(vertical: 15),
-              ),
-            ),
-          ),
-          SizedBox(height: 10),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: () {}, 
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  // Image.asset(
-                  //   'assets/oauth/kakao_logo.png',
-                  //   width: 24,
-                  //   height: 24,
-                  // ),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 8.0), // 이미지와 텍스트 간격 조정
-                    child: Text(
-                      '네이버 로그인',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.white,
-                foregroundColor: Colors.black,
-                padding: EdgeInsets.symmetric(vertical: 15),
-              ),
-            ),
-          ),
+            onPressed: () {
+              print('click');
+          }),
         ],
       ),
     );
