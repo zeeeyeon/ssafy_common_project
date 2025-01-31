@@ -1,6 +1,8 @@
 package com.project.backend.user.controller;
 
 import com.project.backend.common.ApiResponse;
+import com.project.backend.common.ApiResponseHeader;
+import com.project.backend.common.ResponseType;
 import com.project.backend.oauth.entity.UserPrincipal;
 import com.project.backend.user.dto.request.SendOneRequestDto;
 import com.project.backend.user.dto.request.SignUpRequestDto;
@@ -15,14 +17,13 @@ import net.nurigo.sdk.message.model.Message;
 import net.nurigo.sdk.message.request.SingleMessageSendingRequest;
 import net.nurigo.sdk.message.response.SingleMessageSentResponse;
 import net.nurigo.sdk.message.service.DefaultMessageService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/v1/users")
+@RequestMapping("/api/user")
 @RequiredArgsConstructor
 public class UserController {
 
@@ -81,5 +82,26 @@ public class UserController {
     ResponseEntity<?> response = userService.signUp(signUpRequestDto);
     return response;
   }
+
+  // 일반 사용자 로그인
+//  @PostMapping("/login")
+//  public ResponseEntity<?> login(@RequestBody @Valid LoginRequestDto loginRequestDto) {
+//    ResponseEntity<?> response = userService.login(loginRequestDto);
+//    return response;
+//  }
+
+  // 이메일 중복 체크
+  @GetMapping("/email-check")
+  public ApiResponse<Boolean> emailDuplicationCheck(@RequestParam(name = "email") String email) {
+    boolean isDuplicated = userService.checkEmailDuplication(email);
+    if(isDuplicated) {
+      return ApiResponse.existUserEmail();
+    }
+    else {
+      return ApiResponse.success();
+    }
+  }
+
+
 
 }

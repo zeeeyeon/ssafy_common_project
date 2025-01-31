@@ -12,4 +12,6 @@ public interface UserService {
   public User getUserByUserName(String userName);
 
   public ResponseEntity<?> signUp(SignUpRequestDto signUpRequestDto);
+
+  public boolean checkEmailDuplication(String email);
 }
