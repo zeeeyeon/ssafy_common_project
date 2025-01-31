@@ -1,6 +1,6 @@
 package com.project.backend.climbground.entity;
 
-import com.project.backend.climbinfo.entity.ClimbGroundInfo;
+import com.project.backend.climbinfo.entity.ClimbInfo;
 import com.project.backend.hold.entity.Hold;
 import com.project.backend.userclimbground.entity.userClimbGround;
 import jakarta.persistence.*;
@@ -51,7 +51,7 @@ public class ClimbGround {
     private List<userClimbGround> userClimbGroundList = new ArrayList<>();
 
     @OneToMany(mappedBy = "climbGround", cascade = CascadeType.ALL)
-    private List<ClimbGroundInfo> climbGroundInfoList = new ArrayList<>();
+    private List<ClimbInfo> climbGroundInfoList = new ArrayList<>();
 
     @OneToMany(mappedBy = "climbGround", cascade = CascadeType.ALL ,fetch = FetchType.EAGER) //즉시 로딩이 설정되어 있어야 오류가 안남
     private List<Hold> holdList = new ArrayList<>();
