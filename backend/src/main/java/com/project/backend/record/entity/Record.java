@@ -17,7 +17,8 @@ public class Record extends BaseEntity {
 //    @GeneratedValue( strategy = GenerationType.IDENTITY )
 //    @Column(name = "record_id")
 //    private Long id;
-//    private boolean isSuccess;
+
+    private boolean isSuccess;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_date_id")
@@ -27,7 +28,7 @@ public class Record extends BaseEntity {
     private Video video;
 
     // 단반향이니까 hold entity에는 따로 안넣어도 되지 않나??
-    @OneToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "hold_id")
     private Hold hold;
 
