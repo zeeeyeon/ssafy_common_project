@@ -20,6 +20,7 @@ public class UserClimbGround extends BaseEntity {
 //    @Column(name = "user_climbground_id")
 //    private Long id;
 
+    @Enumerated(EnumType.STRING)
     private UserClimbGroundMedalEnum medal;
 
     @ManyToOne(fetch = FetchType.LAZY)
