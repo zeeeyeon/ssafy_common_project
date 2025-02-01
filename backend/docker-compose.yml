@@ -1,4 +1,3 @@
-
 services:
   api:
     build:
@@ -7,6 +6,10 @@ services:
     container_name: ssafy_orai_api_1
     ports:
       - "8080:8080"
+    environment:
+      - SPRING_CONFIG_LOCATION=/config/application.yml
+    volumes:
+      - ./config:/config
     networks:
       - mynetwork
 
