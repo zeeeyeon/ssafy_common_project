@@ -11,6 +11,7 @@ import com.project.backend.hold.dto.responseDTO.HoldResponseDTO;
 import com.project.backend.info.dto.responseDTO.InfoResponseDTO;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.stereotype.Service;
@@ -20,13 +21,12 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class ClimbGroundServiceImpl implements ClimbGroundService {
 
-    @Autowired
-    private ClimbGroundRepository climbGroundRepository;
+    private final ClimbGroundRepository climbGroundRepository;
 
-    @Autowired
-    private ClimbGroundInfoRepository climbGroundInfoRepository;
+    private final ClimbGroundInfoRepository climbGroundInfoRepository;
 
     //클라이밍장 상세 페이지
     @Override
