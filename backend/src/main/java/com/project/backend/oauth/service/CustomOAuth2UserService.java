@@ -7,6 +7,8 @@ import com.project.backend.oauth.info.OAuth2UserInfoFactory;
 import com.project.backend.user.entity.User;
 import com.project.backend.user.entity.UserProviderEnum;
 import com.project.backend.user.entity.UserRoleEnum;
+import com.project.backend.user.ex.CustomApiException;
+import com.project.backend.user.ex.ErrorCode;
 import com.project.backend.user.repository.jpa.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
@@ -43,7 +45,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         UserProviderEnum providerType = UserProviderEnum.valueOf(userRequest.getClientRegistration().getRegistrationId().toUpperCase());
 
         OAuth2UserInfo userInfo = OAuth2UserInfoFactory.getOAuth2UserInfo(providerType, user.getAttributes());
-        User savedUser = userRepository.findByUsername(userInfo.getName());
+        User savedUser = userRepository.findByUsername(userInfo.getName()).orElseThrow(() -> new CustomApiException(ErrorCode.USER_NOT_EXIST));
 
         String email = userInfo.getEmail() != null ? userInfo.getEmail() : "default@example.com"; // 기본값 설정
 
