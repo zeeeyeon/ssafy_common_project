@@ -19,4 +19,6 @@ public interface ClimbGroundRepository extends JpaRepository<ClimbGround, Long> 
             "OR LOWER(c.name) LIKE LOWER(CONCAT('%', :keyword, '%'))")
     List<ClimbGround> searchClimbGround(@Param("keyword") String keyword);
 
+    List<ClimbGround> findByIdIn(List<Long> climbgroundIds);
+
 }

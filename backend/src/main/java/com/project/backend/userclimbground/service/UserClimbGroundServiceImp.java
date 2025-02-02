@@ -1,5 +1,11 @@
 package com.project.backend.userclimbground.service;
 
+import com.project.backend.climbground.entity.ClimbGround;
+import com.project.backend.climbground.repository.ClimbGroundRepository;
+import com.project.backend.common.ResponseType;
+import com.project.backend.user.entity.User;
+import com.project.backend.user.repository.jpa.UserRepository;
+import com.project.backend.userclimbground.dto.requestDTO.UnlockClimbGroundRequsetDTO;
 import com.project.backend.hold.entity.HoldColorEnum;
 import com.project.backend.record.entity.Record;
 import com.project.backend.userclimbground.dto.requestDTO.ClimbRecordRequestDTO;
@@ -7,6 +13,7 @@ import com.project.backend.userclimbground.dto.responseDTO.ClimbGroundStatus;
 import com.project.backend.userclimbground.dto.responseDTO.ClimbRecordResponseDTO;
 import com.project.backend.userclimbground.dto.responseDTO.HoldStats;
 import com.project.backend.userclimbground.entity.UserClimbGround;
+import com.project.backend.userclimbground.entity.UserClimbGroundMedalEnum;
 import com.project.backend.userclimbground.repository.UserClimbGroundRepository;
 import com.project.backend.userdate.entity.UserDate;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +27,8 @@ import java.util.*;
 public class UserClimbGroundServiceImp implements UserClimbGroundService{
 
     private final UserClimbGroundRepository userClimbGroundRepository;
+    private final UserRepository userRepository;
+    private final ClimbGroundRepository climbGroundRepository;
 
     // 년별 통계 조회
     @Override
@@ -95,4 +104,27 @@ public class UserClimbGroundServiceImp implements UserClimbGroundService{
 
         return new ClimbRecordResponseDTO(climbGroundStatus,totalSuccess,successRate,totalTries,holdStatsList);
     }
+
+    @Override
+    public ResponseType saveUnlockClimbGround(UnlockClimbGroundRequsetDTO requestDTO) {
+        Boolean is_unlock = userClimbGroundRepository.existsUserCLimbGroundByUserIdAndClimbGroundId(requestDTO.getUserId(),requestDTO.getClimbGroundId());
+
+        // 이미 해금되어 있으면
+        if (is_unlock) {
+            return ResponseType.DATA_ALREADY_EXISTS;
+        }
+
+        User user = userRepository.findById(requestDTO.getUserId()).orElse(null);
+        ClimbGround climbGround = climbGroundRepository.findById(requestDTO.getClimbGroundId()).orElse(null);
+        if (user == null || climbGround == null) { // 유저나 클라이밍장이 없으면
+            return ResponseType.CREATION_FAILED_BAD_REQUEST;
+        }
+
+        UserClimbGround newUserClimbGround = new UserClimbGround();
+        newUserClimbGround.setUser(user);
+        newUserClimbGround.setClimbGround(climbGround);
+        newUserClimbGround.setMedal(UserClimbGroundMedalEnum.BRONZE);
+        userClimbGroundRepository.save(newUserClimbGround);
+        return ResponseType.CREATED;
+    };
 }
