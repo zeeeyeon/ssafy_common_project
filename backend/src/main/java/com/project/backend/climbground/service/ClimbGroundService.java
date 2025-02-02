@@ -4,6 +4,7 @@ import com.project.backend.climbground.dto.requsetDTO.ClimbGroundAllRequestDTO;
 import com.project.backend.climbground.dto.requsetDTO.ClimbGroundSearchRequestDTO;
 import com.project.backend.climbground.dto.responseDTO.ClimbGroundAllResponseDTO;
 import com.project.backend.climbground.dto.responseDTO.ClimbGroundDetailResponseDTO;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;

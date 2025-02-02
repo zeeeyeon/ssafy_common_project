@@ -66,4 +66,15 @@ public class ApiResponse<T> {
   public static <T> ApiResponse<T> notFound() {
     return new ApiResponse<>(new ApiResponseHeader(ResponseType.NOT_FOUND_404),null);
   }
+
+
+  // 이거 두개로만 돌려쓰기
+  public static <T> ApiResponse<T> apiResponse(ResponseType responseType, String name, T body) {
+    return new ApiResponse<>(new ApiResponseHeader(responseType),name,body);
+  }
+
+  public static <T> ApiResponse<T> apiResponse(ResponseType responseType) {
+    return new ApiResponse<>(new ApiResponseHeader(responseType),null);
+  }
+
 }

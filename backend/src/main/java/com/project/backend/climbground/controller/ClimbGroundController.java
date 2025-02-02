@@ -6,8 +6,10 @@ import com.project.backend.climbground.dto.responseDTO.ClimbGroundAllResponseDTO
 import com.project.backend.climbground.dto.responseDTO.ClimbGroundDetailResponseDTO;
 import com.project.backend.climbground.service.ClimbGroundServiceImpl;
 import com.project.backend.common.ApiResponse;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.project.backend.common.ResponseType;
+import lombok.RequiredArgsConstructor;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Optional;
@@ -15,10 +17,11 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/climbground")
+@RequiredArgsConstructor
 public class ClimbGroundController {
 
-    @Autowired
-    private ClimbGroundServiceImpl ClimbGroundService;
+
+    private final ClimbGroundServiceImpl ClimbGroundService;
 
     // 클라이밍장 상세 조회
     @GetMapping("/detail/{climbground_id}")
@@ -49,6 +52,7 @@ public class ClimbGroundController {
         if (climbGrounds.isEmpty()) {
             return ApiResponse.fail();
         }
-        return ApiResponse.success("data",climbGrounds);
+//        return ApiResponse.success("data",climbGrounds);
+        return ApiResponse.apiResponse(ResponseType.SUCCESS, "data", climbGrounds);
     }
 }
