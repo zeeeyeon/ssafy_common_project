@@ -2,8 +2,10 @@ package com.project.backend.userclimbground.controller;
 
 import com.project.backend.common.ApiResponse;
 import com.project.backend.common.ResponseType;
+import com.project.backend.userclimbground.dto.requestDTO.ClimbGroundRecordRequestDTO;
 import com.project.backend.userclimbground.dto.requestDTO.ClimbRecordRequestDTO;
 import com.project.backend.userclimbground.dto.requestDTO.UnlockClimbGroundRequsetDTO;
+import com.project.backend.userclimbground.dto.responseDTO.ClimbGroundRecordResponseDTO;
 import com.project.backend.userclimbground.dto.responseDTO.ClimbRecordResponseDTO;
 import com.project.backend.userclimbground.service.UserClimbGroundServiceImp;
 import lombok.RequiredArgsConstructor;
@@ -46,10 +48,16 @@ public class UserClimbGroundController {
         return ApiResponse.apiResponse(ResponseType.SUCCESS,"data",responseDTO);
     }
 
-        @PostMapping("/unlock")
+    @PostMapping("/unlock")
     public ApiResponse<?> postUnlockClimbGround(@RequestBody UnlockClimbGroundRequsetDTO requestDTO) {
         ResponseType responseType = userClimbGroundService.saveUnlockClimbGround(requestDTO);
         return ApiResponse.apiResponse(responseType);
+    }
+
+    @GetMapping("/climb/year")
+    public ApiResponse<?> getClimbGroundRecordYear(@ModelAttribute ClimbGroundRecordRequestDTO requestDTO) {
+        ClimbGroundRecordResponseDTO responseDTO= userClimbGroundService.getUserClimbGroundRecordYear(requestDTO);
+        return ApiResponse.apiResponse(ResponseType.SUCCESS,"data",responseDTO);
     }
     
 }
