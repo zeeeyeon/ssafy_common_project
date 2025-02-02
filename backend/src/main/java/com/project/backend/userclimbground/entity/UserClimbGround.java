@@ -8,7 +8,9 @@ import jakarta.persistence.*;
 import lombok.Getter;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Getter
@@ -32,6 +34,6 @@ public class UserClimbGround extends BaseEntity {
     private ClimbGround climbGround;
 
     @OneToMany(mappedBy = "userClimbGround", cascade = CascadeType.ALL)
-    private List<UserDate> userDateList = new ArrayList<>();
+    private Set<UserDate> userDateList = new HashSet<>();
 
 }
