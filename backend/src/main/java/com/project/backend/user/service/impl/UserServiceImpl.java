@@ -1,9 +1,12 @@
 package com.project.backend.user.service.impl;
 
+import com.project.backend.user.dto.request.LoginRequestDto;
 import com.project.backend.user.dto.request.SignUpRequestDto;
 import com.project.backend.user.dto.response.SignUpResponseDto;
 import com.project.backend.user.entity.RoleRegister;
 import com.project.backend.user.entity.User;
+import com.project.backend.user.ex.CustomApiException;
+import com.project.backend.user.ex.ErrorCode;
 import com.project.backend.user.repository.jpa.RoleRegisterRepository;
 import com.project.backend.user.repository.jpa.UserRepository;
 import com.project.backend.user.service.UserService;
@@ -25,7 +28,7 @@ public class UserServiceImpl implements UserService {
   private final BCryptPasswordEncoder passwordEncoder;
 
   public User getUserByUserName(String userName){
-    return userRepository.findByUsername(userName);
+    return userRepository.findByUsername(userName).orElseThrow(() -> new CustomApiException(ErrorCode.USER_NOT_EXIST));
   }
 
   @Override
@@ -62,4 +65,14 @@ public class UserServiceImpl implements UserService {
   public boolean checkNicknameDuplication(String nickname) {
     return userRepository.existsByNickname(nickname);
   }
+
+  @Override
+  public ResponseEntity<?> login(LoginRequestDto loginRequestDto) {
+    return null;
+  }
+
+//  ResponseEntity<?> login(LoginRequestDto loginRequestDto) {
+//    return userRepository.
+//  }
+
 }

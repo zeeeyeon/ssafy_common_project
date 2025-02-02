@@ -1,9 +1,8 @@
 package com.project.backend.user.controller;
 
 import com.project.backend.common.ApiResponse;
-import com.project.backend.common.ApiResponseHeader;
-import com.project.backend.common.ResponseType;
 import com.project.backend.oauth.entity.UserPrincipal;
+import com.project.backend.user.dto.request.LoginRequestDto;
 import com.project.backend.user.dto.request.SendOneRequestDto;
 import com.project.backend.user.dto.request.SignUpRequestDto;
 import com.project.backend.user.dto.response.SignUpResDto;
@@ -84,11 +83,11 @@ public class UserController {
   }
 
   // 일반 사용자 로그인
-//  @PostMapping("/login")
-//  public ResponseEntity<?> login(@RequestBody @Valid LoginRequestDto loginRequestDto) {
-//    ResponseEntity<?> response = userService.login(loginRequestDto);
-//    return response;
-//  }
+  @PostMapping("/login")
+  public ResponseEntity<?> login(@RequestBody @Valid LoginRequestDto loginRequestDto) {
+    ResponseEntity<?> response = userService.login(loginRequestDto);
+    return response;
+  }
 
   // 이메일 중복 체크
   @GetMapping("/email-check")
