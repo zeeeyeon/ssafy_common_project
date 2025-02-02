@@ -134,6 +134,33 @@ class SignUpViewModel extends ChangeNotifier{
   }
 
   // 닉네임 중복 확인
+  Future<bool> duplicatedNickname() async {
+    final String nickname = nicknameController.text;
+    try {
+      isLoading = true;
+      notifyListeners();
+
+      final Response response = await _authRepository.duplicatedNickname(nickname);
+
+      if(response.statusCode == 200) {
+        if(response.data['header']['httpStatus'] == 400) {
+          print('닉네임 중복');
+          errorMessage = '이미 존재하는 닉네임입니다';
+          notifyListeners();
+          return false;
+        }else if(response.data['header']['httpStatus'] == 200) {
+          print('사용가능한 닉네임');
+          successMessage = '사용가능한 닉네임입니다';
+          notifyListeners();
+          return true;
+        }
+      }
+
+    } catch (e) {
+      return false;
+    }
+    return false;
+  }
 
   // 회원가입
   Future<void> signUp() async {

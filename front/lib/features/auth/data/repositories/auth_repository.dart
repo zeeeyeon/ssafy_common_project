@@ -44,18 +44,11 @@ class AuthRepository {
   }
 
   // 닉네임 중복 확인
-  Future<Response> duplicatedNickname(UserDuplicatedNicknameModel UserDuplicatedNicknameModel) async {
-    final String url = 'http://localhost:8080/api/user/nickname';
-
+  Future<Response> duplicatedNickname(String nickname) async {
     try {
       final response = await _dio.get(
-        url,
-        data: UserDuplicatedNicknameModel.toJson(),
-        options: Options(
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        ),
+        '/user/nickname-check',
+        queryParameters: {'nickname' : nickname},
       );
       return response;
     } catch(e) {
