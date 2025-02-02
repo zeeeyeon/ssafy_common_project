@@ -9,7 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/history")
+@RequestMapping("/api/statistics")
 @RequiredArgsConstructor
 public class UserClimbGroundController {
 
@@ -27,6 +27,20 @@ public class UserClimbGroundController {
     @GetMapping("/monthly")
     public ApiResponse<?> getClimbRecordsMonth(@ModelAttribute ClimbRecordRequestDTO requestDTO) {
         ClimbRecordResponseDTO responseDTO = userClimbGroundService.getUserClimbRecordMonth(requestDTO);
+
+        return ApiResponse.apiResponse(ResponseType.SUCCESS,"data",responseDTO);
+    }
+
+    @GetMapping("/weekly")
+    public ApiResponse<?> getClimbRecordsWeek(@ModelAttribute ClimbRecordRequestDTO requestDTO) {
+        ClimbRecordResponseDTO responseDTO = userClimbGroundService.getUserClimbRecordWeek(requestDTO);
+
+        return ApiResponse.apiResponse(ResponseType.SUCCESS,"data",responseDTO);
+    }
+
+    @GetMapping("/daily")
+    public ApiResponse<?> getClimbRecordsDay(@ModelAttribute ClimbRecordRequestDTO requestDTO) {
+        ClimbRecordResponseDTO responseDTO = userClimbGroundService.getUserClimbRecordDay(requestDTO);
 
         return ApiResponse.apiResponse(ResponseType.SUCCESS,"data",responseDTO);
     }

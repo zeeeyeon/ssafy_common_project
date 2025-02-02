@@ -4,6 +4,8 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.time.temporal.ChronoField;
+
 
 @Getter
 @Setter
@@ -22,6 +24,10 @@ public class ClimbRecordRequestDTO {
 
     public int getDay() {
         return date.getDayOfMonth();
+    }
+
+    public int getWeek() {
+        return date.get(ChronoField.ALIGNED_WEEK_OF_MONTH);
     }
 
 }

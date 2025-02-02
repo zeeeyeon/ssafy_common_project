@@ -8,4 +8,8 @@ public interface UserClimbGroundService {
     ClimbRecordResponseDTO getUserClimbRecordYear(ClimbRecordRequestDTO requestDTO);
 
     ClimbRecordResponseDTO getUserClimbRecordMonth(ClimbRecordRequestDTO requestDTO);
+
+    ClimbRecordResponseDTO getUserClimbRecordWeek(ClimbRecordRequestDTO requestDTO);
+
+    ClimbRecordResponseDTO getUserClimbRecordDay(ClimbRecordRequestDTO requestDTO);
 }
