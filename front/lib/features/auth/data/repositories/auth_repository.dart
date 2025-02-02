@@ -50,46 +50,6 @@ class AuthRepository {
     }
   }
 
-  // 휴대폰 인증코드 발송
-  Future<Response> submitPhoneCode(UserSubmitPhoneCodeModel UserSubmitPhoneCodeModel) async {
-    final String url = 'http://localhost:8080/api/user/auth-code';
-
-    try {
-      final response = await _dio.post(
-        url,
-        data: UserSubmitPhoneCodeModel.toJson(),
-        options: Options(
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        ),
-      );
-      return response;
-    } catch(e) {
-      rethrow;
-    }
-  }
-
-  // 휴대폰 인증코드 확인
-  Future<Response> checkPhoneCode(UserCheckPhoneCodeModel UserCheckPhoneCodeModel) async {
-    final String url = 'http://localhost:8080/api/user/auth-code';
-
-    try {
-      final response = await _dio.get(
-        url,
-        data: UserCheckPhoneCodeModel.toJson(),
-        options: Options(
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        ),
-      );
-      return response;
-    } catch(e) {
-      rethrow;
-    }
-  }
-
   // 닉네임 중복 확인
   Future<Response> duplicatedNickname(UserDuplicatedNicknameModel UserDuplicatedNicknameModel) async {
     final String url = 'http://localhost:8080/api/user/nickname';
@@ -114,7 +74,7 @@ class AuthRepository {
   Future<Response> signup(UserSignupModel UserSignupModel) async {
     try {
       final response = await _dio.post(
-        '/users/sign-up',
+        '/user/sign-up',
         data: UserSignupModel.toJson(),
       );
       return response;
