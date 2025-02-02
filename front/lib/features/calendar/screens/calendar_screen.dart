@@ -37,12 +37,11 @@ class CalendarScreenState extends ConsumerState<CalendarScreen> {
       appBar: CustomAppBar(
         title: '${currentMonth.year}년 ${currentMonth.month}월',
         showBackButton: false,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.calendar_today),
-            onPressed: () => selectDate(context),
-          ),
-        ],
+        leading: IconButton(
+          icon: const Icon(Icons.calendar_today),
+          onPressed: () => selectDate(context),
+        ),
+        actions: const [],
       ),
       body: SafeArea(
         child: Column(
@@ -83,7 +82,7 @@ class CalendarScreenState extends ConsumerState<CalendarScreen> {
                     crossAxisCount: 7,
                     mainAxisSpacing: 4,
                     crossAxisSpacing: 4,
-                    childAspectRatio: 1.0,
+                    childAspectRatio: 0.7,
                   ),
                   itemCount: getDaysInMonth() + getFirstWeekdayOfMonth() - 1,
                   itemBuilder: (context, index) {
@@ -98,8 +97,11 @@ class CalendarScreenState extends ConsumerState<CalendarScreen> {
                       dayNumber,
                     );
 
-                    final hasRecord = dayNumber % 3 == 0;
-                    return buildDayCell(currentDate, hasRecord);
+                    final int dailyAttempts =
+                        _getDailyAttemptCount(currentDate);
+                    final bool hasRecord = dailyAttempts > 0;
+                    return buildDayCell(currentDate, hasRecord,
+                        dailyAttempts: dailyAttempts);
                   },
                 ),
               ),
@@ -171,7 +173,7 @@ class CalendarScreenState extends ConsumerState<CalendarScreen> {
     );
   }
 
-  Widget buildDayCell(DateTime date, bool hasRecord) {
+  Widget buildDayCell(DateTime date, bool hasRecord, {int dailyAttempts = 0}) {
     final isToday = DateTime.now().year == date.year &&
         DateTime.now().month == date.month &&
         DateTime.now().day == date.day;
@@ -181,7 +183,7 @@ class CalendarScreenState extends ConsumerState<CalendarScreen> {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 4.0),
         decoration: BoxDecoration(
-          color: hasRecord ? Colors.blue.withOpacity(0.1) : null,
+          color: hasRecord ? const Color.fromRGBO(33, 150, 243, 0.1) : null,
           border: isToday
               ? Border.all(color: Colors.blue, width: 2)
               : Border.all(color: Colors.grey[300]!, width: 0.5),
@@ -191,7 +193,7 @@ class CalendarScreenState extends ConsumerState<CalendarScreen> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Padding(
-              padding: const EdgeInsets.all(4.0),
+              padding: const EdgeInsets.all(2.0),
               child: Text(
                 '${date.day}',
                 style: TextStyle(
@@ -201,12 +203,18 @@ class CalendarScreenState extends ConsumerState<CalendarScreen> {
               ),
             ),
             if (hasRecord)
-              Container(
-                height: 4,
-                margin: const EdgeInsets.symmetric(horizontal: 4),
-                decoration: BoxDecoration(
-                  color: Colors.blue.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(2),
+              Expanded(
+                child: Container(
+                  margin: const EdgeInsets.only(left: 6, right: 6, bottom: 2),
+                  decoration: BoxDecoration(
+                    color: hasRecord
+                        ? Color.fromRGBO(33, 150, 243,
+                            _getOpacityFromAttempts(dailyAttempts))
+                        : null,
+                    borderRadius: const BorderRadius.vertical(
+                      bottom: Radius.circular(6),
+                    ),
+                  ),
                 ),
               ),
           ],
@@ -244,5 +252,19 @@ class CalendarScreenState extends ConsumerState<CalendarScreen> {
 
   int getFirstWeekdayOfMonth() {
     return DateTime(currentMonth.year, currentMonth.month, 1).weekday;
+  }
+
+  int _getDailyAttemptCount(DateTime date) {
+    if (date.day == 3 || date.day == 15 || date.day == 24) return 5;
+    if (date.day == 6 || date.day == 18) return 10;
+    if (date.day == 9 || date.day == 21) return 20;
+    return 0;
+  }
+
+  double _getOpacityFromAttempts(int attempts) {
+    if (attempts >= 20) return 0.9;
+    if (attempts >= 10) return 0.6;
+    if (attempts > 0) return 0.3;
+    return 0.0;
   }
 }

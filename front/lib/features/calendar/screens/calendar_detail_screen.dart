@@ -89,11 +89,32 @@ class CalendarDetailScreenState extends ConsumerState<CalendarDetailScreen> {
 
   Future<void> fetchProblemData() async {
     try {
-      final dummyData = [
-        {"color": 0xFFFF0000, "success": 2, "attempts": 3}, // 빨강
-        {"color": 0xFFFFA500, "success": 1, "attempts": 1}, // 주황
-        {"color": 0xFFFFFF00, "success": 1, "attempts": 2}, // 노랑
-      ];
+      final double? dummyOpacity = _getDummyOpacity(selectedDate);
+      int baseAttempts =
+          (dummyOpacity != null) ? (dummyOpacity * 10).round() : 0;
+      final dummyData = (dummyOpacity != null)
+          ? [
+              {
+                "color": 0xFFFF0000,
+                "success": (baseAttempts / 2).round(),
+                "attempts": baseAttempts
+              },
+              {
+                "color": 0xFFFFA500,
+                "success": (baseAttempts / 3).round(),
+                "attempts": baseAttempts
+              },
+              {
+                "color": 0xFFFFFF00,
+                "success": (baseAttempts / 4).round(),
+                "attempts": baseAttempts
+              },
+            ]
+          : [
+              {"color": 0xFFFF0000, "success": 2, "attempts": 3},
+              {"color": 0xFFFFA500, "success": 1, "attempts": 1},
+              {"color": 0xFFFFFF00, "success": 1, "attempts": 2},
+            ];
       ref.read(problemProvider.notifier).setProblems(dummyData);
     } catch (e) {
       logger.e('❌ fetchProblemData() 오류: ${e.toString()}');
@@ -200,6 +221,8 @@ class CalendarDetailScreenState extends ConsumerState<CalendarDetailScreen> {
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             const SizedBox(height: 10),
             _problemList(problems),
+            const SizedBox(height: 20),
+            _buildAttemptStatus(_calculateTotalAttempts(problems)),
           ],
         ),
       ),
@@ -249,7 +272,6 @@ class CalendarDetailScreenState extends ConsumerState<CalendarDetailScreen> {
     );
   }
 
-  // ✅ 누락된 _buildStatItem 함수 추가
   Widget _buildStatItem(String title, String value) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4.0),
@@ -265,7 +287,6 @@ class CalendarDetailScreenState extends ConsumerState<CalendarDetailScreen> {
     );
   }
 
-// ✅ 누락된 _problemList 함수 추가
   Widget _problemList(List<Map<String, dynamic>> problems) {
     if (problems.isEmpty) {
       return const Text('도전한 문제가 없습니다.');
@@ -279,10 +300,9 @@ class CalendarDetailScreenState extends ConsumerState<CalendarDetailScreen> {
     );
   }
 
-// ✅ 누락된 _buildProblemItem 함수 추가
   Widget _buildProblemItem(Color color, int success, int attempts) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6.0), // ✅ 문제 사이 간격 추가
+      padding: const EdgeInsets.symmetric(vertical: 6.0),
       child: Row(
         children: [
           Container(
@@ -294,7 +314,7 @@ class CalendarDetailScreenState extends ConsumerState<CalendarDetailScreen> {
           const SizedBox(width: 10),
           Expanded(
             child: Container(
-              height: 20, // ✅ 그래프 두께 증가
+              height: 20,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(5),
                 color: Colors.grey[300],
@@ -314,5 +334,49 @@ class CalendarDetailScreenState extends ConsumerState<CalendarDetailScreen> {
         ],
       ),
     );
+  }
+
+  int _calculateTotalAttempts(List<Map<String, dynamic>> problems) {
+    return problems.fold(
+        0, (sum, problem) => sum + (problem['attempts'] as int));
+  }
+
+  Widget _buildAttemptStatus(int totalAttempts) {
+    double opacity;
+    if (totalAttempts >= 20) {
+      opacity = 1.0;
+    } else if (totalAttempts >= 10) {
+      opacity = 0.6;
+    } else if (totalAttempts >= 5) {
+      opacity = 0.3;
+    } else {
+      opacity = 0.1;
+    }
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Color.fromRGBO(33, 150, 243, opacity),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Text(
+        '총 시도 횟수: $totalAttempts회',
+        style: const TextStyle(
+          fontSize: 18,
+          fontWeight: FontWeight.bold,
+          color: Colors.white,
+        ),
+        textAlign: TextAlign.center,
+      ),
+    );
+  }
+
+  // 추가: 날짜별 dummy opacity 반환 (3,15,24 -> 0.3, 6,18 -> 0.6, 9,21 -> 0.9)
+  double? _getDummyOpacity(DateTime date) {
+    if (date.day == 3 || date.day == 15 || date.day == 24) return 0.3;
+    if (date.day == 6 || date.day == 18) return 0.6;
+    if (date.day == 9 || date.day == 21) return 0.9;
+    return null;
   }
 }
