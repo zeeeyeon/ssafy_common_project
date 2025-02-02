@@ -3,13 +3,14 @@ package com.project.backend.userclimbground.controller;
 import com.project.backend.common.ApiResponse;
 import com.project.backend.common.ResponseType;
 import com.project.backend.userclimbground.dto.requestDTO.ClimbRecordRequestDTO;
+import com.project.backend.userclimbground.dto.requestDTO.UnlockClimbGroundRequsetDTO;
 import com.project.backend.userclimbground.dto.responseDTO.ClimbRecordResponseDTO;
 import com.project.backend.userclimbground.service.UserClimbGroundServiceImp;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/statistics")
+@RequestMapping("/api/user-climbground")
 @RequiredArgsConstructor
 public class UserClimbGroundController {
 
@@ -43,6 +44,12 @@ public class UserClimbGroundController {
         ClimbRecordResponseDTO responseDTO = userClimbGroundService.getUserClimbRecordDay(requestDTO);
 
         return ApiResponse.apiResponse(ResponseType.SUCCESS,"data",responseDTO);
+    }
+
+        @PostMapping("/unlock")
+    public ApiResponse<?> postUnlockClimbGround(@RequestBody UnlockClimbGroundRequsetDTO requestDTO) {
+        ResponseType responseType = userClimbGroundService.saveUnlockClimbGround(requestDTO);
+        return ApiResponse.apiResponse(responseType);
     }
     
 }
