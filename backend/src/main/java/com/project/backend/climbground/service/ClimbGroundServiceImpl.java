@@ -2,8 +2,10 @@ package com.project.backend.climbground.service;
 
 import com.project.backend.climbground.dto.requsetDTO.ClimbGroundAllRequestDTO;
 import com.project.backend.climbground.dto.requsetDTO.ClimbGroundSearchRequestDTO;
+import com.project.backend.climbground.dto.requsetDTO.MyClimbGroundRequestDTO;
 import com.project.backend.climbground.dto.responseDTO.ClimbGroundAllResponseDTO;
 import com.project.backend.climbground.dto.responseDTO.ClimbGroundDetailResponseDTO;
+import com.project.backend.climbground.dto.responseDTO.MyClimGroundResponseDTO;
 import com.project.backend.climbground.entity.ClimbGround;
 import com.project.backend.climbground.repository.ClimbGroundRepository;
 import com.project.backend.climbgroundinfo.repository.ClimbGroundInfoRepository;
@@ -12,7 +14,6 @@ import com.project.backend.info.dto.responseDTO.InfoResponseDTO;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.stereotype.Service;
 
@@ -110,6 +111,23 @@ public class ClimbGroundServiceImpl implements ClimbGroundService {
 
         return responseList;
     }
+
+    @Override
+    public List<MyClimGroundResponseDTO> myClimbGroundWithIds(MyClimbGroundRequestDTO requestDTO){
+        List<ClimbGround> climbGrounds = climbGroundRepository.findByIdIn(requestDTO.getClimbGroundIds());
+
+        List<MyClimGroundResponseDTO> responseList = climbGrounds.stream().map(climbGround -> {
+
+            return new MyClimGroundResponseDTO(
+                    climbGround.getId(),
+                    climbGround.getName(),
+                    climbGround.getImage(),
+                    climbGround.getAddress()
+            );
+        }).collect(Collectors.toList());
+        return responseList;
+    }
+
     // 클라이밍장별 거리 계산
     public double calculateDistance(BigDecimal lat1, BigDecimal lon1, BigDecimal lat2, BigDecimal lon2){
         final int EARTH_RADIUS = 6371; // 지구 반지름 (km)
@@ -126,5 +144,7 @@ public class ClimbGroundServiceImpl implements ClimbGroundService {
 
         return Math.round(distance * 100.0) / 100.0; // 소수점 둘째 자리까지 반올림
     };
+
+
 
 }

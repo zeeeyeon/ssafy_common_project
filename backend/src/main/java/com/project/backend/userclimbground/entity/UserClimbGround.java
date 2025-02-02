@@ -6,6 +6,7 @@ import com.project.backend.user.entity.User;
 import com.project.backend.userdate.entity.UserDate;
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -14,6 +15,7 @@ import java.util.Set;
 
 @Entity
 @Getter
+@Setter
 @Table(name = "user_climbground")
 @AttributeOverride(name="Id", column=@Column(name="user_climbground_id"))
 public class UserClimbGround extends BaseEntity {
