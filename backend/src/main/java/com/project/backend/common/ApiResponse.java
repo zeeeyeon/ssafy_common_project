@@ -11,6 +11,10 @@ public class ApiResponse<T> {
   private Map<String, T> body;
   private T dto;
 
+  public ApiResponse(ApiResponseHeader apiResponseHeader) {
+    this.header = apiResponseHeader;
+  }
+
   public ApiResponse(ApiResponseHeader apiResponseHeader, Object o) {
     this.header = apiResponseHeader;
     this.dto = (T) o;
