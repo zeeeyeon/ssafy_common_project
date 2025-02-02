@@ -1,11 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:kkulkkulk/common/widgets/layout/custom_app_bar.dart';
+import 'package:kkulkkulk/features/profile/screens/profile_screen_edit.dart';
+import 'package:kkulkkulk/features/profile/view_models/profile_view_model.dart';
 
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Riverpod 상태 읽기
+    final userProfile = ref.watch(profileProvider);
+
     return Scaffold(
       appBar: CustomAppBar(
         title: '',
@@ -13,7 +19,7 @@ class ProfileScreen extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.settings),
             onPressed: () {
-              // 이후 설정 화면으로 이동
+              // 설정 화면으로 이동
             },
           ),
         ],
@@ -26,25 +32,31 @@ class ProfileScreen extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Row(
+                Row(
                   children: [
                     CircleAvatar(
                       radius: 30,
-                      backgroundImage: NetworkImage(
-                          'https://via.placeholder.com/150'), // 프로필 이미지
+                      backgroundImage: NetworkImage(userProfile.profileImage),
                     ),
-                    SizedBox(width: 16),
+                    const SizedBox(width: 16),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          '클라이밍킹도경원',
-                          style: TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.bold),
+                          userProfile.name,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                         Text(
-                          '언제 클라이밍을 시작했나요 ?',
-                          style: TextStyle(fontSize: 14, color: Colors.grey),
+                          userProfile.startDate != null
+                              ? "클라이밍 시작: ${userProfile.startDate!.year}-${userProfile.startDate!.month}-${userProfile.startDate!.day}"
+                              : "클라이밍 시작일을 입력해주세요.",
+                          style: const TextStyle(
+                            fontSize: 14,
+                            color: Colors.grey,
+                          ),
                         ),
                       ],
                     )
@@ -53,7 +65,12 @@ class ProfileScreen extends StatelessWidget {
                 IconButton(
                   icon: const Icon(Icons.edit),
                   onPressed: () {
-                    // 프로필 편집 화면으로 이동
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const ProfileScreenEdit(),
+                      ),
+                    );
                   },
                 )
               ],
@@ -67,10 +84,10 @@ class ProfileScreen extends StatelessWidget {
                 color: Colors.blue[300],
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: const Column(
+              child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Text(
+                  const Text(
                     '클라이밍 D-day',
                     style: TextStyle(
                       fontSize: 18,
@@ -78,15 +95,14 @@ class ProfileScreen extends StatelessWidget {
                       color: Colors.white,
                     ),
                   ),
-                  SizedBox(
-                    height: 8,
-                  ),
+                  const SizedBox(height: 8),
                   Text(
-                    '??? 일',
-                    style: TextStyle(
-                        fontSize: 32,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white),
+                    '${userProfile.dDay} 일',
+                    style: const TextStyle(
+                      fontSize: 32,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
                   ),
                 ],
               ),
@@ -95,16 +111,12 @@ class ProfileScreen extends StatelessWidget {
             // 키와 팔길이 카드
             Row(
               children: [
-                // 키 카드
                 Expanded(
-                  flex: 1,
-                  child: _buildInfoCard('키', '-cm'),
+                  child: _buildInfoCard('키', userProfile.height),
                 ),
-                const SizedBox(width: 8), // 카드 간 간격
-                // 팔길이 카드
+                const SizedBox(width: 8),
                 Expanded(
-                  flex: 1,
-                  child: _buildInfoCard('팔길이', '-cm'),
+                  child: _buildInfoCard('팔길이', userProfile.armSpan),
                 ),
               ],
             ),
@@ -114,7 +126,6 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  // 키와 팔길이 카드 위젯
   Widget _buildInfoCard(String title, String value) {
     return Container(
       padding: const EdgeInsets.all(16.0),
@@ -140,7 +151,7 @@ class ProfileScreen extends StatelessWidget {
               fontWeight: FontWeight.bold,
               color: Colors.white,
             ),
-          )
+          ),
         ],
       ),
     );
