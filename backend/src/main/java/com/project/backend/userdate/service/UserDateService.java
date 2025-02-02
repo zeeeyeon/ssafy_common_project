@@ -5,7 +5,9 @@ import com.project.backend.hold.entity.HoldColorEnum;
 import com.project.backend.hold.entity.HoldLevelEnum;
 import com.project.backend.hold.repository.HoldRepository;
 import com.project.backend.record.entity.Record;
+import com.project.backend.userdate.dto.MonthlyRecordDto;
 import com.project.backend.userdate.dto.response.DailyClimbingRecordResponse;
+import com.project.backend.userdate.dto.response.MonthlyClimbingRecordResponse;
 import com.project.backend.userdate.entity.UserDate;
 import com.project.backend.userdate.repository.UserDateRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -15,6 +17,8 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.YearMonth;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -90,6 +94,43 @@ public class UserDateService {
                 .holdColorLevel(holdColorLevel)
                 .colorAttempts(colorAttempts)
                 .colorSuccesses(colorSuccesses)
+                .build();
+    }
+
+
+    public MonthlyClimbingRecordResponse getMonthlyRecords(YearMonth selectedMonth, Long userId) {
+        int year = selectedMonth.getYear();
+        int month = selectedMonth.getMonthValue();
+
+        List<MonthlyRecordDto> monthlyRecords = userDateRepository
+                .findMonthlyRecords(year, month, userId);
+
+        // <일자, 각 날짜별 시도 횟수>
+        Map<Integer, MonthlyRecordDto> recordMap = monthlyRecords.stream()
+                .collect(Collectors.toMap(
+                        MonthlyRecordDto::getDay,
+                        record -> record
+                ));
+
+        // 마지막 날 계산
+        YearMonth yearMonth = YearMonth.of(year, month);
+        int lastDay = yearMonth.lengthOfMonth();
+
+        // DayRecord 생성
+        List<MonthlyClimbingRecordResponse.DayRecord> dayRecords = new ArrayList<>();
+        for (int day = 1; day <= lastDay; day++) {
+            MonthlyRecordDto record = recordMap.get(day);
+            dayRecords.add(new MonthlyClimbingRecordResponse.DayRecord(
+                    day,
+                    record != null,
+                    record != null ? record.getTotalCount() : 0
+            ));
+        }
+
+        return MonthlyClimbingRecordResponse.builder()
+                .year(year)
+                .month(month)
+                .records(dayRecords)
                 .build();
     }
 }
