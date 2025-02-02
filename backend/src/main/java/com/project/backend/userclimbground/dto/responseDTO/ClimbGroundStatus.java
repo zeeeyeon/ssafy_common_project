@@ -12,7 +12,9 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ClimbGroundStatus {
+
     private int climbGround;
     private int visited;
     private List<Long> list;
+
 }
