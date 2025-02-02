@@ -5,11 +5,7 @@ import com.project.backend.userdate.service.UserDateService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 
@@ -20,14 +16,19 @@ public class UserDateController {
     private final UserDateService userDateService;
 
     // user 가져오는 방법 물어보기
-    @GetMapping("/daily")
+    @GetMapping("/daily/{userId}")
     public ResponseEntity<DailyClimbingRecordResponse> getDailyRecord (
-            @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate selectedDate
-            /*@AuthenticationPrincipal UserPrincipal userPrincipal*/) {
+            @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate selectedDate,
+            @PathVariable Long userId) {
 
-
-        // response<T> 물어보기
+        DailyClimbingRecordResponse dailyRecord = userDateService.getDailyRecord(selectedDate, userId);
         return null;
     }
+
+//    @GetMapping("/test")
+//    public void test(@AuthenticationPrincipal UserPrincipal userPrincipal) throws JsonProcessingException {
+//        ObjectMapper objectMapper = new ObjectMapper();
+//        System.out.println(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(userPrincipal));
+//    }
 
 }
