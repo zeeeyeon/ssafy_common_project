@@ -24,7 +24,10 @@ public enum ResponseType {
 
 
   NO_MATCHING_CLIMBING_GYM(204, "NMCG", "No matching climbing gym found."),
-  NOT_FOUND_404(404, "NF", "Not Found");
+  NOT_FOUND_404(404, "NF", "Not Found"),
+  CREATED(201,"CR","Row Created successfully"),
+  CREATION_FAILED_BAD_REQUEST(400, "CFBR", "Bad request, invalid data provided for creation."),
+  DATA_ALREADY_EXISTS(409, "DAE", "Data already exists.");
 
   private final int httpStatus;  // HTTP 상태 코드 혹은 기타 숫자 코드
   private final String code;     // 비즈니스 로직에서 쓸 고유 식별 코드 (ex: "SU", "EUE")

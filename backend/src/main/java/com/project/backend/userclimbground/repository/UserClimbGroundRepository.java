@@ -56,5 +56,7 @@ public interface UserClimbGroundRepository extends JpaRepository<UserClimbGround
             "AND MONTH(ud.createdAt) = :month " +
             "AND DAY(ud.createdAt) = :day")
     List<UserClimbGround> findClimbRecordsByUserIdAndDay(Long userId, int year, int month, int day);
+
+    Boolean existsUserCLimbGroundByUserIdAndClimbGroundId(Long userId, Long climbGroundId);
 }
 

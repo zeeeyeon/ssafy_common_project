@@ -2,14 +2,15 @@ package com.project.backend.climbground.controller;
 
 import com.project.backend.climbground.dto.requsetDTO.ClimbGroundAllRequestDTO;
 import com.project.backend.climbground.dto.requsetDTO.ClimbGroundSearchRequestDTO;
+import com.project.backend.climbground.dto.requsetDTO.MyClimbGroundRequestDTO;
 import com.project.backend.climbground.dto.responseDTO.ClimbGroundAllResponseDTO;
 import com.project.backend.climbground.dto.responseDTO.ClimbGroundDetailResponseDTO;
+import com.project.backend.climbground.dto.responseDTO.MyClimGroundResponseDTO;
 import com.project.backend.climbground.service.ClimbGroundServiceImpl;
 import com.project.backend.common.ApiResponse;
 import com.project.backend.common.ResponseType;
 import lombok.RequiredArgsConstructor;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Optional;
@@ -55,4 +56,14 @@ public class ClimbGroundController {
 //        return ApiResponse.success("data",climbGrounds);
         return ApiResponse.apiResponse(ResponseType.SUCCESS, "data", climbGrounds);
     }
+
+    @GetMapping("/my-climbground")
+    public ApiResponse<?> getMyClimbGround(@RequestBody MyClimbGroundRequestDTO requestDTO) {
+        List<MyClimGroundResponseDTO> climbGrounds = ClimbGroundService.myClimbGroundWithIds(requestDTO);
+        if (climbGrounds.isEmpty()) {
+            return ApiResponse.apiResponse(ResponseType.NO_MATCHING_CLIMBING_GYM);
+        }
+        return ApiResponse.apiResponse(ResponseType.SUCCESS, "data", climbGrounds);
+    }
+
 }
