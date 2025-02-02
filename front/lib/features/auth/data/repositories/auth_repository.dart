@@ -31,18 +31,11 @@ class AuthRepository {
   }
 
   // 이메일 중복 확인
-  Future<Response> duplicatedEmail(UserDuplicatedEmailModel UserDuplicatedEmailModel) async {
-    final String url = 'http://localhost:8080/api/user/email';
-
+  Future<Response> duplicatedEmail(String email) async {
     try {
       final response = await _dio.get(
-        url,
-        data: UserDuplicatedEmailModel.toJson(),
-        options: Options(
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        ),
+        '/user/email-check',
+        queryParameters: {'email' : email},
       );
       return response;
     } catch(e) {
@@ -71,11 +64,11 @@ class AuthRepository {
   }
 
   // 회원가입
-  Future<Response> signup(UserSignupModel UserSignupModel) async {
+  Future<Response> signup(UserSignupModel userSignupModel) async {
     try {
       final response = await _dio.post(
         '/user/sign-up',
-        data: UserSignupModel.toJson(),
+        data: userSignupModel.toJson(),
       );
       return response;
     } catch(e) {

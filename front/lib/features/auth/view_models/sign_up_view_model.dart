@@ -17,6 +17,7 @@ class SignUpViewModel extends ChangeNotifier{
   bool isLoading = false;
   
   String errorMessage = '';
+  String successMessage = '';
 
   // 이메일 유효성 검사
   String? validateEmail(String? value) {
@@ -103,6 +104,38 @@ class SignUpViewModel extends ChangeNotifier{
     return true;
   }
 
+  // 이메일 중복 확인
+  Future<bool> duplicatedEmail() async {
+    final String email = emailController.text;
+    try {
+      isLoading = true;
+      notifyListeners();
+
+      final Response response = await _authRepository.duplicatedEmail(email);
+
+      if(response.statusCode == 200) {
+        if(response.data['header']['httpStatus'] == 400) {
+          print('이메일 중복');
+          errorMessage = '이미 존재하는 계정의 이메일입니다';
+          notifyListeners();
+          return false;
+        }else if(response.data['header']['httpStatus'] == 200) {
+          print('사용가능한 이메일입니다');
+          successMessage = '사용가능한 이메일입니다';
+          notifyListeners();
+          return true;
+        }
+      }
+
+    } catch (e) {
+      return false;
+    }
+    return false;
+  }
+
+  // 닉네임 중복 확인
+
+  // 회원가입
   Future<void> signUp() async {
     final String email = emailController.text;
     final String password = passwordController.text;
@@ -131,8 +164,9 @@ class SignUpViewModel extends ChangeNotifier{
     } catch (e) {
       print('에러 발생 $e');
     }
-
   }
+
+
 
 }
 

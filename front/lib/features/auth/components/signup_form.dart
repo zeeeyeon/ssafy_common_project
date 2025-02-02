@@ -7,26 +7,48 @@ import 'package:kkulkkulk/features/auth/view_models/sign_up_view_model.dart';
 class SignupForm extends ConsumerWidget {
   final _formKey = GlobalKey<FormState>();
 
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _nicknameController = TextEditingController();
-
-  void _duplicatedEmail() {
-    String email = _emailController.text;
-    print('이메일 중복 확인 버튼 클릭');
-    print('email: $email');
-  }
-
-  void _duplicatedNickname() {
-    String nickname = _nicknameController.text;
-    print('닉네임 중복 확인 버튼 클릭');
-    print('nickname: $nickname');
-  }
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final signUpViewModel = ref.watch(signUpViewModelProvider);
-    final isLoading = signUpViewModel.isLoading;
-    final errorMessage = signUpViewModel.errorMessage;
+
+    // 이메일 중복 확인 처리
+void duplicatedEmail() async {
+  print('이메일 중복 확인 시작');
+
+  // 이메일 유효성 검사
+  final emailValidationMessage = signUpViewModel.validateEmail(signUpViewModel.emailController.text);
+
+  if (emailValidationMessage == null) {
+    // 이메일 형식이 유효한 경우, 중복 체크 진행
+    try {
+      bool flag = await signUpViewModel.duplicatedEmail();
+      if (flag) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(signUpViewModel.successMessage)),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(signUpViewModel.errorMessage)),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('이메일 중복 확인 실패')),
+      );
+    }
+  } else {
+    // 이메일 유효성 검사 실패 시, 해당 메시지를 SnackBar에 표시
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(emailValidationMessage)),
+    );
+  }
+}
+
+
+    // 닉네임 중복 확인 처리
+    void duplicatedNickname() async {
+
+    }
 
     // 회원가입 처리
     void signUp() async {
@@ -74,7 +96,7 @@ class SignupForm extends ConsumerWidget {
                     flex: 2, 
                     child: TextButtonForm(
                       '중복확인',
-                      _duplicatedEmail,
+                      duplicatedEmail,
                     ),
                   ),
                 ],
@@ -121,7 +143,7 @@ class SignupForm extends ConsumerWidget {
                     flex: 2,  // 9:1 비율로 크기 조정
                     child: TextButtonForm(
                       '중복확인',
-                      _duplicatedNickname,
+                      duplicatedNickname,
                     ),
                   ),
                 ],
