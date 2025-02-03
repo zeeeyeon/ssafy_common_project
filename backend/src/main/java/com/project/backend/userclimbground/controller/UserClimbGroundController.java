@@ -59,5 +59,23 @@ public class UserClimbGroundController {
         ClimbGroundRecordResponseDTO responseDTO= userClimbGroundService.getUserClimbGroundRecordYear(requestDTO);
         return ApiResponse.apiResponse(ResponseType.SUCCESS,"data",responseDTO);
     }
+
+    @GetMapping("/climb/monthly")
+    public ApiResponse<?> getClimbGroundRecordMonth(@ModelAttribute ClimbGroundRecordRequestDTO requestDTO) {
+        ClimbGroundRecordResponseDTO responseDTO= userClimbGroundService.getUserClimbGroundRecordMonth(requestDTO);
+        return ApiResponse.apiResponse(ResponseType.SUCCESS,"data",responseDTO);
+    }
+
+    @GetMapping("/climb/weekly")
+    public ApiResponse<?> getClimbGroundRecordWeek(@ModelAttribute ClimbGroundRecordRequestDTO requestDTO) {
+        ClimbGroundRecordResponseDTO responseDTO= userClimbGroundService.getUserClimbGroundRecordWeek(requestDTO);
+        return ApiResponse.apiResponse(ResponseType.SUCCESS,"data",responseDTO);
+    }
+
+    @GetMapping("/climb/daily")
+    public ApiResponse<?> getClimbGroundRecordDaily(@ModelAttribute ClimbGroundRecordRequestDTO requestDTO) {
+        ClimbGroundRecordResponseDTO responseDTO= userClimbGroundService.getUserClimbGroundRecordDay(requestDTO);
+        return ApiResponse.apiResponse(ResponseType.SUCCESS,"data",responseDTO);
+    }
     
 }
