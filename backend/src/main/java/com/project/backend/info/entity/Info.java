@@ -1,12 +1,14 @@
 package com.project.backend.info.entity;
 
-import com.project.backend.climbinfo.entity.ClimbInfo;
+import com.project.backend.climbinfo.entity.ClimbGroundInfo;
 import jakarta.persistence.*;
+import lombok.Getter;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
+@Getter
 public class Info {
 
     @Id
@@ -17,5 +19,5 @@ public class Info {
     private String info;
 
     @OneToMany(mappedBy = "info", cascade = CascadeType.ALL)
-    private List<ClimbInfo> climbInfoList = new ArrayList<>();
+    private List<ClimbGroundInfo> climbGroundInfoList = new ArrayList<>();
 }

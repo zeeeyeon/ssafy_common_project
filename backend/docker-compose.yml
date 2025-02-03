@@ -1,0 +1,16 @@
+services:
+  api:
+    build:
+      context: .
+    container_name: ssafy_orai_api_1
+    ports:
+      - "8080:8080"
+    networks:
+      - mynetwork
+
+networks:
+  mynetwork:
+    external: true
+
+
+
