@@ -1,7 +1,6 @@
 package com.project.backend.climbground.service;
 
 import com.project.backend.climbground.dto.requsetDTO.ClimbGroundAllRequestDTO;
-import com.project.backend.climbground.dto.requsetDTO.ClimbGroundSearchRequestDTO;
 import com.project.backend.climbground.dto.responseDTO.ClimbGroundAllResponseDTO;
 import com.project.backend.climbground.dto.responseDTO.ClimbGroundDetailResponseDTO;
 
@@ -17,6 +16,6 @@ public interface ClimbGroundService {
     Optional<ClimbGroundDetailResponseDTO> findClimbGroundDetailById(Long climbground_id);
 
     // 클라이밍장 검색 조회
-    List<ClimbGroundAllResponseDTO> searchClimbGroundByKeyword(ClimbGroundSearchRequestDTO requestDTO);
+//    List<ClimbGroundAllResponseDTO> searchClimbGroundByKeyword(ClimbGroundSearchRequestDTO requestDTO);
 
 }

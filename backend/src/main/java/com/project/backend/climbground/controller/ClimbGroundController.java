@@ -1,7 +1,6 @@
 package com.project.backend.climbground.controller;
 
 import com.project.backend.climbground.dto.requsetDTO.ClimbGroundAllRequestDTO;
-import com.project.backend.climbground.dto.requsetDTO.ClimbGroundSearchRequestDTO;
 import com.project.backend.climbground.dto.responseDTO.ClimbGroundAllResponseDTO;
 import com.project.backend.climbground.dto.responseDTO.ClimbGroundDetailResponseDTO;
 import com.project.backend.climbground.service.ClimbGroundServiceImpl;
@@ -32,16 +31,16 @@ public class ClimbGroundController {
     }
 
     // 클라이밍장 검색
-    @GetMapping("/search")
-    public ApiResponse<?> searchClimbGround(@ModelAttribute ClimbGroundSearchRequestDTO requestDTO) {
-        List<ClimbGroundAllResponseDTO> climbGrounds = ClimbGroundService.searchClimbGroundByKeyword(requestDTO);
-
-        if (climbGrounds.isEmpty()) {
-            return ApiResponse.notMatchedClimbGround();
-        }
-
-        return ApiResponse.success("data",climbGrounds);
-    }
+//    @GetMapping("/search")
+//    public ApiResponse<?> searchClimbGround(@ModelAttribute ClimbGroundSearchRequestDTO requestDTO) {
+//        List<ClimbGroundAllResponseDTO> climbGrounds = ClimbGroundService.searchClimbGroundByKeyword(requestDTO);
+//
+//        if (climbGrounds.isEmpty()) {
+//            return ApiResponse.notMatchedClimbGround();
+//        }
+//
+//        return ApiResponse.success("data",climbGrounds);
+//    }
     // 클라이밍장 리스트 조회 (거리별 정렬)
     @GetMapping("/all/user-location")
     public ApiResponse<?> getAllDisCLimbs(@ModelAttribute ClimbGroundAllRequestDTO requestDTO) {
