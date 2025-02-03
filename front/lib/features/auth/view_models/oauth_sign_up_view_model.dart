@@ -1,13 +1,11 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:kkulkkulk/features/auth/data/models/user_signup_model.dart';
 import 'package:kkulkkulk/features/auth/data/repositories/auth_repository.dart';
 
-class SignUpViewModel extends ChangeNotifier{
+class OauthSignUpViewModel extends ChangeNotifier {
   final AuthRepository _authRepository = AuthRepository();
 
-  final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController checkPasswordController = TextEditingController();
   final TextEditingController usernameController = TextEditingController();
@@ -18,19 +16,6 @@ class SignUpViewModel extends ChangeNotifier{
   
   String errorMessage = '';
   String successMessage = '';
-
-  // 이메일 유효성 검사
-  String? validateEmail(String? value) {
-    if (value == null || value.isEmpty) {
-      return '이메일을 입력해주세요';
-    }
-    // 이메일 형식 체크
-    final emailRegExp = RegExp(r"^[a-zA-Z0-9]+@[0-9a-zA-Z]+\.[a-z]+$");
-    if (!emailRegExp.hasMatch(value)) {
-      return '이메일 형식이어야 합니다.';
-    }
-    return null;
-  }
 
   // 비밀번호 유효성 검사
   String? validatePassword(String? value) {
@@ -79,8 +64,6 @@ class SignUpViewModel extends ChangeNotifier{
     return null;
   }
 
-
-
   // 닉네임 유효성 검사
   String? validateNickname(String? value) {
     if (value == null || value.isEmpty) {
@@ -91,46 +74,16 @@ class SignUpViewModel extends ChangeNotifier{
 
   // 유효성 검사 함수
   bool validateInputs() {
-    final emailError = validateEmail(emailController.text);
     final passwordError = validatePassword(passwordController.text);
     final checkPasswordError = validateCheckPassword(checkPasswordController.text);
     final usernameError = validateUsername(usernameController.text);
     final phoneError = validatePhone(phoneController.text);
     final nicknameError = validateNickname(nicknameController.text);
 
-    if (emailError != null || passwordError != null || checkPasswordError != null || usernameError != null || phoneError != null || nicknameError != null) {
+    if (passwordError != null || checkPasswordError != null || usernameError != null || phoneError != null || nicknameError != null) {
       return false;
     }
     return true;
-  }
-
-  // 이메일 중복 확인
-  Future<bool> duplicatedEmail() async {
-    final String email = emailController.text;
-    try {
-      isLoading = true;
-      notifyListeners();
-
-      final Response response = await _authRepository.duplicatedEmail(email);
-
-      if(response.statusCode == 200) {
-        if(response.data['header']['httpStatus'] == 400) {
-          print('이메일 중복');
-          errorMessage = '이미 존재하는 계정의 이메일입니다';
-          notifyListeners();
-          return false;
-        }else if(response.data['header']['httpStatus'] == 200) {
-          print('사용가능한 이메일입니다');
-          successMessage = '사용가능한 이메일입니다';
-          notifyListeners();
-          return true;
-        }
-      }
-
-    } catch (e) {
-      return false;
-    }
-    return false;
   }
 
   // 닉네임 중복 확인
@@ -162,41 +115,8 @@ class SignUpViewModel extends ChangeNotifier{
     return false;
   }
 
-  // 회원가입
-  Future<void> signUp() async {
-    final String email = emailController.text;
-    final String password = passwordController.text;
-    final String username = usernameController.text;
-    final String phone = phoneController.text;
-    final String nickname = nicknameController.text;
-
-    final UserSignupModel userSignupModel = UserSignupModel(
-      email: email, 
-      password: password, 
-      username: username, 
-      phone: phone, 
-      nickname: nickname
-    );
-
-    try {
-      isLoading = true;
-      notifyListeners();
-
-      final Response response = await _authRepository.signup(userSignupModel);
-
-      if(response.statusCode == 200) {
-        print(response);
-      }
-      
-    } catch (e) {
-      print('에러 발생 $e');
-    }
-  }
-
-
-
 }
 
-final signUpViewModelProvider = ChangeNotifierProvider<SignUpViewModel>((ref) {
-  return SignUpViewModel();
+final OauthSignUpViewModelProvider = ChangeNotifierProvider<OauthSignUpViewModel>((ref) {
+  return OauthSignUpViewModel();
 });
