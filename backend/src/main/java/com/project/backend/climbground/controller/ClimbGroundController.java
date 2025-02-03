@@ -11,11 +11,18 @@ import com.project.backend.climbground.dto.responseDTO.MyClimGroundResponseDTO;
 import com.project.backend.climbground.service.ClimbGroundServiceImpl;
 import com.project.backend.common.ApiResponse;
 import com.project.backend.common.ResponseType;
+import com.project.backend.common.advice.exception.CustomException;
+import com.project.backend.common.response.Response;
+import com.project.backend.common.response.ResponseCode;
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Optional;
+
+import static com.project.backend.common.response.ResponseCode.GET_CLIMB_GROUND_DETAIL;
 
 
 @RestController
@@ -28,13 +35,14 @@ public class ClimbGroundController {
 
     // 클라이밍장 상세 조회
     @GetMapping("/detail/{climbground_id}")
-    public ApiResponse<?> getCLimbDetail(@PathVariable Long climbground_id) {
+    public ResponseEntity<?> getCLimbDetail(@PathVariable Long climbground_id) {
         Optional<ClimbGroundDetailResponseDTO> climbGroundDetail = ClimbGroundService.findClimbGroundDetailById(climbground_id);
 
         if(climbGroundDetail.isEmpty()) {
-            return ApiResponse.notFound();
+            throw new CustomException(ResponseCode.NOT_FOUND_CLIMB_GROUND_DETAIL);
         }
-        return ApiResponse.success("data",climbGroundDetail);
+
+        return new ResponseEntity<>(Response.create(GET_CLIMB_GROUND_DETAIL, climbGroundDetail), GET_CLIMB_GROUND_DETAIL.getHttpStatus());
     }
 
     // 클라이밍장 검색

@@ -1,6 +1,6 @@
 package com.project.backend.video.entity;
 
-import com.project.backend.common.entity.BaseEntity;
+import com.project.backend.common.auditing.BaseEntity;
 import com.project.backend.record.entity.Record;
 import jakarta.persistence.*;
 import lombok.Getter;

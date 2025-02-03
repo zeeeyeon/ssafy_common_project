@@ -1,14 +1,12 @@
 package com.project.backend.userdate.entity;
 
-import com.project.backend.common.entity.BaseEntity;
+import com.project.backend.common.auditing.BaseEntity;
 import com.project.backend.record.entity.Record;
 import com.project.backend.userclimbground.entity.UserClimbGround;
 import jakarta.persistence.*;
 import lombok.Getter;
 
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 @Entity
