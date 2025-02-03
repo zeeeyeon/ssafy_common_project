@@ -12,11 +12,9 @@ class AuthRepository {
 
   // 로그인
   Future<Response> login(UserLoginModel userLoginModel) async {
-    final String url = 'http://localhost:8080/api/user/log-in';
-
     try {
       final response = await _dio.post(
-        url,
+        '/login',
         data: userLoginModel.toJson(),
         options: Options(
           headers: {

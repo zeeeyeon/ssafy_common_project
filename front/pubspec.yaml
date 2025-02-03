@@ -43,6 +43,7 @@ dependencies:
   go_router: ^13.0.1
   sign_button: ^2.0.6
   pretty_animated_buttons: ^0.0.2
+  jwt_decoder: ^2.0.1
 
 dev_dependencies:
   flutter_test:
