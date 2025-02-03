@@ -3,6 +3,7 @@ package com.project.backend.userclimbground.service;
 import com.project.backend.climbground.entity.ClimbGround;
 import com.project.backend.climbground.repository.ClimbGroundRepository;
 import com.project.backend.common.ResponseType;
+import com.project.backend.common.response.ResponseCode;
 import com.project.backend.user.entity.User;
 import com.project.backend.user.repository.jpa.UserRepository;
 import com.project.backend.userclimbground.dto.requestDTO.ClimbGroundRecordRequestDTO;
@@ -108,18 +109,18 @@ public class UserClimbGroundServiceImp implements UserClimbGroundService{
     }
 
     @Override
-    public ResponseType saveUnlockClimbGround(UnlockClimbGroundRequsetDTO requestDTO) {
+    public ResponseCode saveUnlockClimbGround(UnlockClimbGroundRequsetDTO requestDTO) {
         Boolean is_unlock = userClimbGroundRepository.existsUserCLimbGroundByUserIdAndClimbGroundId(requestDTO.getUserId(),requestDTO.getClimbGroundId());
 
         // 이미 해금되어 있으면
         if (is_unlock) {
-            return ResponseType.DATA_ALREADY_EXISTS;
+            return ResponseCode.ALEADY_UNLUCKED;
         }
 
         User user = userRepository.findById(requestDTO.getUserId()).orElse(null);
         ClimbGround climbGround = climbGroundRepository.findById(requestDTO.getClimbGroundId()).orElse(null);
         if (user == null || climbGround == null) { // 유저나 클라이밍장이 없으면
-            return ResponseType.CREATION_FAILED_BAD_REQUEST;
+            return ResponseCode.NOT_FOUND_CLIMB_GROUND_OR_USER;
         }
 
         UserClimbGround newUserClimbGround = new UserClimbGround();
@@ -127,7 +128,7 @@ public class UserClimbGroundServiceImp implements UserClimbGroundService{
         newUserClimbGround.setClimbGround(climbGround);
         newUserClimbGround.setMedal(UserClimbGroundMedalEnum.BRONZE);
         userClimbGroundRepository.save(newUserClimbGround);
-        return ResponseType.CREATED;
+        return ResponseCode.POST_UNLUCK_CLIMB_GROUND;
     };
 
     @Override

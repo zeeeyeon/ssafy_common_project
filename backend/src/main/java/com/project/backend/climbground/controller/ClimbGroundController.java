@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static com.project.backend.common.response.ResponseCode.GET_CLIMB_GROUND_DETAIL;
+import static com.project.backend.common.response.ResponseCode.GET_CLIMB_GROUND_List;
 
 
 @RestController
@@ -38,62 +39,61 @@ public class ClimbGroundController {
     public ResponseEntity<?> getCLimbDetail(@PathVariable Long climbground_id) {
         Optional<ClimbGroundDetailResponseDTO> climbGroundDetail = ClimbGroundService.findClimbGroundDetailById(climbground_id);
 
-        if(climbGroundDetail.isEmpty()) {
-            throw new CustomException(ResponseCode.NOT_FOUND_CLIMB_GROUND_DETAIL);
+        if(!climbGroundDetail.isEmpty()) {
+            return new ResponseEntity<>(Response.create(GET_CLIMB_GROUND_DETAIL, climbGroundDetail), GET_CLIMB_GROUND_DETAIL.getHttpStatus());
         }
+        throw new CustomException(ResponseCode.NOT_FOUND_CLIMB_GROUND);
 
-        return new ResponseEntity<>(Response.create(GET_CLIMB_GROUND_DETAIL, climbGroundDetail), GET_CLIMB_GROUND_DETAIL.getHttpStatus());
     }
 
     // 클라이밍장 검색
     @GetMapping("/search")
-    public ApiResponse<?> searchClimbGround(@ModelAttribute ClimbGroundSearchRequestDTO requestDTO) {
+    public ResponseEntity<?> searchClimbGround(@ModelAttribute ClimbGroundSearchRequestDTO requestDTO) {
         List<ClimbGroundAllResponseDTO> climbGrounds = ClimbGroundService.searchClimbGroundByKeyword(requestDTO);
 
-        if (climbGrounds.isEmpty()) {
-            return ApiResponse.notMatchedClimbGround();
+        if (!climbGrounds.isEmpty()) {
+            return new ResponseEntity<>(Response.create(GET_CLIMB_GROUND_List, climbGrounds), GET_CLIMB_GROUND_List.getHttpStatus());
         }
 
-        return ApiResponse.success("data",climbGrounds);
+        throw new CustomException(ResponseCode.NO_MATCHING_CLIMBING_GYM);
     }
     // 클라이밍장 리스트 조회 (거리별 정렬)
     @GetMapping("/all/user-location")
-    public ApiResponse<?> getAllDisCLimbs(@ModelAttribute ClimbGroundAllRequestDTO requestDTO) {
+    public ResponseEntity<?> getAllDisCLimbs(@ModelAttribute ClimbGroundAllRequestDTO requestDTO) {
         List<ClimbGroundAllResponseDTO> climbGrounds = ClimbGroundService.findAllClimbGround(requestDTO);
-        if (climbGrounds.isEmpty()) {
-            return ApiResponse.fail();
+        if (!climbGrounds.isEmpty()) {
+            return new ResponseEntity<>(Response.create(GET_CLIMB_GROUND_List, climbGrounds), GET_CLIMB_GROUND_List.getHttpStatus());
         }
-//        return ApiResponse.success("data",climbGrounds);
-        return ApiResponse.apiResponse(ResponseType.SUCCESS, "data", climbGrounds);
+        throw new CustomException(ResponseCode.NOT_FOUND_CLIMB_GROUND);
     }
 
     @GetMapping("/my-climbground")
-    public ApiResponse<?> getMyClimbGround(@RequestBody MyClimbGroundRequestDTO requestDTO) {
+    public ResponseEntity<?> getMyClimbGround(@RequestBody MyClimbGroundRequestDTO requestDTO) {
         List<MyClimGroundResponseDTO> climbGrounds = ClimbGroundService.myClimbGroundWithIds(requestDTO);
-        if (climbGrounds.isEmpty()) {
-            return ApiResponse.apiResponse(ResponseType.NO_MATCHING_CLIMBING_GYM);
+        if (!climbGrounds.isEmpty()) {
+            return new ResponseEntity<>(Response.create(GET_CLIMB_GROUND_List, climbGrounds), GET_CLIMB_GROUND_List.getHttpStatus());
         }
-        return ApiResponse.apiResponse(ResponseType.SUCCESS, "data", climbGrounds);
+        throw new CustomException(ResponseCode.NOT_FOUND_CLIMB_GROUND);
     }
 
     @GetMapping("/lock-climbground/list")
-    public ApiResponse<?> getLockCimbGroundList(@ModelAttribute LockClimbGroundAllRequsetDTO requestDTO) {
+    public ResponseEntity<?> getLockCimbGroundList(@ModelAttribute LockClimbGroundAllRequsetDTO requestDTO) {
         List<LockClimbGroundAllResponseDTO> lockClimbGrounds = ClimbGroundService.findAllLockClimbGround(requestDTO);
 
-        if (lockClimbGrounds.isEmpty()) {
-            return ApiResponse.apiResponse(ResponseType.NOT_FOUND_404);
+        if (!lockClimbGrounds.isEmpty()) {
+            return  new ResponseEntity<>(Response.create(GET_CLIMB_GROUND_List, lockClimbGrounds), GET_CLIMB_GROUND_List.getHttpStatus());
         }
-        return ApiResponse.apiResponse(ResponseType.SUCCESS, "data", lockClimbGrounds);
+        throw new CustomException(ResponseCode.NOT_FOUND_CLIMB_GROUND);
     }
 
     @GetMapping("/lock-climbground/limit-five")
-    public ApiResponse<?> getLockCimbGroundLimitFive(@ModelAttribute LockClimbGroundAllRequsetDTO requestDTO) {
+    public ResponseEntity<?> getLockCimbGroundLimitFive(@ModelAttribute LockClimbGroundAllRequsetDTO requestDTO) {
         List<LockClimbGroundAllResponseDTO> lockClimbGrounds = ClimbGroundService.findAllLockClimbGroundLimitFive(requestDTO);
 
-        if (lockClimbGrounds.isEmpty()) {
-            return ApiResponse.apiResponse(ResponseType.NOT_FOUND_404);
+        if (!lockClimbGrounds.isEmpty()) {
+            return  new ResponseEntity<>(Response.create(GET_CLIMB_GROUND_List, lockClimbGrounds), GET_CLIMB_GROUND_List.getHttpStatus());
         }
-        return ApiResponse.apiResponse(ResponseType.SUCCESS, "data", lockClimbGrounds);
+        throw new CustomException(ResponseCode.NOT_FOUND_CLIMB_GROUND);
     }
 
 }
