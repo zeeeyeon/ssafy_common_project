@@ -17,7 +17,7 @@ public enum ResponseCode {
     BAD_REQUEST(2001, HttpStatus.BAD_REQUEST, "올바르지 않은 요청입니다."),
     ENTITY_NOT_FOUND(404, HttpStatus.NOT_FOUND, "요청하신 데이터를 찾을 수 없습니다."),
 
-    NOT_FOUND_CLIMB_GROUND_DETAIL(404, HttpStatus.NOT_FOUND, "해당 클라이밍장의 정보를 찾을 수 없습니다.");
+    NOT_FOUND_CLIMB_GROUND_DETAIL(404, HttpStatus.NOT_FOUND, "요청하신 클라이밍장 정보를 찾을 수 없습니다..");
 
 
 
