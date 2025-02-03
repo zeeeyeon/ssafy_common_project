@@ -1,6 +1,6 @@
 package com.project.backend.user.jwt;
 
-import com.project.backend.user.auth.LoginUser;
+import com.project.backend.user.auth.CustomUserDetails;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -35,8 +35,8 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
         if (isHeaderVerify(request, response)) { // 토큰이 존재한다.
             log.debug("디버그 : Jwt 토큰 검증 성공");
             // 토큰 파싱하기 (Bearer 없애기)
-            String token = request.getHeader(JwtVO.HEADER).replace(JwtVO.TOKEN_PREFIX, "");
-            LoginUser loginUser = JwtProcess.verify(token); // 토큰 검증
+            String token = request.getHeader(JwtVO.HEADER);
+            CustomUserDetails loginUser = JwtProcess.verify(token); // 토큰 검증
 
             // 임시 세션 (UserDetails 타입 or username(현재 null이라 넣을 수 없음))
             Authentication authentication = new UsernamePasswordAuthenticationToken(loginUser,

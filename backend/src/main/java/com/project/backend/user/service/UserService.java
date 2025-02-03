@@ -16,5 +16,4 @@ public interface UserService {
 
   public boolean checkNicknameDuplication(String nickname);
 
-  ResponseEntity<?> login(LoginRequestDto loginRequestDto);
 }

@@ -28,64 +28,10 @@ public class UserController {
 
   private final UserService userService;
 
-  @GetMapping
-  public ApiResponse getUser() {
-    Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-
-    if (principal instanceof UserPrincipal userPrincipal) {
-      User user = userService.getUserByUserName(userPrincipal.getUsername());
-      SignUpResDto signUpResDto = new SignUpResDto(user);
-      return ApiResponse.success(signUpResDto);
-    } else if (principal instanceof User user) {
-      SignUpResDto signUpResDto = new SignUpResDto(user);
-      return ApiResponse.success(signUpResDto);
-    } else if (principal instanceof String username) { // principal이 String인 경우 처리
-      User user = userService.getUserByUserName(username); // username 기반으로 User 조회
-      SignUpResDto signUpResDto = new SignUpResDto(user);
-      return ApiResponse.success(signUpResDto);
-    }
-
-    throw new RuntimeException("Unexpected principal type: " + principal.getClass());
-  }
-
-
-
-  @Value("${solapi.api.key}") // solapi 에서 발급받은 key
-  private String apiKey;
-
-  @Value("${solapi.api.secret}")
-  private String secretKey; // solapi 메서 발급받은 secret key
-
-  private DefaultMessageService messageService;
-
-  @PostConstruct
-  public void init() {
-    // 반드시 계정 내 등록된 유효한 API 키, API Secret Key를 입력해주셔야 합니다!
-    this.messageService = NurigoApp.INSTANCE.initialize(apiKey, secretKey, "https://api.solapi.com");
-  }
-
-  @PostMapping("/send-one")
-  public SingleMessageSentResponse sendOne(@RequestBody SendOneRequestDto sendOneRequestDto) {
-    Message message = new Message();
-    message.setFrom("01086167589"); // 발신
-    message.setTo(sendOneRequestDto.getPhone()); // 수신
-    message.setText("SMS 인증 테스트 문자입니다."); // 텍스트
-
-    SingleMessageSentResponse response = this.messageService.sendOne(new SingleMessageSendingRequest(message));
-    return response;
-  }
-
   // 일반 사용자 회원가입
-  @PostMapping("/sign-up")
+  @PostMapping("/signup")
   public ResponseEntity<?> signUp(@RequestBody @Valid SignUpRequestDto signUpRequestDto) {
     ResponseEntity<?> response = userService.signUp(signUpRequestDto);
-    return response;
-  }
-
-  // 일반 사용자 로그인
-  @PostMapping("/login")
-  public ResponseEntity<?> login(@RequestBody @Valid LoginRequestDto loginRequestDto) {
-    ResponseEntity<?> response = userService.login(loginRequestDto);
     return response;
   }
 
