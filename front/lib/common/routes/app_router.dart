@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kkulkkulk/common/widgets/layout/main_layout.dart';
+import 'package:kkulkkulk/features/auth/screens/oauth_register_screen.dart';
 import 'package:kkulkkulk/features/calendar/screens/calendar_screen.dart';
 import 'package:kkulkkulk/features/calendar/screens/calendar_detail_screen.dart';
 import 'package:kkulkkulk/features/camera/screens/camera_screen.dart';
@@ -39,6 +40,10 @@ final router = GoRouter(
     GoRoute(
       path: '/register',
       builder: (context, state) => const RegisterScreen(),
+    ),
+    GoRoute(
+      path: '/oauth',
+      builder: (context, state) => const OauthRegisterScreen(),
     ),
     // 메인 레이아웃을 포함하는 Shell Route
     ShellRoute(

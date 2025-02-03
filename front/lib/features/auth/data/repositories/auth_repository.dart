@@ -30,6 +30,9 @@ class AuthRepository {
     }
   }
 
+  // 연동 로그인
+  
+
   // 이메일 중복 확인
   Future<Response> duplicatedEmail(String email) async {
     try {
