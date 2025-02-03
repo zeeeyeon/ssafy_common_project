@@ -1,14 +1,14 @@
-package com.project.backend.date.entity;
+package com.project.backend.userdate.entity;
 
 import com.project.backend.record.entity.Record;
-import com.project.backend.userclimb.entity.UserClimb;
 import jakarta.persistence.*;
+import com.project.backend.userclimbground.entity.userClimbGround;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-public class Date {
+public class userDate {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "date_id")
@@ -16,9 +16,9 @@ public class Date {
 
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_climb_id")
-    private UserClimb userClimb;
+    @JoinColumn(name = "user_climbground_id")
+    private userClimbGround userClimbGround;
 
-    @OneToMany(mappedBy = "date", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "userDate", cascade = CascadeType.ALL)
     private List<Record> recordList = new ArrayList<>();
 }
