@@ -72,7 +72,20 @@ public interface UserClimbGroundRepository extends JpaRepository<UserClimbGround
             "AND FUNCTION('YEAR', ud.createdAt) = :year ")
     List<UserClimbGround> findClimbRecordsByUserIdAndClimbGroundIdAndYear(Long userId,Long climbGroundId, int year);
 
-    // 클라이밍장 기록 통계 조회(년별)
+    // 클라이밍장 기록 통계 조회(월별)
+    @Query("SELECT uc FROM UserClimbGround uc " +
+            "LEFT JOIN FETCH uc.user " +
+            "LEFT JOIN FETCH uc.climbGround " +
+            "LEFT JOIN FETCH uc.userDateList ud " +
+            "LEFT JOIN FETCH ud.recordList r " +
+            "LEFT JOIN FETCH r.hold h " +
+            "WHERE uc.user.id = :userId " +
+            "AND uc.climbGround.Id = :climbGroundId " +
+            "AND YEAR(ud.createdAt) = :year " +
+            "AND MONTH(ud.createdAt) = :month")
+    List<UserClimbGround> findClimbRecordsByUserIdAndClimbGroundIdAndMonth(Long userId,Long climbGroundId, int year, int month);
+
+    // 클라이밍장 기록 통계 조회(주별)
     @Query("SELECT uc FROM UserClimbGround uc " +
             "LEFT JOIN FETCH uc.user " +
             "LEFT JOIN FETCH uc.climbGround " +
@@ -83,9 +96,9 @@ public interface UserClimbGroundRepository extends JpaRepository<UserClimbGround
             "AND uc.climbGround.Id = :climbGroundId " +
             "AND YEAR(ud.createdAt) = :year " +
             "AND WEEK(ud.createdAt) = :week")
-    List<UserClimbGround> findClimbRecordsByUserIdAndClimbGroundIdAndMonth(Long userId,Long climbGroundId, int year, int month);
+    List<UserClimbGround> findClimbRecordsByUserIdAndClimbGroundIdAndWeek(Long userId,Long climbGroundId, int year, int week);
 
-    // 클라이밍장 기록 통계 조회(년별)
+    // 클라이밍장 기록 통계 조회(일별)
     @Query("SELECT uc FROM UserClimbGround uc " +
             "LEFT JOIN FETCH uc.user " +
             "LEFT JOIN FETCH uc.climbGround " +

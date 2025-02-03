@@ -27,6 +27,9 @@ public interface UserClimbGroundService {
     ClimbGroundRecordResponseDTO getUserClimbGroundRecordMonth(ClimbGroundRecordRequestDTO requestDTO);
 
     // 클라이밍장별 통계(주별)
+    ClimbGroundRecordResponseDTO getUserClimbGroundRecordWeek(ClimbGroundRecordRequestDTO requestDTO);
+
+    // 클라이밍장별 통계(일별)
     ClimbGroundRecordResponseDTO getUserClimbGroundRecordDay(ClimbGroundRecordRequestDTO requestDTO);
 
 }

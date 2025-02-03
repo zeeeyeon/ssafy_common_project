@@ -147,6 +147,14 @@ public class UserClimbGroundServiceImp implements UserClimbGroundService{
     }
 
     @Override
+    public ClimbGroundRecordResponseDTO getUserClimbGroundRecordWeek(ClimbGroundRecordRequestDTO requestDTO){
+        List<UserClimbGround> userClimbGrounds = userClimbGroundRepository.findClimbRecordsByUserIdAndClimbGroundIdAndWeek(
+                requestDTO.getUserId(), requestDTO.getClimbGroundId(), requestDTO.getYear(), requestDTO.getWeek());
+
+        return makeClimbGroundRecordResponseDTO(userClimbGrounds);
+    }
+
+    @Override
     public ClimbGroundRecordResponseDTO getUserClimbGroundRecordDay(ClimbGroundRecordRequestDTO requestDTO){
         List<UserClimbGround> userClimbGrounds = userClimbGroundRepository.findClimbRecordsByUserIdAndClimbGroundIdAndDay(
                 requestDTO.getUserId(), requestDTO.getClimbGroundId(), requestDTO.getYear(), requestDTO.getMonth(), requestDTO.getDay());
