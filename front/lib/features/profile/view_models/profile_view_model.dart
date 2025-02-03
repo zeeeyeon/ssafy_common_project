@@ -46,7 +46,7 @@ class ProfileNotifier extends StateNotifier<UserProfile> {
   ProfileNotifier()
       : super(UserProfile(
           name: "클라이밍 유저",
-          profileImage: "https://via.placeholder.com/150",
+          profileImage: "",
           startDate: null,
           height: "-CM",
           armSpan: "-CM",

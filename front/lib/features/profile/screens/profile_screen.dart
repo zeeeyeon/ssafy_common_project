@@ -34,9 +34,10 @@ class ProfileScreen extends ConsumerWidget {
               children: [
                 Row(
                   children: [
-                    CircleAvatar(
+                    const CircleAvatar(
                       radius: 30,
-                      backgroundImage: NetworkImage(userProfile.profileImage),
+                      backgroundImage: AssetImage(
+                          "assets/default_profile.png"), // 기본 이미지로 원복
                     ),
                     const SizedBox(width: 16),
                     Column(
@@ -49,17 +50,32 @@ class ProfileScreen extends ConsumerWidget {
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        Text(
-                          userProfile.startDate != null
-                              ? "클라이밍 시작: ${userProfile.startDate!.year}-${userProfile.startDate!.month}-${userProfile.startDate!.day}"
-                              : "클라이밍 시작일을 입력해주세요.",
-                          style: const TextStyle(
-                            fontSize: 14,
-                            color: Colors.grey,
+                        InkWell(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const ProfileScreenEdit(),
+                              ),
+                            );
+                          },
+                          borderRadius: BorderRadius.circular(4),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                                vertical: 4.0, horizontal: 4.0),
+                            child: Text(
+                              userProfile.startDate != null
+                                  ? "클라이밍 시작: ${userProfile.startDate!.year}-${userProfile.startDate!.month}-${userProfile.startDate!.day}"
+                                  : "언제 클라이밍을 시작했나요?",
+                              style: const TextStyle(
+                                fontSize: 14,
+                                color: Color.fromARGB(255, 121, 163, 231),
+                              ),
+                            ),
                           ),
                         ),
                       ],
-                    )
+                    ),
                   ],
                 ),
                 IconButton(
@@ -72,7 +88,7 @@ class ProfileScreen extends ConsumerWidget {
                       ),
                     );
                   },
-                )
+                ),
               ],
             ),
             const SizedBox(height: 24),
@@ -81,7 +97,7 @@ class ProfileScreen extends ConsumerWidget {
               width: double.infinity,
               padding: const EdgeInsets.all(16.0),
               decoration: BoxDecoration(
-                color: Colors.blue[300],
+                color: const Color.fromARGB(255, 80, 118, 232),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Column(
@@ -99,7 +115,7 @@ class ProfileScreen extends ConsumerWidget {
                   Text(
                     '${userProfile.dDay} 일',
                     style: const TextStyle(
-                      fontSize: 32,
+                      fontSize: 18,
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
                     ),
@@ -107,7 +123,7 @@ class ProfileScreen extends ConsumerWidget {
                 ],
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 10),
             // 키와 팔길이 카드
             Row(
               children: [
@@ -130,7 +146,7 @@ class ProfileScreen extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.all(16.0),
       decoration: BoxDecoration(
-        color: Colors.blue[300],
+        color: const Color.fromARGB(255, 80, 118, 232),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
@@ -138,7 +154,7 @@ class ProfileScreen extends ConsumerWidget {
           Text(
             title,
             style: const TextStyle(
-              fontSize: 18,
+              fontSize: 14,
               fontWeight: FontWeight.bold,
               color: Colors.white,
             ),
@@ -147,7 +163,7 @@ class ProfileScreen extends ConsumerWidget {
           Text(
             value,
             style: const TextStyle(
-              fontSize: 18,
+              fontSize: 14,
               fontWeight: FontWeight.bold,
               color: Colors.white,
             ),
