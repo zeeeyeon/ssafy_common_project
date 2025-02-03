@@ -7,6 +7,9 @@ services:
       - "8080:8080"
     networks:
       - mynetwork
+    depends_on:
+      - mysql
+      - redis
 
 networks:
   mynetwork:
