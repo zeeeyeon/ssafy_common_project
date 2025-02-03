@@ -2,9 +2,11 @@ package com.project.backend.climbground.controller;
 
 import com.project.backend.climbground.dto.requsetDTO.ClimbGroundAllRequestDTO;
 import com.project.backend.climbground.dto.requsetDTO.ClimbGroundSearchRequestDTO;
+import com.project.backend.climbground.dto.requsetDTO.LockClimbGroundAllRequsetDTO;
 import com.project.backend.climbground.dto.requsetDTO.MyClimbGroundRequestDTO;
 import com.project.backend.climbground.dto.responseDTO.ClimbGroundAllResponseDTO;
 import com.project.backend.climbground.dto.responseDTO.ClimbGroundDetailResponseDTO;
+import com.project.backend.climbground.dto.responseDTO.LockClimbGroundAllResponseDTO;
 import com.project.backend.climbground.dto.responseDTO.MyClimGroundResponseDTO;
 import com.project.backend.climbground.service.ClimbGroundServiceImpl;
 import com.project.backend.common.ApiResponse;
@@ -64,6 +66,26 @@ public class ClimbGroundController {
             return ApiResponse.apiResponse(ResponseType.NO_MATCHING_CLIMBING_GYM);
         }
         return ApiResponse.apiResponse(ResponseType.SUCCESS, "data", climbGrounds);
+    }
+
+    @GetMapping("/lock-climbground/list")
+    public ApiResponse<?> getLockCimbGroundList(@ModelAttribute LockClimbGroundAllRequsetDTO requestDTO) {
+        List<LockClimbGroundAllResponseDTO> lockClimbGrounds = ClimbGroundService.findAllLockClimbGround(requestDTO);
+
+        if (lockClimbGrounds.isEmpty()) {
+            return ApiResponse.apiResponse(ResponseType.NOT_FOUND_404);
+        }
+        return ApiResponse.apiResponse(ResponseType.SUCCESS, "data", lockClimbGrounds);
+    }
+
+    @GetMapping("/lock-climbground/limit-five")
+    public ApiResponse<?> getLockCimbGroundLimitFive(@ModelAttribute LockClimbGroundAllRequsetDTO requestDTO) {
+        List<LockClimbGroundAllResponseDTO> lockClimbGrounds = ClimbGroundService.findAllLockClimbGroundLimitFive(requestDTO);
+
+        if (lockClimbGrounds.isEmpty()) {
+            return ApiResponse.apiResponse(ResponseType.NOT_FOUND_404);
+        }
+        return ApiResponse.apiResponse(ResponseType.SUCCESS, "data", lockClimbGrounds);
     }
 
 }
