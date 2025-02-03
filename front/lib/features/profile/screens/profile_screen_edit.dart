@@ -106,15 +106,16 @@ class _ProfileScreenEditState extends ConsumerState<ProfileScreenEdit> {
               const SizedBox(height: 8),
 
               // 달력 표시/숨기기
-              Visibility(
-                visible: _isCalendarVisible,
-                child: Container(
+              AnimatedCrossFade(
+                firstChild: const SizedBox.shrink(), // 숨겨진 상태
+                secondChild: Container(
                   padding: const EdgeInsets.all(8.0),
                   decoration: BoxDecoration(
                     border: Border.all(color: Colors.grey),
                     borderRadius: BorderRadius.circular(8.0),
                   ),
                   child: TableCalendar(
+                    // locale: 'ko_KR',
                     firstDay: DateTime(2000),
                     lastDay: DateTime(2100),
                     focusedDay: _focusedDay,
@@ -142,6 +143,10 @@ class _ProfileScreenEditState extends ConsumerState<ProfileScreenEdit> {
                     ),
                   ),
                 ),
+                crossFadeState: _isCalendarVisible
+                    ? CrossFadeState.showSecond
+                    : CrossFadeState.showFirst,
+                duration: const Duration(milliseconds: 300),
               ),
               const SizedBox(height: 24),
 

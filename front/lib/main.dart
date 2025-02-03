@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:kkulkkulk/common/routes/app_router.dart';
 
-void main() {
+void main() async {
   // Flutter 바인딩 초기화 추가
   WidgetsFlutterBinding.ensureInitialized();
 
