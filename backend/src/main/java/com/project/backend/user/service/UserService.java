@@ -16,4 +16,6 @@ public interface UserService {
 
   public boolean checkNicknameDuplication(String nickname);
 
+  User getEmail(String email);
+
 }

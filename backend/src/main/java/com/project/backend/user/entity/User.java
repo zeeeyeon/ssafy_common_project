@@ -33,7 +33,7 @@ public class User {
     private Long id;
 
     @NotNull
-    @Column(unique = true)
+    @Column(name="email", unique = true)
     private String email;
 
     @JsonIgnore

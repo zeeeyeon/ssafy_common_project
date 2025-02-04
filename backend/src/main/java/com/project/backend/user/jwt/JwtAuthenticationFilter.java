@@ -2,6 +2,7 @@ package com.project.backend.user.jwt;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.backend.oauth.entity.UserPrincipal;
+import com.project.backend.oauth.token.AuthTokenProvider;
 import com.project.backend.user.dto.LoginRequestDto;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -9,6 +10,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
@@ -25,6 +27,9 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     private final Logger log = LoggerFactory.getLogger(getClass());
     private final AuthenticationManager authenticationManager;
     private final ObjectMapper objectMapper;
+
+    @Autowired
+    private AuthTokenProvider authTokenProvider;
 
     public JwtAuthenticationFilter(AuthenticationManager authenticationManager) {
         this.authenticationManager = authenticationManager;
@@ -64,7 +69,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response,
                                             FilterChain chain, Authentication authResult) throws IOException, ServletException {
         UserPrincipal userDetails = (UserPrincipal) authResult.getPrincipal();
-        String token = JwtProcess.create(userDetails);
+        String token = JwtProcess.create(userDetails, authTokenProvider.getSecretKey());
 
         response.addHeader("Authorization", token);
         response.setContentType("application/json");
