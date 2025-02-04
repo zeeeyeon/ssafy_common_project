@@ -1,5 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+/// 기본 프로필 이미지 경로
+const String defaultProfileImage = "assets/images/default_profile.png";
+
 /// 사용자 프로필 데이터 모델
 class UserProfile {
   final String name; // 닉네임
@@ -16,7 +19,7 @@ class UserProfile {
     required this.armSpan,
   });
 
-  /// D-Day 계산 (클라이밍 시작일이 있는 경우만)
+  /// 클라이밍 시작일 기준 계산 (클라이밍 시작일이 있는 경우만)
   int get dDay {
     if (startDate == null) return 0;
     final now = DateTime.now();
@@ -38,6 +41,11 @@ class UserProfile {
       height: height ?? this.height,
       armSpan: armSpan ?? this.armSpan,
     );
+  }
+
+  /// 프로필 이미지가 비어있으면 기본 프로필 이미지 반환
+  String get effectiveProfileImage {
+    return profileImage.isNotEmpty ? profileImage : defaultProfileImage;
   }
 }
 

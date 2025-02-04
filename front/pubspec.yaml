@@ -68,7 +68,9 @@ flutter:
 
   assets:
     - assets/fonts/
+    - assets/images/
     - assets/images/tier/
+    - assets/images/default_profile.png
 
   fonts:
     - family: Pretendard
