@@ -5,9 +5,7 @@ services:
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: "1234"
-      MYSQL_DATABASE: "mydatabase"
-      MYSQL_USER: "user"
-      MYSQL_PASSWORD: "password"
+      MYSQL_DATABASE: "ssafy"
     ports:
       - "3306:3306"
     volumes:
@@ -30,4 +28,4 @@ volumes:
 networks:
   mynetwork:
     driver: bridge
-    external: true   #
+    external: true
