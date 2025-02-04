@@ -31,7 +31,6 @@ public class UserDateController {
         return new ResponseEntity<>(Response.create(GET_DAILY_RECORD, dailyRecord), GET_DAILY_RECORD.getHttpStatus());
     }
 
-
     @GetMapping("/monthly/{userId}")
     public ResponseEntity<?> getMonthlyRecords(
             @RequestParam("date") @DateTimeFormat(pattern = "yyyy-MM") YearMonth selectedMonth,
