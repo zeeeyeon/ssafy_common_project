@@ -1,5 +1,6 @@
 package com.project.backend.user.auth;
 
+import com.project.backend.oauth.entity.UserPrincipal;
 import com.project.backend.user.entity.User;
 import com.project.backend.user.repository.jpa.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +28,6 @@ public class CustomUserDetailsService implements UserDetailsService {
 
         log.debug("로그인 성공한 user: {}", user.getEmail());
 
-        return new CustomUserDetails(user);
+        return new UserPrincipal(user);
     }
 }

@@ -1,7 +1,7 @@
 package com.project.backend.user.jwt;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.project.backend.user.auth.CustomUserDetails;
+import com.project.backend.oauth.entity.UserPrincipal;
 import com.project.backend.user.dto.LoginRequestDto;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -63,7 +63,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     @Override
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response,
                                             FilterChain chain, Authentication authResult) throws IOException, ServletException {
-        CustomUserDetails userDetails = (CustomUserDetails) authResult.getPrincipal();
+        UserPrincipal userDetails = (UserPrincipal) authResult.getPrincipal();
         String token = JwtProcess.create(userDetails);
 
         response.addHeader("Authorization", token);
