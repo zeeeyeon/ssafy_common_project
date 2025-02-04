@@ -2,12 +2,19 @@ package com.project.backend.userclimbground.controller;
 
 import com.project.backend.common.ApiResponse;
 import com.project.backend.common.ResponseType;
+import com.project.backend.common.response.Response;
+import com.project.backend.common.response.ResponseCode;
+import com.project.backend.userclimbground.dto.requestDTO.ClimbGroundRecordRequestDTO;
 import com.project.backend.userclimbground.dto.requestDTO.ClimbRecordRequestDTO;
 import com.project.backend.userclimbground.dto.requestDTO.UnlockClimbGroundRequsetDTO;
+import com.project.backend.userclimbground.dto.responseDTO.ClimbGroundRecordResponseDTO;
 import com.project.backend.userclimbground.dto.responseDTO.ClimbRecordResponseDTO;
 import com.project.backend.userclimbground.service.UserClimbGroundServiceImp;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import static com.project.backend.common.response.ResponseCode.*;
 
 @RestController
 @RequestMapping("/api/user-climbground")
@@ -18,38 +25,68 @@ public class UserClimbGroundController {
 
     // 통계 페이지 년별 조회
     @GetMapping("/year")
-    public ApiResponse<?> getClimbRecordsYear(@ModelAttribute ClimbRecordRequestDTO requestDTO) {
+    public ResponseEntity<?> getClimbRecordsYear(@ModelAttribute ClimbRecordRequestDTO requestDTO) {
         ClimbRecordResponseDTO responseDTO = userClimbGroundService.getUserClimbRecordYear(requestDTO);
 
-        return ApiResponse.apiResponse(ResponseType.SUCCESS,"data",responseDTO);
+        return new ResponseEntity<>(Response.create(GET_RECORD_YEAR, responseDTO), GET_RECORD_YEAR.getHttpStatus());
     }
 
-    // 통계 페이지 년별 조회
+    // 통계 페이지 달별 조회
     @GetMapping("/monthly")
-    public ApiResponse<?> getClimbRecordsMonth(@ModelAttribute ClimbRecordRequestDTO requestDTO) {
+    public ResponseEntity<?> getClimbRecordsMonth(@ModelAttribute ClimbRecordRequestDTO requestDTO) {
         ClimbRecordResponseDTO responseDTO = userClimbGroundService.getUserClimbRecordMonth(requestDTO);
 
-        return ApiResponse.apiResponse(ResponseType.SUCCESS,"data",responseDTO);
+        return new ResponseEntity<>(Response.create(GET_RECORD_MONTH, responseDTO), GET_RECORD_MONTH.getHttpStatus());
+
     }
 
     @GetMapping("/weekly")
-    public ApiResponse<?> getClimbRecordsWeek(@ModelAttribute ClimbRecordRequestDTO requestDTO) {
+    public ResponseEntity<?> getClimbRecordsWeek(@ModelAttribute ClimbRecordRequestDTO requestDTO) {
         ClimbRecordResponseDTO responseDTO = userClimbGroundService.getUserClimbRecordWeek(requestDTO);
 
-        return ApiResponse.apiResponse(ResponseType.SUCCESS,"data",responseDTO);
+        return new ResponseEntity<>(Response.create(GET_RECORD_WEEKLY, responseDTO), GET_RECORD_WEEKLY.getHttpStatus());
+
     }
 
     @GetMapping("/daily")
-    public ApiResponse<?> getClimbRecordsDay(@ModelAttribute ClimbRecordRequestDTO requestDTO) {
+    public ResponseEntity<?> getClimbRecordsDay(@ModelAttribute ClimbRecordRequestDTO requestDTO) {
         ClimbRecordResponseDTO responseDTO = userClimbGroundService.getUserClimbRecordDay(requestDTO);
 
-        return ApiResponse.apiResponse(ResponseType.SUCCESS,"data",responseDTO);
+        return new ResponseEntity<>(Response.create(GET_RECORD_DAILY, responseDTO), GET_RECORD_DAILY.getHttpStatus());
+
     }
 
-        @PostMapping("/unlock")
-    public ApiResponse<?> postUnlockClimbGround(@RequestBody UnlockClimbGroundRequsetDTO requestDTO) {
-        ResponseType responseType = userClimbGroundService.saveUnlockClimbGround(requestDTO);
-        return ApiResponse.apiResponse(responseType);
+    @PostMapping("/unlock")
+    public ResponseEntity<?> postUnlockClimbGround(@RequestBody UnlockClimbGroundRequsetDTO requestDTO) {
+        ResponseCode responseCode = userClimbGroundService.saveUnlockClimbGround(requestDTO);
+        return new ResponseEntity<>(Response.create(responseCode,null), responseCode.getHttpStatus());
+    }
+
+    @GetMapping("/climb/year")
+    public ResponseEntity<?> getClimbGroundRecordYear(@ModelAttribute ClimbGroundRecordRequestDTO requestDTO) {
+        ClimbGroundRecordResponseDTO responseDTO= userClimbGroundService.getUserClimbGroundRecordYear(requestDTO);
+        return new ResponseEntity<>(Response.create(GET_CLIMBGROUND_RECORD_YEAR, responseDTO), GET_CLIMBGROUND_RECORD_YEAR.getHttpStatus());
+    }
+
+    @GetMapping("/climb/monthly")
+    public ResponseEntity<?> getClimbGroundRecordMonth(@ModelAttribute ClimbGroundRecordRequestDTO requestDTO) {
+        ClimbGroundRecordResponseDTO responseDTO= userClimbGroundService.getUserClimbGroundRecordMonth(requestDTO);
+        return new ResponseEntity<>(Response.create(GET_CLIMBGROUND_RECORD_MONTH, responseDTO), GET_CLIMBGROUND_RECORD_MONTH.getHttpStatus());
+
+    }
+
+    @GetMapping("/climb/weekly")
+    public ResponseEntity<?> getClimbGroundRecordWeek(@ModelAttribute ClimbGroundRecordRequestDTO requestDTO) {
+        ClimbGroundRecordResponseDTO responseDTO= userClimbGroundService.getUserClimbGroundRecordWeek(requestDTO);
+        return new ResponseEntity<>(Response.create(GET_CLIMBGROUND_RECORD_WEEKLY, responseDTO), GET_CLIMBGROUND_RECORD_WEEKLY.getHttpStatus());
+
+    }
+
+    @GetMapping("/climb/daily")
+    public ResponseEntity<?> getClimbGroundRecordDaily(@ModelAttribute ClimbGroundRecordRequestDTO requestDTO) {
+        ClimbGroundRecordResponseDTO responseDTO= userClimbGroundService.getUserClimbGroundRecordDay(requestDTO);
+        return new ResponseEntity<>(Response.create(GET_CLIMBGROUND_RECORD_DAILY, responseDTO), GET_CLIMBGROUND_RECORD_DAILY.getHttpStatus());
+
     }
     
 }
