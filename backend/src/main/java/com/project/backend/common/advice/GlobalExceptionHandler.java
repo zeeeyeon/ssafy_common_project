@@ -23,8 +23,11 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(value = CustomException.class)
     protected ResponseEntity<?> handleCustomException(CustomException exception) {
-        return new ResponseEntity<>(Response.create(exception.getResponseCode(), exception.getContent()),
-                exception.getResponseCode().getHttpStatus());
+
+        return new ResponseEntity<>(
+                Response.create(exception.getResponseCode(), exception.getContent()),
+                exception.getResponseCode().getHttpStatus()
+        );
     }
 
     @ExceptionHandler({MethodArgumentNotValidException.class, BindException.class})

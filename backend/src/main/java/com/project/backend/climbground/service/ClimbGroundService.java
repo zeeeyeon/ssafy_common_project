@@ -2,10 +2,9 @@ package com.project.backend.climbground.service;
 
 import com.project.backend.climbground.dto.requsetDTO.ClimbGroundAllRequestDTO;
 import com.project.backend.climbground.dto.requsetDTO.ClimbGroundSearchRequestDTO;
+import com.project.backend.climbground.dto.requsetDTO.LockClimbGroundAllRequsetDTO;
 import com.project.backend.climbground.dto.requsetDTO.MyClimbGroundRequestDTO;
-import com.project.backend.climbground.dto.responseDTO.ClimbGroundAllResponseDTO;
-import com.project.backend.climbground.dto.responseDTO.ClimbGroundDetailResponseDTO;
-import com.project.backend.climbground.dto.responseDTO.MyClimGroundResponseDTO;
+import com.project.backend.climbground.dto.responseDTO.*;
 
 import java.util.List;
 import java.util.Optional;
@@ -23,4 +22,8 @@ public interface ClimbGroundService {
 
     // 내가 방문한 클라이밍장 리스트 조회
     List<MyClimGroundResponseDTO> myClimbGroundWithIds(MyClimbGroundRequestDTO requestDTO);
+
+    List<LockClimbGroundAllResponseDTO> findAllLockClimbGround(LockClimbGroundAllRequsetDTO requestDTO);
+
+    List<LockClimbGroundAllResponseDTO> findAllLockClimbGroundLimitFive(LockClimbGroundAllRequsetDTO requestDTO);
 }

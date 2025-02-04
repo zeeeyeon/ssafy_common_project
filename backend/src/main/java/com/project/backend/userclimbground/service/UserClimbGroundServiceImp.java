@@ -3,12 +3,15 @@ package com.project.backend.userclimbground.service;
 import com.project.backend.climbground.entity.ClimbGround;
 import com.project.backend.climbground.repository.ClimbGroundRepository;
 import com.project.backend.common.ResponseType;
+import com.project.backend.common.response.ResponseCode;
 import com.project.backend.user.entity.User;
 import com.project.backend.user.repository.jpa.UserRepository;
+import com.project.backend.userclimbground.dto.requestDTO.ClimbGroundRecordRequestDTO;
 import com.project.backend.userclimbground.dto.requestDTO.UnlockClimbGroundRequsetDTO;
 import com.project.backend.hold.entity.HoldColorEnum;
 import com.project.backend.record.entity.Record;
 import com.project.backend.userclimbground.dto.requestDTO.ClimbRecordRequestDTO;
+import com.project.backend.userclimbground.dto.responseDTO.ClimbGroundRecordResponseDTO;
 import com.project.backend.userclimbground.dto.responseDTO.ClimbGroundStatus;
 import com.project.backend.userclimbground.dto.responseDTO.ClimbRecordResponseDTO;
 import com.project.backend.userclimbground.dto.responseDTO.HoldStats;
@@ -106,18 +109,18 @@ public class UserClimbGroundServiceImp implements UserClimbGroundService{
     }
 
     @Override
-    public ResponseType saveUnlockClimbGround(UnlockClimbGroundRequsetDTO requestDTO) {
+    public ResponseCode saveUnlockClimbGround(UnlockClimbGroundRequsetDTO requestDTO) {
         Boolean is_unlock = userClimbGroundRepository.existsUserCLimbGroundByUserIdAndClimbGroundId(requestDTO.getUserId(),requestDTO.getClimbGroundId());
 
         // 이미 해금되어 있으면
         if (is_unlock) {
-            return ResponseType.DATA_ALREADY_EXISTS;
+            return ResponseCode.ALEADY_UNLUCKED;
         }
 
         User user = userRepository.findById(requestDTO.getUserId()).orElse(null);
         ClimbGround climbGround = climbGroundRepository.findById(requestDTO.getClimbGroundId()).orElse(null);
         if (user == null || climbGround == null) { // 유저나 클라이밍장이 없으면
-            return ResponseType.CREATION_FAILED_BAD_REQUEST;
+            return ResponseCode.NOT_FOUND_CLIMB_GROUND_OR_USER;
         }
 
         UserClimbGround newUserClimbGround = new UserClimbGround();
@@ -125,6 +128,75 @@ public class UserClimbGroundServiceImp implements UserClimbGroundService{
         newUserClimbGround.setClimbGround(climbGround);
         newUserClimbGround.setMedal(UserClimbGroundMedalEnum.BRONZE);
         userClimbGroundRepository.save(newUserClimbGround);
-        return ResponseType.CREATED;
+        return ResponseCode.POST_UNLUCK_CLIMB_GROUND;
     };
+
+    @Override
+    public ClimbGroundRecordResponseDTO getUserClimbGroundRecordYear(ClimbGroundRecordRequestDTO requestDTO){
+        List<UserClimbGround> userClimbGrounds = userClimbGroundRepository.findClimbRecordsByUserIdAndClimbGroundIdAndYear(
+                requestDTO.getUserId(), requestDTO.getClimbGroundId(), requestDTO.getYear());
+
+        return makeClimbGroundRecordResponseDTO(userClimbGrounds);
+    }
+
+    @Override
+    public ClimbGroundRecordResponseDTO getUserClimbGroundRecordMonth(ClimbGroundRecordRequestDTO requestDTO){
+        List<UserClimbGround> userClimbGrounds = userClimbGroundRepository.findClimbRecordsByUserIdAndClimbGroundIdAndMonth(
+                requestDTO.getUserId(), requestDTO.getClimbGroundId(), requestDTO.getYear(), requestDTO.getMonth());
+
+        return makeClimbGroundRecordResponseDTO(userClimbGrounds);
+    }
+
+    @Override
+    public ClimbGroundRecordResponseDTO getUserClimbGroundRecordWeek(ClimbGroundRecordRequestDTO requestDTO){
+        List<UserClimbGround> userClimbGrounds = userClimbGroundRepository.findClimbRecordsByUserIdAndClimbGroundIdAndWeek(
+                requestDTO.getUserId(), requestDTO.getClimbGroundId(), requestDTO.getYear(), requestDTO.getWeek());
+
+        return makeClimbGroundRecordResponseDTO(userClimbGrounds);
+    }
+
+    @Override
+    public ClimbGroundRecordResponseDTO getUserClimbGroundRecordDay(ClimbGroundRecordRequestDTO requestDTO){
+        List<UserClimbGround> userClimbGrounds = userClimbGroundRepository.findClimbRecordsByUserIdAndClimbGroundIdAndDay(
+                requestDTO.getUserId(), requestDTO.getClimbGroundId(), requestDTO.getYear(), requestDTO.getMonth(), requestDTO.getDay());
+
+        return makeClimbGroundRecordResponseDTO(userClimbGrounds);
+    }
+
+    //ClimbGroundRecordResponseDTO 만들어주는 메서드
+    public ClimbGroundRecordResponseDTO makeClimbGroundRecordResponseDTO(List<UserClimbGround> userClimbGrounds ){
+        int totalSuccess =0;
+        int totalTries =0;
+        Map<HoldColorEnum, HoldStats> holdStatsMap = new HashMap<>(); // 색상별
+
+        int totalVisited =0;
+        String name= "";
+
+        for (UserClimbGround uc : userClimbGrounds) {
+            name = uc.getClimbGround().getName();
+            for (UserDate ud : uc.getUserDateList()){
+                totalVisited++;
+                for (Record r : ud.getRecordList()){
+                    totalTries++;
+                    if (r.isSuccess()) totalSuccess++;
+
+                    //홀드 색상별로 정리
+                    HoldColorEnum color = r.getHold().getColor();
+                    holdStatsMap.putIfAbsent(color, new HoldStats(color,0,0));
+                    HoldStats holdStats = holdStatsMap.get(color);
+                    holdStats.setTryCount(holdStats.getTryCount() + 1);
+                    if (r.isSuccess()){
+                        holdStats.setSuccess(holdStats.getSuccess() + 1);
+                    }
+                }
+
+            }
+        }
+        double successRate = ((double) totalSuccess / totalTries) * 100;
+        successRate = Math.round(successRate * 100) / 100.0;
+        List<HoldStats> holdStatsList = new ArrayList<>(holdStatsMap.values());
+        holdStatsList.sort(Comparator.comparing(HoldStats::getColor));
+
+        return new ClimbGroundRecordResponseDTO(name,totalVisited,totalSuccess,successRate,totalTries,holdStatsList);
+    }
 }

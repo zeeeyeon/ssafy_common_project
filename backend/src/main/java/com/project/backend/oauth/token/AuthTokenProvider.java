@@ -5,8 +5,11 @@ import com.project.backend.user.entity.User;
 import com.project.backend.user.entity.UserProviderEnum;
 import com.project.backend.user.entity.UserRoleEnum;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -16,6 +19,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.time.LocalDateTime;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.Collection;
 import java.util.Date;
 import java.util.stream.Collectors;
@@ -26,9 +30,16 @@ public class AuthTokenProvider {
   private final Key key;
   private static final String AUTHORITIES_KEY = "role";
 
-  public AuthTokenProvider(String secret) {
-    this.key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
+  // @Value를 사용하여 설정 파일에서 비밀 키를 주입받습니다.
+  public AuthTokenProvider(@Value("${jwt.secret}") String secret) {
+    byte[] keyBytes = Decoders.BASE64.decode(secret);
+    this.key = Keys.hmacShaKeyFor(keyBytes);
+    log.debug("Loaded JWT Key: {}", Base64.getEncoder().encodeToString(this.key.getEncoded()));
   }
+
+//  public AuthTokenProvider(String secret) {
+//    this.key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
+//  }
 
   public AuthToken createAuthToken(String id, Date expiry) {
     return new AuthToken(id, expiry, key);

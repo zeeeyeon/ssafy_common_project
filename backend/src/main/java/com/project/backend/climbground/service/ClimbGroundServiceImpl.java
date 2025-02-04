@@ -2,10 +2,9 @@ package com.project.backend.climbground.service;
 
 import com.project.backend.climbground.dto.requsetDTO.ClimbGroundAllRequestDTO;
 import com.project.backend.climbground.dto.requsetDTO.ClimbGroundSearchRequestDTO;
+import com.project.backend.climbground.dto.requsetDTO.LockClimbGroundAllRequsetDTO;
 import com.project.backend.climbground.dto.requsetDTO.MyClimbGroundRequestDTO;
-import com.project.backend.climbground.dto.responseDTO.ClimbGroundAllResponseDTO;
-import com.project.backend.climbground.dto.responseDTO.ClimbGroundDetailResponseDTO;
-import com.project.backend.climbground.dto.responseDTO.MyClimGroundResponseDTO;
+import com.project.backend.climbground.dto.responseDTO.*;
 import com.project.backend.climbground.entity.ClimbGround;
 import com.project.backend.climbground.repository.ClimbGroundRepository;
 import com.project.backend.climbgroundinfo.repository.ClimbGroundInfoRepository;
@@ -145,6 +144,44 @@ public class ClimbGroundServiceImpl implements ClimbGroundService {
         return Math.round(distance * 100.0) / 100.0; // 소수점 둘째 자리까지 반올림
     };
 
+    @Override
+    public List<LockClimbGroundAllResponseDTO> findAllLockClimbGround(LockClimbGroundAllRequsetDTO requestDTO) {
+          List<MiddleLockClimbGroundResponseDTO> middleLockClimbGrounds = climbGroundRepository.findAllWithUnlockStatus(requestDTO.getUserId());
 
+          List<LockClimbGroundAllResponseDTO> responseList = middleLockClimbGrounds.stream().map(
+                  middleLockClimbGround -> {
+                      double distance = calculateDistance(requestDTO.getLatitude(),requestDTO.getLongitude(), middleLockClimbGround.getLatitude(),middleLockClimbGround.getLongitude());
 
+                      return new LockClimbGroundAllResponseDTO(
+                              middleLockClimbGround.getClimbGroundId(),
+                              middleLockClimbGround.getName(),
+                              middleLockClimbGround.getImage(),
+                              middleLockClimbGround.getAddress(),
+                              distance,
+                              middleLockClimbGround.isLocked()
+                              );
+                  }).sorted(Comparator.comparing(LockClimbGroundAllResponseDTO::getDistance)).collect(Collectors.toList());
+          return responseList;
+
+    };
+
+    @Override
+    public List<LockClimbGroundAllResponseDTO> findAllLockClimbGroundLimitFive(LockClimbGroundAllRequsetDTO requestDTO) {
+        List<MiddleLockClimbGroundResponseDTO> middleLockClimbGrounds = climbGroundRepository.findAllWithUnlockStatus(requestDTO.getUserId());
+
+        List<LockClimbGroundAllResponseDTO> responseList = middleLockClimbGrounds.stream().map(
+                middleLockClimbGround -> {
+                    double distance = calculateDistance(requestDTO.getLatitude(), requestDTO.getLongitude(), middleLockClimbGround.getLatitude(), middleLockClimbGround.getLongitude());
+
+                    return new LockClimbGroundAllResponseDTO(
+                            middleLockClimbGround.getClimbGroundId(),
+                            middleLockClimbGround.getName(),
+                            middleLockClimbGround.getImage(),
+                            middleLockClimbGround.getAddress(),
+                            distance,
+                            middleLockClimbGround.isLocked()
+                    );
+                }).sorted(Comparator.comparing(LockClimbGroundAllResponseDTO::getDistance)).limit(5).collect(Collectors.toList());
+        return responseList;
+    };
 }
