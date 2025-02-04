@@ -1,7 +1,7 @@
 package com.project.backend.climbground.entity;
 
 import com.project.backend.climbgroundinfo.entity.ClimbGroundInfo;
-import com.project.backend.common.entity.BaseEntity;
+import com.project.backend.common.auditing.BaseEntity;
 import com.project.backend.hold.entity.Hold;
 import com.project.backend.userclimbground.entity.UserClimbGround;
 import jakarta.persistence.*;
