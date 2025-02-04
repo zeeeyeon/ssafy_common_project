@@ -36,4 +36,13 @@ public interface UserDateRepository extends JpaRepository<UserDate, Long> {
             "AND MONTH(ud.createdAt) = :month " +
             "GROUP BY DAY(ud.createdAt)")
     List<MonthlyRecordDto> findMonthlyRecords(@Param("year") int year, @Param("month") int month, @Param("userId") Long userId);
+
+    @Query("SELECT ud FROM UserDate ud " +
+            "JOIN ud.userClimbGround uc " +
+            "WHERE uc.user.id = :userId " +
+            "AND uc.climbGround.Id = :climbGroundId " +
+            "AND ud.createdAt >= :startOfDay AND ud.createdAt < :endOfDay ")
+    Optional<UserDate> findUserDateByUserAndClimbgroundAndDate(
+        Long userId, Long climbGroundId, LocalDateTime startOfDay, LocalDateTime endOfDay
+    );
 }
