@@ -1,4 +1,4 @@
-package com.project.backend.common.entity;
+package com.project.backend.common.auditing;
 
 import jakarta.persistence.*;
 import lombok.Getter;

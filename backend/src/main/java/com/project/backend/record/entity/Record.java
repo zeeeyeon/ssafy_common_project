@@ -1,6 +1,6 @@
 package com.project.backend.record.entity;
 
-import com.project.backend.common.entity.BaseEntity;
+import com.project.backend.common.auditing.BaseEntity;
 import com.project.backend.user.entity.User;
 import com.project.backend.hold.entity.Hold;
 import com.project.backend.userdate.entity.UserDate;
