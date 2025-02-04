@@ -8,7 +8,7 @@ import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.exceptions.SignatureVerificationException;
 import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.auth0.jwt.interfaces.DecodedJWT;
-import com.project.backend.user.auth.CustomUserDetails;
+import com.project.backend.oauth.entity.UserPrincipal;
 import com.project.backend.user.entity.User;
 import com.project.backend.user.entity.UserRoleEnum;
 import org.slf4j.Logger;
@@ -20,7 +20,7 @@ public class JwtProcess {
     private static final Logger log = LoggerFactory.getLogger(JwtProcess.class);
 
     // 토큰 생성
-    public static String create(CustomUserDetails loginUser) {
+    public static String create(UserPrincipal loginUser) {
         try {
             log.debug("디버그 : JwtProcess create() 시작");
 
@@ -43,7 +43,7 @@ public class JwtProcess {
     }
 
     // 토큰 검증
-    public static CustomUserDetails verify(String token) {
+    public static UserPrincipal verify(String token) {
         if (token == null || !token.startsWith(JwtVO.TOKEN_PREFIX)) {
             log.error("토큰이 null이거나 Bearer로 시작하지 않습니다. token: {}", token);
             throw new RuntimeException("유효하지 않은 토큰 형식입니다.");
@@ -89,7 +89,7 @@ public class JwtProcess {
                     .roleType(UserRoleEnum.valueOf(role))
                     .build();
 
-            return new CustomUserDetails(user);
+            return new UserPrincipal(user);
 
         } catch (TokenExpiredException e) {
             log.error("토큰이 만료됨. 만료시간: {}", e.getExpiredOn());

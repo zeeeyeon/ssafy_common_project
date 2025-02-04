@@ -59,7 +59,7 @@ public class AuthController {
     long accessTokenExpiry = appProperties.getAuth().getTokenExpiry();
     AuthToken accessToken = tokenProvider.createAuthToken(
             userName,
-            ((UserPrincipal) authentication.getPrincipal()).getRoleType().getCode(),
+            ((UserPrincipal) authentication.getPrincipal()).getUser().getRoleType().getCode(),
             new Date(now.getTime() + accessTokenExpiry)
     );
 

@@ -17,6 +17,7 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 @Getter
@@ -25,11 +26,8 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class UserPrincipal implements OAuth2User, UserDetails, OidcUser {
 
-  private final String userName;
-  private final String password;
-  private final UserProviderEnum providerType;
-  private final UserRoleEnum roleType;
-  private final Collection<GrantedAuthority> authorities;
+
+  private final User user;
   private Map<String, Object> attributes;
 
   @Override
@@ -39,17 +37,22 @@ public class UserPrincipal implements OAuth2User, UserDetails, OidcUser {
 
   @Override
   public Collection<? extends GrantedAuthority> getAuthorities() {
-    return authorities;
+    return List.of(new SimpleGrantedAuthority("ROLE_" + user.getRoleType()));
   }
 
   @Override
   public String getName() {
-    return userName;
+    return user.getEmail();
   }
 
   @Override
   public String getUsername() {
-    return userName;
+    return user.getEmail();
+  }
+
+  @Override
+  public String getPassword() {
+    return user.getPassword();
   }
 
   @Override
@@ -89,11 +92,8 @@ public class UserPrincipal implements OAuth2User, UserDetails, OidcUser {
 
   public static UserPrincipal create(User user) {
     return new UserPrincipal(
-            user.getUsername(),
-            user.getPassword(),
-            user.getProviderType(),
-            UserRoleEnum.USER,
-            Collections.singletonList(new SimpleGrantedAuthority(UserRoleEnum.USER.getCode()))
+            user,
+            Map.of()
     );
   }
 
@@ -103,5 +103,4 @@ public class UserPrincipal implements OAuth2User, UserDetails, OidcUser {
 
     return userPrincipal;
   }
-
 }

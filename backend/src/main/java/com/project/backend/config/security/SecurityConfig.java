@@ -2,7 +2,6 @@ package com.project.backend.config.security;
 
 import com.project.backend.config.properties.AppProperties;
 import com.project.backend.config.properties.CorsProperties;
-//import com.project.backend.oauth.filter.TokenAuthenticationFilter;
 import com.project.backend.oauth.handler.OAuth2AuthenticationFailureHandler;
 import com.project.backend.oauth.handler.OAuth2AuthenticationSuccessHandler;
 import com.project.backend.oauth.handler.TokenAccessDeniedHandler;
@@ -22,6 +21,7 @@ import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -42,12 +42,13 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @EnableConfigurationProperties(CorsProperties.class)
 public class SecurityConfig {
 
-    private final UserRepository userRepository;  // 필드 추가
+    private final UserRepository userRepository;
     private final CorsProperties corsProperties;
+    private final CustomOAuth2UserService oAuth2UserService;
+
     private final AppProperties appProperties;
     private final AuthTokenProvider tokenProvider;
     private final CustomUserDetailsService userDetailsService;
-    private final CustomOAuth2UserService oAuth2UserService;
     private final TokenAccessDeniedHandler tokenAccessDeniedHandler;
     private final UserRefreshTokenRepository userRefreshTokenRepository;
     private final Logger log = LoggerFactory.getLogger(getClass());
@@ -88,10 +89,25 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> {
                     auth
                             .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
-                            .requestMatchers("/api/user/sign-up").permitAll()
+                            .requestMatchers("/oauth2/**", "/login/**", "/api/user/signup").permitAll()
                             .requestMatchers("/api/user/**").authenticated()
                             .anyRequest().permitAll();
                 })
+                .oauth2Login(oauth2 -> oauth2
+                        .authorizationEndpoint(authorization -> authorization
+                                .baseUri("/oauth2/authorization")
+                                .authorizationRequestRepository(oAuth2AuthorizationRequestBasedOnCookieRepository())
+                        )
+                        .redirectionEndpoint(redirection -> redirection
+                                .baseUri("/login/oauth2/code/*")
+                        )
+                        .userInfoEndpoint(userInfo -> userInfo
+                                .userService(oAuth2UserService)
+                        )
+                        // 직접 주입한 핸들러 사용 (지연 초기화 적용됨)
+                        .successHandler(oAuth2AuthenticationSuccessHandler())
+                        .failureHandler(oAuth2AuthenticationFailureHandler())
+                )
                 .exceptionHandling(exception -> {
                     exception
                             .authenticationEntryPoint((request, response, authException) -> {
@@ -114,16 +130,19 @@ public class SecurityConfig {
                 .passwordEncoder(passwordEncoder());
         return authenticationManagerBuilder.build();
     }
-//    @Bean
-//    public TokenAuthenticationFilter tokenAuthenticationFilter() {
-//        return new TokenAuthenticationFilter(tokenProvider);
-//    }
 
+    /*
+     * 쿠키 기반 인가 Repository
+     * 인가 응답을 연계 하고 검증할 때 사용.
+     * */
     @Bean
     public OAuth2AuthorizationRequestBasedOnCookieRepository oAuth2AuthorizationRequestBasedOnCookieRepository() {
         return new OAuth2AuthorizationRequestBasedOnCookieRepository();
     }
 
+    /*
+     * Oauth 인증 성공 핸들러
+     * */
     @Bean
     public OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler() {
         return new OAuth2AuthenticationSuccessHandler(
@@ -134,6 +153,9 @@ public class SecurityConfig {
         );
     }
 
+    /*
+     * Oauth 인증 실패 핸들러
+     * */
     @Bean
     public OAuth2AuthenticationFailureHandler oAuth2AuthenticationFailureHandler() {
         return new OAuth2AuthenticationFailureHandler(oAuth2AuthorizationRequestBasedOnCookieRepository());
@@ -145,7 +167,7 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.addAllowedHeader("*");
         configuration.addAllowedMethod("*");
-        configuration.addAllowedOriginPattern("*");
+        configuration.addAllowedOriginPattern("http://localhost:3000");
         configuration.setAllowCredentials(true);
         configuration.addExposedHeader("Authorization");
 
