@@ -1,7 +1,5 @@
 package com.project.backend.userclimbground.controller;
 
-import com.project.backend.common.ApiResponse;
-import com.project.backend.common.ResponseType;
 import com.project.backend.common.response.Response;
 import com.project.backend.common.response.ResponseCode;
 import com.project.backend.userclimbground.dto.requestDTO.ClimbGroundRecordRequestDTO;

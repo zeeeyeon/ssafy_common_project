@@ -16,9 +16,9 @@ public enum ResponseType {
   NOT_EXPIRED_TOKEN_YET(400, "NETY", "Not expired token yet."),
 
   // 예시: 기존 ResponseCode / ResponseMessage에 있던 것들
-  EXISTED_USER_EMAIL(200, "EUE", "Existed User Email"),
+  EXISTED_USER_EMAIL(400, "EUE", "Existed User Email"),
   NO_EXISTED_USER_EMAIL(200, "NEUE", "No Existed User Email"),
-  EXISTED_USER_NICKNAME(200, "EUN", "Existed User Nickname"),
+  EXISTED_USER_NICKNAME(400, "EUN", "Existed User Nickname"),
   NO_EXISTED_USER_NICKNAME(200, "NEUN", "No Existed User Nickname"),
   EXISTED_USER_PHONE(200, "EUP", "Existed User Phone"),
 
