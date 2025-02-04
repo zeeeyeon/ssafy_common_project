@@ -1,21 +1,28 @@
 package com.project.backend.userclimbground.entity;
 
 import com.project.backend.climbground.entity.ClimbGround;
+import com.project.backend.common.auditing.BaseEntity;
 import com.project.backend.user.entity.User;
 import com.project.backend.userdate.entity.UserDate;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
+@Getter
+@Setter
 @Table(name = "user_climbground")
-public class UserClimbGround {
+@AttributeOverride(name="Id", column=@Column(name="user_climbground_id"))
+public class UserClimbGround extends BaseEntity {
 
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "user_climbground_id")
-    private Long id;
+//    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+//    @Column(name = "user_climbground_id")
+//    private Long id;
 
+    @Enumerated(EnumType.STRING)
     private UserClimbGroundMedalEnum medal;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -27,6 +34,6 @@ public class UserClimbGround {
     private ClimbGround climbGround;
 
     @OneToMany(mappedBy = "userClimbGround", cascade = CascadeType.ALL)
-    private List<UserDate> userDateList = new ArrayList<>();
+    private Set<UserDate> userDateList = new HashSet<>();
 
 }
