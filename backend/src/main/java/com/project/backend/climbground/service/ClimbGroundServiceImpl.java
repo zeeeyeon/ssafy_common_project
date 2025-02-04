@@ -64,32 +64,32 @@ public class ClimbGroundServiceImpl implements ClimbGroundService {
         return Optional.of(response);
     }
 
-    @Override
-    public List<ClimbGroundAllResponseDTO> searchClimbGroundByKeyword(ClimbGroundSearchRequestDTO requestDTO) {
-        //검색결과가 나올수도 안나올수도 여러 개일수도 한개 일수도 있음
-        List<ClimbGround> climbGrounds = climbGroundRepository.searchClimbGround(requestDTO.getKeyword());
-
-        // 검색 결과 없으면 빈리스트 주기
-        if (climbGrounds.isEmpty()) {
-            return List.of();
-        }
-        List<ClimbGroundAllResponseDTO> responseList = climbGrounds.stream().map(climb -> {
-
-            double distance = calculateDistance(requestDTO.getLatitude(),requestDTO.getLongitude(),climb.getLatitude(),climb.getLongitude());
-
-            return new ClimbGroundAllResponseDTO(
-                    climb.getId(),
-                    climb.getName(),
-                    climb.getImage(),
-                    climb.getAddress(),
-                    distance
-            );
-        }).sorted(Comparator.comparing(ClimbGroundAllResponseDTO::getDistance)).collect(Collectors.toList());
-
-
-        return responseList;
-
-    }
+//    @Override
+//    public List<ClimbGroundAllResponseDTO> searchClimbGroundByKeyword(ClimbGroundSearchRequestDTO requestDTO) {
+//        //검색결과가 나올수도 안나올수도 여러 개일수도 한개 일수도 있음
+//        List<ClimbGround> climbGrounds = climbGroundRepository.searchClimbGround(requestDTO.getKeyword());
+//
+//        // 검색 결과 없으면 빈리스트 주기
+//        if (climbGrounds.isEmpty()) {
+//            return List.of();
+//        }
+//        List<ClimbGroundAllResponseDTO> responseList = climbGrounds.stream().map(climb -> {
+//
+//            double distance = calculateDistance(requestDTO.getLatitude(),requestDTO.getLongitude(),climb.getLatitude(),climb.getLongitude());
+//
+//            return new ClimbGroundAllResponseDTO(
+//                    climb.getId(),
+//                    climb.getName(),
+//                    climb.getImage(),
+//                    climb.getAddress(),
+//                    distance
+//            );
+//        }).sorted(Comparator.comparing(ClimbGroundAllResponseDTO::getDistance)).collect(Collectors.toList());
+//
+//
+//        return responseList;
+//
+//    }
 
     // 클라이밍장 전체 조회 (거리별 정렬)
     @Override
