@@ -11,7 +11,17 @@ import java.util.Map;
 public class ApiResponse<T> {
 
   private final ApiResponseHeader header;
-  private final Map<String, T> body;
+  private Map<String, T> body;
+  private T dto;
+
+  public ApiResponse(ApiResponseHeader apiResponseHeader) {
+    this.header = apiResponseHeader;
+  }
+
+  public ApiResponse(ApiResponseHeader apiResponseHeader, Object o) {
+    this.header = apiResponseHeader;
+    this.dto = (T) o;
+  }
 
   public ApiResponse(ApiResponseHeader apiResponseHeader, String name, T body) {
     Map<String, T> map = new HashMap<>();
@@ -78,4 +88,15 @@ public class ApiResponse<T> {
   public static <T> ApiResponse<T> notFound() {
     return new ApiResponse<>(new ApiResponseHeader(ResponseType.NOT_FOUND_404),null);
   }
+
+
+  // 이거 두개로만 돌려쓰기
+  public static <T> ApiResponse<T> apiResponse(ResponseType responseType, String name, T body) {
+    return new ApiResponse<>(new ApiResponseHeader(responseType),name,body);
+  }
+
+  public static <T> ApiResponse<T> apiResponse(ResponseType responseType) {
+    return new ApiResponse<>(new ApiResponseHeader(responseType),null);
+  }
+
 }
