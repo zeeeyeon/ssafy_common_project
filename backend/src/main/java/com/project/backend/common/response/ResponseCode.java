@@ -20,7 +20,6 @@ public enum ResponseCode {
     NOT_FOUND_CLIMB_GROUND_DETAIL(404, HttpStatus.NOT_FOUND, "해당 클라이밍장의 정보를 찾을 수 없습니다.");
 
 
-
     private int code;
     private HttpStatus httpStatus;
     private String message;
