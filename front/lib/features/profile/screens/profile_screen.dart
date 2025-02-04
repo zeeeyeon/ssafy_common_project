@@ -24,155 +24,160 @@ class ProfileScreen extends ConsumerWidget {
           ),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            // 프로필 섹션
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Row(
-                  children: [
-                    const CircleAvatar(
-                      radius: 30,
-                      backgroundImage: AssetImage(""),
-                    ),
-                    const SizedBox(width: 16),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          userProfile.name,
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
+      body: SingleChildScrollView(
+        // 🔹 스크롤 가능하도록 추가
+        physics: const BouncingScrollPhysics(), // 🔹 iOS에서도 부드러운 스크롤
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            children: [
+              // 프로필 섹션
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    children: [
+                      CircleAvatar(
+                        radius: 30,
+                        backgroundImage:
+                            AssetImage(userProfile.effectiveProfileImage),
+                      ),
+                      const SizedBox(width: 16),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            userProfile.name,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
-                        ),
-                        InkWell(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const ProfileScreenEdit(),
-                              ),
-                            );
-                          },
-                          borderRadius: BorderRadius.circular(4),
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(
-                                vertical: 4.0, horizontal: 4.0),
-                            child: Text(
-                              userProfile.startDate != null
-                                  ? "${userProfile.startDate!.year}년${userProfile.startDate!.month}월${userProfile.startDate!.day}일 클라이밍 시작🚀"
-                                  : "언제 클라이밍을 시작했나요?",
-                              style: const TextStyle(
-                                fontSize: 14,
-                                color: Color.fromARGB(255, 121, 163, 231),
+                          InkWell(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      const ProfileScreenEdit(),
+                                ),
+                              );
+                            },
+                            borderRadius: BorderRadius.circular(4),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                  vertical: 4.0, horizontal: 4.0),
+                              child: Text(
+                                userProfile.startDate != null
+                                    ? "${userProfile.startDate!.year}년${userProfile.startDate!.month}월${userProfile.startDate!.day}일 클라이밍 시작🚀"
+                                    : "언제 클라이밍을 시작했나요?",
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  color: Color.fromARGB(255, 121, 163, 231),
+                                ),
                               ),
                             ),
                           ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.edit),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const ProfileScreenEdit(),
                         ),
-                      ],
+                      );
+                    },
+                  ),
+                ],
+              ),
+              const SizedBox(height: 24),
+              // 클라이밍 시작 카드
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(16.0),
+                decoration: BoxDecoration(
+                  color: const Color.fromARGB(255, 80, 118, 232),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    const Text(
+                      '클라이밍 시작한지',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      '${userProfile.dDay} 일',
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
                     ),
                   ],
                 ),
-                IconButton(
-                  icon: const Icon(Icons.edit),
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const ProfileScreenEdit(),
-                      ),
-                    );
-                  },
-                ),
-              ],
-            ),
-            const SizedBox(height: 24),
-            // 클라이밍 시작 카드
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(16.0),
-              decoration: BoxDecoration(
-                color: const Color.fromARGB(255, 80, 118, 232),
-                borderRadius: BorderRadius.circular(12),
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
+              const SizedBox(height: 10),
+              // 키와 팔길이 카드
+              Row(
                 children: [
-                  const Text(
-                    '클라이밍 시작한지',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
+                  Expanded(
+                    child: _buildInfoCard('키', userProfile.height),
                   ),
-                  const SizedBox(height: 8),
-                  Text(
-                    '${userProfile.dDay} 일',
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: _buildInfoCard('팔길이', userProfile.armSpan),
                   ),
                 ],
               ),
-            ),
-            const SizedBox(height: 10),
-            // 키와 팔길이 카드
-            Row(
-              children: [
-                Expanded(
-                  child: _buildInfoCard('키', userProfile.height),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: _buildInfoCard('팔길이', userProfile.armSpan),
-                ),
-              ],
-            ),
-
-            const SizedBox(height: 24),
-            // 티어 이미지 추가
-            Align(
-              alignment: Alignment.center, // 중앙 정렬
-              child: Column(
-                children: [
-                  const Text(
-                    "나의 클라이밍 티어",
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  SizedBox(
-                    width: 230, // 크기를 키우기
-                    height: 230,
-                    child: ClipOval(
-                      child: Image.asset(
-                        _getTierImage(userProfile.dDay),
-                        fit: BoxFit.cover, // 꽉 차게 맞추기
+              const SizedBox(height: 24),
+              // 티어 이미지 추가
+              Align(
+                alignment: Alignment.center, // 중앙 정렬
+                child: Column(
+                  children: [
+                    const Text(
+                      "나의 클라이밍 티어",
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    _getTierText(userProfile.dDay),
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.blueAccent,
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      width: 230, // 크기를 키우기
+                      height: 230,
+                      child: ClipOval(
+                        child: Image.asset(
+                          _getTierImage(userProfile.dDay),
+                          fit: BoxFit.cover, // 꽉 차게 맞추기
+                        ),
+                      ),
                     ),
-                  )
-                ],
+                    const SizedBox(height: 8),
+                    Text(
+                      _getTierText(userProfile.dDay),
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.blueAccent,
+                      ),
+                    )
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -209,7 +214,7 @@ class ProfileScreen extends ConsumerWidget {
     );
   }
 
-  /// 클라이밍 D-Day에 따른 티어 결정 로직 (규칙에 맞게 수정이 필요함함)
+  /// 클라이밍 D-Day에 따른 티어 결정 로직 (규칙에 맞게 수정이 필요함)
   String _getTierImage(int dDay) {
     if (dDay >= 365) {
       return "assets/images/tier/diamond.webp";

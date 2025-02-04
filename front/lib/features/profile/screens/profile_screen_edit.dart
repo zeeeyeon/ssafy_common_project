@@ -278,18 +278,23 @@ class _ProfileScreenEditState extends ConsumerState<ProfileScreenEdit> {
               const SizedBox(height: 24),
 
               // 저장 버튼
+              // 저장 버튼
               Center(
-                child: ElevatedButton(
-                  onPressed: _saveProfile,
-                  style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 218.0, vertical: 16.0),
-                      backgroundColor: const Color.fromARGB(243, 24, 0, 0)),
-                  child: const Text(
-                    '저장',
-                    style: TextStyle(
+                child: SizedBox(
+                  width: double.infinity, // 🔹 반응형으로 너비 조절
+                  child: ElevatedButton(
+                    onPressed: _saveProfile,
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 16.0),
+                      backgroundColor: const Color.fromARGB(255, 80, 118, 232),
+                    ),
+                    child: const Text(
+                      '저장',
+                      style: TextStyle(
                         fontSize: 18,
-                        color: Color.fromARGB(220, 255, 255, 255)),
+                        color: Color.fromARGB(220, 255, 255, 255),
+                      ),
+                    ),
                   ),
                 ),
               ),
