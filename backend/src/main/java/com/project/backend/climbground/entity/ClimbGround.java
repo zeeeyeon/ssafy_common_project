@@ -1,6 +1,7 @@
 package com.project.backend.climbground.entity;
 
 import com.project.backend.climbgroundinfo.entity.ClimbGroundInfo;
+import com.project.backend.common.auditing.BaseEntity;
 import com.project.backend.hold.entity.Hold;
 import com.project.backend.userclimbground.entity.UserClimbGround;
 import jakarta.persistence.*;
@@ -14,12 +15,13 @@ import java.util.List;
 @Entity
 @Getter
 @NoArgsConstructor
+@AttributeOverride(name="Id", column=@Column(name="climbground_id")) //baseEntity에서 공통으로 관리해서 다른 이름 쓸려면 override 해야함
 @Table(name = "climbground")
-public class ClimbGround {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "climbground_id")
-    private Long id;
+public class ClimbGround extends BaseEntity {
+//    @Id
+//    @GeneratedValue(strategy = GenerationType.IDENTITY)
+//    @Column(name = "climbground_id")
+//    private Long id;
 
 
     @Column(nullable = false)

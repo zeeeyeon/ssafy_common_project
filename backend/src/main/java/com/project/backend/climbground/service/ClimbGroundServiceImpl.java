@@ -1,8 +1,10 @@
 package com.project.backend.climbground.service;
 
 import com.project.backend.climbground.dto.requsetDTO.ClimbGroundAllRequestDTO;
-import com.project.backend.climbground.dto.responseDTO.ClimbGroundAllResponseDTO;
-import com.project.backend.climbground.dto.responseDTO.ClimbGroundDetailResponseDTO;
+import com.project.backend.climbground.dto.requsetDTO.ClimbGroundSearchRequestDTO;
+import com.project.backend.climbground.dto.requsetDTO.LockClimbGroundAllRequsetDTO;
+import com.project.backend.climbground.dto.requsetDTO.MyClimbGroundRequestDTO;
+import com.project.backend.climbground.dto.responseDTO.*;
 import com.project.backend.climbground.entity.ClimbGround;
 import com.project.backend.climbground.repository.ClimbGroundRepository;
 import com.project.backend.climbgroundinfo.repository.ClimbGroundInfoRepository;
@@ -10,7 +12,7 @@ import com.project.backend.hold.dto.responseDTO.HoldResponseDTO;
 import com.project.backend.info.dto.responseDTO.InfoResponseDTO;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 
 import org.springframework.stereotype.Service;
 
@@ -19,13 +21,12 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class ClimbGroundServiceImpl implements ClimbGroundService {
 
-    @Autowired
-    private ClimbGroundRepository climbGroundRepository;
+    private final ClimbGroundRepository climbGroundRepository;
 
-    @Autowired
-    private ClimbGroundInfoRepository climbGroundInfoRepository;
+    private final ClimbGroundInfoRepository climbGroundInfoRepository;
 
     //클라이밍장 상세 페이지
     @Override
@@ -109,6 +110,23 @@ public class ClimbGroundServiceImpl implements ClimbGroundService {
 
         return responseList;
     }
+
+    @Override
+    public List<MyClimGroundResponseDTO> myClimbGroundWithIds(MyClimbGroundRequestDTO requestDTO){
+        List<ClimbGround> climbGrounds = climbGroundRepository.findByIdIn(requestDTO.getClimbGroundIds());
+
+        List<MyClimGroundResponseDTO> responseList = climbGrounds.stream().map(climbGround -> {
+
+            return new MyClimGroundResponseDTO(
+                    climbGround.getId(),
+                    climbGround.getName(),
+                    climbGround.getImage(),
+                    climbGround.getAddress()
+            );
+        }).collect(Collectors.toList());
+        return responseList;
+    }
+
     // 클라이밍장별 거리 계산
     public double calculateDistance(BigDecimal lat1, BigDecimal lon1, BigDecimal lat2, BigDecimal lon2){
         final int EARTH_RADIUS = 6371; // 지구 반지름 (km)
@@ -126,4 +144,44 @@ public class ClimbGroundServiceImpl implements ClimbGroundService {
         return Math.round(distance * 100.0) / 100.0; // 소수점 둘째 자리까지 반올림
     };
 
+    @Override
+    public List<LockClimbGroundAllResponseDTO> findAllLockClimbGround(LockClimbGroundAllRequsetDTO requestDTO) {
+          List<MiddleLockClimbGroundResponseDTO> middleLockClimbGrounds = climbGroundRepository.findAllWithUnlockStatus(requestDTO.getUserId());
+
+          List<LockClimbGroundAllResponseDTO> responseList = middleLockClimbGrounds.stream().map(
+                  middleLockClimbGround -> {
+                      double distance = calculateDistance(requestDTO.getLatitude(),requestDTO.getLongitude(), middleLockClimbGround.getLatitude(),middleLockClimbGround.getLongitude());
+
+                      return new LockClimbGroundAllResponseDTO(
+                              middleLockClimbGround.getClimbGroundId(),
+                              middleLockClimbGround.getName(),
+                              middleLockClimbGround.getImage(),
+                              middleLockClimbGround.getAddress(),
+                              distance,
+                              middleLockClimbGround.isLocked()
+                              );
+                  }).sorted(Comparator.comparing(LockClimbGroundAllResponseDTO::getDistance)).collect(Collectors.toList());
+          return responseList;
+
+    };
+
+    @Override
+    public List<LockClimbGroundAllResponseDTO> findAllLockClimbGroundLimitFive(LockClimbGroundAllRequsetDTO requestDTO) {
+        List<MiddleLockClimbGroundResponseDTO> middleLockClimbGrounds = climbGroundRepository.findAllWithUnlockStatus(requestDTO.getUserId());
+
+        List<LockClimbGroundAllResponseDTO> responseList = middleLockClimbGrounds.stream().map(
+                middleLockClimbGround -> {
+                    double distance = calculateDistance(requestDTO.getLatitude(), requestDTO.getLongitude(), middleLockClimbGround.getLatitude(), middleLockClimbGround.getLongitude());
+
+                    return new LockClimbGroundAllResponseDTO(
+                            middleLockClimbGround.getClimbGroundId(),
+                            middleLockClimbGround.getName(),
+                            middleLockClimbGround.getImage(),
+                            middleLockClimbGround.getAddress(),
+                            distance,
+                            middleLockClimbGround.isLocked()
+                    );
+                }).sorted(Comparator.comparing(LockClimbGroundAllResponseDTO::getDistance)).limit(5).collect(Collectors.toList());
+        return responseList;
+    };
 }

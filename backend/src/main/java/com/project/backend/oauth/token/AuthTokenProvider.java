@@ -5,9 +5,6 @@ import com.project.backend.user.entity.User;
 import com.project.backend.user.entity.UserProviderEnum;
 import com.project.backend.user.entity.UserRoleEnum;
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.security.Keys;
-import lombok.Getter;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -15,8 +12,6 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
 
-import java.nio.charset.StandardCharsets;
-import java.security.Key;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collection;
@@ -26,7 +21,6 @@ import java.util.stream.Collectors;
 import static com.project.backend.oauth.token.AuthToken.*;
 
 @Component
-@Getter
 public class AuthTokenProvider {
 
   private final String secretKey;
