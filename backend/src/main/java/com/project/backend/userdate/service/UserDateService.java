@@ -1,5 +1,6 @@
 package com.project.backend.userdate.service;
 
+import com.project.backend.common.advice.exception.CustomException;
 import com.project.backend.hold.dto.HoldColorLevelDto;
 import com.project.backend.hold.entity.HoldColorEnum;
 import com.project.backend.hold.entity.HoldLevelEnum;
@@ -18,11 +19,10 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.YearMonth;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
+
+import static com.project.backend.common.response.ResponseCode.NOT_FOUND_CLIMB_GROUND_OR_USER;
 
 @Service
 @RequiredArgsConstructor
@@ -38,17 +38,19 @@ public class UserDateService {
         LocalDateTime endOfDay = selectedDate.atTime(LocalTime.MAX);
 
         // 해당 날짜 기록이 존재하는지 확인
-        UserDate userDate = userDateRepository.findByDateAndUserId(startOfDay, endOfDay, userId)
-                .orElseThrow(() -> new EntityNotFoundException("해당 날짜의 기록이 존재하지 않습니다."));
+        Optional<UserDate> userDate = userDateRepository.findByDateAndUserId(startOfDay, endOfDay, userId);
+        if (!userDate.isPresent()) {
+            throw new CustomException(NOT_FOUND_CLIMB_GROUND_OR_USER);
+        }
 
         // 클라이밍장 이름
-        String climbingGround = userDate.getUserClimbGround().getClimbGround().getName();
+        String climbingGround = userDate.get().getUserClimbGround().getClimbGround().getName();
 
         // 해당 클라이밍장 방문 횟수
-        int visitCount = userDateRepository.countVisits(startOfDay, endOfDay, userDate.getUserClimbGround().getId());
+        int visitCount = userDateRepository.countVisits(startOfDay, endOfDay, userDate.get().getUserClimbGround().getClimbGround().getId());
 
         // 완등 횟수
-        Set<Record> records = userDate.getRecordList();
+        Set<Record> records = userDate.get().getRecordList();
         int totalCount = records.size();
         long successCount = records.stream()
                 .filter(Record::isSuccess)
@@ -59,14 +61,16 @@ public class UserDateService {
 
         // 클라이밍장 난이도
         // 클라이밍장 홀드 정보 조회
-        Long climbingHoldGround = userDate.getUserClimbGround().getClimbGround().getId();
+        Long climbingHoldGround = userDate.get().getUserClimbGround().getClimbGround().getId();
         List<HoldColorLevelDto> holdColorLevelInfo = holdRepository.findHoldColorLevelByClimbGroundId(climbingHoldGround);
 
         Map<HoldColorEnum, HoldLevelEnum> holdColorLevel = holdColorLevelInfo.stream()
+                .sorted(Comparator.comparing(dto -> dto.getLevel().getValue()))
                 .collect(Collectors.toMap(
                         HoldColorLevelDto::getColor,
                         HoldColorLevelDto::getLevel,
-                        (existing, replacement) -> existing
+                        (existing, replacement) -> existing,
+                        LinkedHashMap::new
                 ));
 
         // 해당 난이도 완등률
