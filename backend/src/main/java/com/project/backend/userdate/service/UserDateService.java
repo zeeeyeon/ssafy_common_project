@@ -6,8 +6,10 @@ import com.project.backend.hold.entity.HoldLevelEnum;
 import com.project.backend.hold.repository.HoldRepository;
 import com.project.backend.record.entity.Record;
 import com.project.backend.userdate.dto.MonthlyRecordDto;
+import com.project.backend.userdate.dto.request.UserDateCheckAndAddRequestDTO;
 import com.project.backend.userdate.dto.response.DailyClimbingRecordResponse;
 import com.project.backend.userdate.dto.response.MonthlyClimbingRecordResponse;
+import com.project.backend.userdate.dto.response.UserDateCheckAndAddResponseDTO;
 import com.project.backend.userdate.entity.UserDate;
 import com.project.backend.userdate.repository.UserDateRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -18,10 +20,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.YearMonth;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -132,5 +131,17 @@ public class UserDateService {
                 .month(month)
                 .records(dayRecords)
                 .build();
+    }
+
+    public UserDateCheckAndAddResponseDTO UserDateCheckAndAddResponseDTO(UserDateCheckAndAddRequestDTO requestDTO) {
+        LocalDateTime startOfDay = requestDTO.getDate().atStartOfDay();
+        LocalDateTime endOfDay = requestDTO.getDate().atTime(LocalTime.MAX);
+
+        Optional<UserDate> userDate =userDateRepository.findUserDateByUserAndClimbgroundAndDate(requestDTO.getUserId(), requestDTO.getClimbGroundId(), startOfDay, endOfDay);
+        UserDateCheckAndAddResponseDTO responseDTO = new UserDateCheckAndAddResponseDTO();
+        if (userDate.isPresent()) { // 데이터가 있으면
+            responseDTO.setUserDateId(userDate.get().getId());
+
+        }
     }
 }
