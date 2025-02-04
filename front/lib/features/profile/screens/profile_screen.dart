@@ -14,7 +14,7 @@ class ProfileScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: CustomAppBar(
-        title: '',
+        title: 'My',
         actions: [
           IconButton(
             icon: const Icon(Icons.settings),
@@ -36,8 +36,7 @@ class ProfileScreen extends ConsumerWidget {
                   children: [
                     const CircleAvatar(
                       radius: 30,
-                      backgroundImage: AssetImage(
-                          "assets/default_profile.png"), // 기본 이미지로 원복
+                      backgroundImage: AssetImage(""),
                     ),
                     const SizedBox(width: 16),
                     Column(
@@ -65,7 +64,7 @@ class ProfileScreen extends ConsumerWidget {
                                 vertical: 4.0, horizontal: 4.0),
                             child: Text(
                               userProfile.startDate != null
-                                  ? "클라이밍 시작: ${userProfile.startDate!.year}-${userProfile.startDate!.month}-${userProfile.startDate!.day}"
+                                  ? "${userProfile.startDate!.year}년${userProfile.startDate!.month}월${userProfile.startDate!.day}일 클라이밍 시작🚀"
                                   : "언제 클라이밍을 시작했나요?",
                               style: const TextStyle(
                                 fontSize: 14,
@@ -92,7 +91,7 @@ class ProfileScreen extends ConsumerWidget {
               ],
             ),
             const SizedBox(height: 24),
-            // D-Day 카드
+            // 클라이밍 시작 카드
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(16.0),
@@ -104,7 +103,7 @@ class ProfileScreen extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   const Text(
-                    '클라이밍 D-day',
+                    '클라이밍 시작한지',
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -135,6 +134,43 @@ class ProfileScreen extends ConsumerWidget {
                   child: _buildInfoCard('팔길이', userProfile.armSpan),
                 ),
               ],
+            ),
+
+            const SizedBox(height: 24),
+            // 티어 이미지 추가
+            Align(
+              alignment: Alignment.center, // 중앙 정렬
+              child: Column(
+                children: [
+                  const Text(
+                    "나의 클라이밍 티어",
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    width: 230, // 크기를 키우기
+                    height: 230,
+                    child: ClipOval(
+                      child: Image.asset(
+                        _getTierImage(userProfile.dDay),
+                        fit: BoxFit.cover, // 꽉 차게 맞추기
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    _getTierText(userProfile.dDay),
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.blueAccent,
+                    ),
+                  )
+                ],
+              ),
             ),
           ],
         ),
@@ -171,5 +207,39 @@ class ProfileScreen extends ConsumerWidget {
         ],
       ),
     );
+  }
+
+  /// 클라이밍 D-Day에 따른 티어 결정 로직 (규칙에 맞게 수정이 필요함함)
+  String _getTierImage(int dDay) {
+    if (dDay >= 365) {
+      return "assets/images/tier/diamond.webp";
+    } else if (dDay >= 270) {
+      return "assets/images/tier/platinum.webp";
+    } else if (dDay >= 180) {
+      return "assets/images/tier/gold.webp";
+    } else if (dDay >= 90) {
+      return "assets/images/tier/silver.webp";
+    } else if (dDay >= 30) {
+      return "assets/images/tier/bronze.webp";
+    } else {
+      return "assets/images/tier/unranked.webp"; // 기본값
+    }
+  }
+
+  /// D-Day에 따른 티어명 반환
+  String _getTierText(int dDay) {
+    if (dDay >= 365) {
+      return "다이아몬드"; // Diamond
+    } else if (dDay >= 270) {
+      return "플래티넘"; // Platinum
+    } else if (dDay >= 180) {
+      return "골드"; // Gold
+    } else if (dDay >= 90) {
+      return "실버"; // Silver
+    } else if (dDay >= 30) {
+      return "브론즈"; // Bronze
+    } else {
+      return "비기너"; // Unranked
+    }
   }
 }

@@ -68,6 +68,7 @@ flutter:
 
   assets:
     - assets/fonts/
+    - assets/images/tier/
 
   fonts:
     - family: Pretendard
