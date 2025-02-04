@@ -32,8 +32,10 @@ public enum ResponseCode {
 
     POST_UNLUCK_CLIMB_GROUND(201,HttpStatus.CREATED,"클라이밍장 해금에 성공했습니다"),
     ALEADY_UNLUCKED(208, HttpStatus.ALREADY_REPORTED,"이미 해금된 클라이밍장입니다."),
-    NOT_FOUND_CLIMB_GROUND_OR_USER(404, HttpStatus.NOT_FOUND, "클라이밍장 혹은 유저 정보를 찾을 수 없습니다..");
+    NOT_FOUND_CLIMB_GROUND_OR_USER(404, HttpStatus.NOT_FOUND, "클라이밍장 혹은 유저 정보를 찾을 수 없습니다.."),
 
+    POST_USER_DATE(201,HttpStatus.CREATED,"오늘의 현재 클라이밍장 방문 일지가 생성되었습니다"),
+    ALEADY_USER_DATE(208, HttpStatus.ALREADY_REPORTED,"이미 오늘의 현재 클라이밍장 방문 일지가 생성되어 있습니다.");
 
     private int code;
     private HttpStatus httpStatus;
