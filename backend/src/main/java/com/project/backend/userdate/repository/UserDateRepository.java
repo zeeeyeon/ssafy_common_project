@@ -15,8 +15,9 @@ public interface UserDateRepository extends JpaRepository<UserDate, Long> {
     @Query("SELECT DISTINCT ud FROM UserDate ud " +
             "JOIN FETCH ud.userClimbGround ucg " +
             "JOIN FETCH ucg.climbGround cg " +
+            "JOIN FETCH ucg.user u " +
             "WHERE ud.createdAt BETWEEN :startOfDay AND :endOfDay " +
-            "AND ucg.user.id = :userId")
+            "AND u.id = :userId")
     Optional<UserDate> findByDateAndUserId(LocalDateTime startOfDay, LocalDateTime endOfDay, Long userId);
 
     @Query("SELECT COUNT(ud) FROM UserDate ud " +

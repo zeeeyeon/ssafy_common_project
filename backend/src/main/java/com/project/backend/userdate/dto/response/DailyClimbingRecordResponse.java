@@ -2,6 +2,7 @@ package com.project.backend.userdate.dto.response;
 
 import com.project.backend.hold.entity.HoldColorEnum;
 import com.project.backend.hold.entity.HoldLevelEnum;
+import com.project.backend.userdate.entity.UserDate;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -25,26 +26,10 @@ public class DailyClimbingRecordResponse {
     // 색상별 성공 횟수
     private Map<HoldColorEnum, Long> colorSuccesses;
 
-}
+    public static DailyClimbingRecordResponse toDto(UserDate userDate) {
+        return DailyClimbingRecordResponse.builder()
 
-//{
-//        "climbGroundName": "클라이밍장 이름",
-//        "visitCount": 5,
-//        "successCount": 12,
-//        "completionRate": 65.5,
-//        "holdColorLevel": {
-//        "RED": "SEVEN",
-//        "BLUE": "FIVE",
-//        "YELLOW": "THREE"
-//        },
-//        "colorAttempts": {
-//        "RED": 10,
-//        "BLUE": 8,
-//        "YELLOW": 5
-//        },
-//        "colorSuccesses": {
-//        "RED": 7,
-//        "BLUE": 4,
-//        "YELLOW": 2
-//        },
-//}
+                .build();
+    }
+
+}
