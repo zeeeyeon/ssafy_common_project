@@ -12,10 +12,10 @@ import java.util.Optional;
 
 public interface UserDateRepository extends JpaRepository<UserDate, Long> {
 
-    @Query("SELECT ud FROM UserDate ud " +
+    @Query("SELECT DISTINCT ud FROM UserDate ud " +
             "JOIN FETCH ud.userClimbGround ucg " +
             "JOIN FETCH ucg.climbGround cg " +
-            "WHERE ud.createdAt >= :startOfDay AND ud.createdAt < :endOfDay " +
+            "WHERE ud.createdAt BETWEEN :startOfDay AND :endOfDay " +
             "AND ucg.user.id = :userId")
     Optional<UserDate> findByDateAndUserId(LocalDateTime startOfDay, LocalDateTime endOfDay, Long userId);
 
