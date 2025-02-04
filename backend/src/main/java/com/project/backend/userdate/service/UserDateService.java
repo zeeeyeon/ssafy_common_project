@@ -1,10 +1,13 @@
 package com.project.backend.userdate.service;
 
 import com.project.backend.hold.dto.HoldColorLevelDto;
+import com.project.backend.hold.dto.responseDTO.HoldResponseDTO;
 import com.project.backend.hold.entity.HoldColorEnum;
 import com.project.backend.hold.entity.HoldLevelEnum;
 import com.project.backend.hold.repository.HoldRepository;
 import com.project.backend.record.entity.Record;
+import com.project.backend.userclimbground.entity.UserClimbGround;
+import com.project.backend.userclimbground.repository.UserClimbGroundRepository;
 import com.project.backend.userdate.dto.MonthlyRecordDto;
 import com.project.backend.userdate.dto.request.UserDateCheckAndAddRequestDTO;
 import com.project.backend.userdate.dto.response.DailyClimbingRecordResponse;
@@ -29,6 +32,7 @@ public class UserDateService {
 
     private final UserDateRepository userDateRepository;
     private final HoldRepository holdRepository;
+    private final UserClimbGroundRepository userClimbGroundRepository;
 
     public DailyClimbingRecordResponse getDailyRecord(LocalDate selectedDate, Long userId) {
 
@@ -133,7 +137,7 @@ public class UserDateService {
                 .build();
     }
 
-    public UserDateCheckAndAddResponseDTO UserDateCheckAndAddResponseDTO(UserDateCheckAndAddRequestDTO requestDTO) {
+    public UserDateCheckAndAddResponseDTO UserDateCheckAndAdd(UserDateCheckAndAddRequestDTO requestDTO) {
         LocalDateTime startOfDay = requestDTO.getDate().atStartOfDay();
         LocalDateTime endOfDay = requestDTO.getDate().atTime(LocalTime.MAX);
 
@@ -141,7 +145,28 @@ public class UserDateService {
         UserDateCheckAndAddResponseDTO responseDTO = new UserDateCheckAndAddResponseDTO();
         if (userDate.isPresent()) { // 데이터가 있으면
             responseDTO.setUserDateId(userDate.get().getId());
+            responseDTO.setName(userDate.get().getUserClimbGround().getClimbGround().getName());
+            List<HoldResponseDTO> holds = userDate.get().getUserClimbGround().getClimbGround().getHoldList().stream()
+                    .map(hold -> new HoldResponseDTO(hold.getId(),hold.getLevel(),hold.getColor()))
+                    .sorted(Comparator.comparing(HoldResponseDTO::getLevel))
+                    .collect(Collectors.toList());
+            responseDTO.setHolds(holds);
+            responseDTO.setNewlyCreated(false);
+        } else{
+            UserClimbGround userClimbGround = userClimbGroundRepository.findUserClimbGroundByUserIDAndClimbGroundID(requestDTO.getUserId(),requestDTO.getClimbGroundId())
+                    .orElseThrow(() -> new EntityNotFoundException("아직 해금되지 않은 클라이밍장 입니다"));
+            UserDate newUserDate = new UserDate();
+            newUserDate.setUserClimbGround(userClimbGround);
+            List<HoldResponseDTO> holds = userClimbGround.getClimbGround().getHoldList().stream()
+                    .map(hold -> new HoldResponseDTO(hold.getId(),hold.getLevel(),hold.getColor()))
+                    .sorted(Comparator.comparing(HoldResponseDTO::getLevel))
+                    .collect(Collectors.toList());
+            responseDTO.setHolds(holds);
+            responseDTO.setNewlyCreated(true);
+            userDateRepository.save(newUserDate); // 다넣었으면 저장
 
         }
+
+        return responseDTO;
     }
 }
