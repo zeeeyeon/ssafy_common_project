@@ -12,4 +12,5 @@ public class ClimbGroundSearchRequestDTO {
     private String keyword;
     private BigDecimal latitude;
     private BigDecimal longitude;
+
 }
