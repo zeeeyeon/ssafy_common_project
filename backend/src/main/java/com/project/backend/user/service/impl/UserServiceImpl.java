@@ -67,4 +67,9 @@ public class UserServiceImpl implements UserService {
   public boolean checkNicknameDuplication(String nickname) {
     return false;
   }
+
+  @Override
+  public User getEmail(String email) {
+    return userRepository.findByEmail(email).orElseThrow();
+  }
 }

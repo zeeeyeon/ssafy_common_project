@@ -50,10 +50,13 @@ public class AuthToken {
   private Key getKeyFromString(String secretKeyString) {
     try {
       byte[] keyBytes = Base64.getDecoder().decode(secretKeyString);
+      if (keyBytes.length < 64) {
+        throw new IllegalArgumentException("HS512 알고리즘을 위한 키 길이가 충분하지 않습니다. 키는 최소 512비트(64바이트) 이상이어야 합니다.");
+      }
       return Keys.hmacShaKeyFor(keyBytes);
     } catch (IllegalArgumentException e) {
-      log.error("비밀키(Base64) 디코딩 실패: 비밀키 형식을 확인하세요.", e);
-      throw new RuntimeException("비밀키 디코딩 실패: Base64 형식을 확인하세요.");
+      log.error("비밀키(Base64) 디코딩 실패 또는 키 길이 부족: 비밀키 형식을 확인하세요.", e);
+      throw new RuntimeException("비밀키 디코딩 실패 또는 키 길이 부족: Base64 형식을 확인하세요.");
     }
   }
 
@@ -137,3 +140,4 @@ public class AuthToken {
     private String role;
   }
 }
+

@@ -28,6 +28,8 @@ public class CustomUserDetailsService implements UserDetailsService {
 
         log.debug("로그인 성공한 user: {}", user.getEmail());
 
-        return new UserPrincipal(user);
+        // 기존: return new UserPrincipal(user);
+        // 변경: UserPrincipal.create(user) 사용
+        return UserPrincipal.create(user);
     }
 }

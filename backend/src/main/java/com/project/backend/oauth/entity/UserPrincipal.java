@@ -1,9 +1,6 @@
 package com.project.backend.oauth.entity;
 
 import com.project.backend.user.entity.User;
-import com.project.backend.user.entity.UserProviderEnum;
-import com.project.backend.user.entity.UserRoleEnum;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -22,13 +19,21 @@ import java.util.Map;
 
 @Getter
 @Setter
-@AllArgsConstructor
-@RequiredArgsConstructor
 public class UserPrincipal implements OAuth2User, UserDetails, OidcUser {
-
 
   private final User user;
   private Map<String, Object> attributes;
+
+  // 1) User만 받는 생성자
+  public UserPrincipal(User user) {
+    this.user = user;
+  }
+
+  // 2) User + attributes를 모두 받는 생성자
+  public UserPrincipal(User user, Map<String, Object> attributes) {
+    this.user = user;
+    this.attributes = attributes;
+  }
 
   @Override
   public Map<String, Object> getAttributes() {
@@ -42,12 +47,12 @@ public class UserPrincipal implements OAuth2User, UserDetails, OidcUser {
 
   @Override
   public String getName() {
-    return user.getEmail();
+    return user.getId().toString();
   }
 
   @Override
   public String getUsername() {
-    return user.getEmail();
+    return user.getUsername();
   }
 
   @Override
@@ -90,17 +95,21 @@ public class UserPrincipal implements OAuth2User, UserDetails, OidcUser {
     return null;
   }
 
+  public String getEmail() {
+    return user.getEmail();
+  }
+
   public static UserPrincipal create(User user) {
-    return new UserPrincipal(
-            user,
-            Map.of()
-    );
+    // 빈 Map 대신 Collections.emptyMap() 사용 (JDK 8 호환성)
+    return new UserPrincipal(user, Collections.emptyMap());
   }
 
   public static UserPrincipal create(User user, Map<String, Object> attributes) {
-    UserPrincipal userPrincipal = create(user);
-    userPrincipal.setAttributes(attributes);
-
-    return userPrincipal;
+    if (attributes.containsKey("email") && user.getEmail() == null) {
+      user.setEmail((String) attributes.get("email"));
+    }
+    return new UserPrincipal(user, attributes);
   }
 }
+
+

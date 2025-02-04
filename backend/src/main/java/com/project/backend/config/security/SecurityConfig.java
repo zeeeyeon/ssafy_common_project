@@ -17,11 +17,11 @@ import com.project.backend.user.util.CustomResponseUtil;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -61,10 +61,18 @@ public class SecurityConfig {
 
     // JWT 필터 등록이 필요함
     public static class CustomSecurityFilterManager extends AbstractHttpConfigurer<CustomSecurityFilterManager, HttpSecurity> {
+        private final AuthTokenProvider tokenProvider;
+
+        // 생성자에 AuthTokenProvider 주입
+        public CustomSecurityFilterManager(AuthTokenProvider tokenProvider) {
+            this.tokenProvider = tokenProvider;
+        }
+
+        @Override
         public void configure(HttpSecurity builder) throws Exception {
             AuthenticationManager authenticationManager = builder.getSharedObject(AuthenticationManager.class);
             builder.addFilter(new JwtAuthenticationFilter(authenticationManager));
-            builder.addFilter(new JwtAuthorizationFilter(authenticationManager));
+            builder.addFilter(new JwtAuthorizationFilter(authenticationManager, tokenProvider));
             super.configure(builder);
         }
     }
@@ -89,7 +97,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> {
                     auth
                             .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
-                            .requestMatchers("/oauth2/**", "/login/**", "/api/user/signup").permitAll()
+                            .requestMatchers("/oauth2/**", "/api/users", "/login/**", "/api/user/signup").permitAll()
                             .requestMatchers("/api/user/**").authenticated()
                             .anyRequest().permitAll();
                 })
@@ -117,7 +125,7 @@ public class SecurityConfig {
                                 CustomResponseUtil.fail(response, "권한이 없습니다", HttpStatus.FORBIDDEN);
                             });
                 })
-                .with(new CustomSecurityFilterManager(), CustomSecurityFilterManager::getClass);
+                .with(new CustomSecurityFilterManager(tokenProvider), CustomSecurityFilterManager::getClass);
 
         return http.build();
     }

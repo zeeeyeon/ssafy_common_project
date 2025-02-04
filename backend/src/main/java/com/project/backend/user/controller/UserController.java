@@ -11,14 +11,12 @@ import com.project.backend.user.service.UserService;
 import jakarta.annotation.PostConstruct;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import net.nurigo.sdk.NurigoApp;
-import net.nurigo.sdk.message.model.Message;
-import net.nurigo.sdk.message.request.SingleMessageSendingRequest;
-import net.nurigo.sdk.message.response.SingleMessageSentResponse;
-import net.nurigo.sdk.message.service.DefaultMessageService;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -27,6 +25,31 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
 
   private final UserService userService;
+
+  @GetMapping
+  public ApiResponse getUser() {
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    Object principal = authentication.getPrincipal();
+
+    String email;
+
+    if (principal instanceof OAuth2User) {
+      // OAuth2 인증 사용 시
+      OAuth2User oauth2User = (OAuth2User) principal;
+      email = oauth2User.getAttribute("email");
+    } else if (principal instanceof UserDetails) {
+      // JWT 또는 일반 Spring Security 인증 사용 시
+      UserDetails userDetails = (UserDetails) principal;
+      email = userDetails.getUsername(); // UserDetails는 username 필드를 사용 (email로 저장된 경우)
+    } else {
+      throw new RuntimeException("Unknown authentication type: " + principal.getClass().getName());
+    }
+
+    User user = userService.getEmail(email);
+    return ApiResponse.success("user", user);
+  }
+
+
 
   // 일반 사용자 회원가입
   @PostMapping("/signup")
@@ -59,4 +82,10 @@ public class UserController {
     }
   }
 
+  @GetMapping("/profile")
+  public String profile(@AuthenticationPrincipal UserPrincipal userPrincipal) {
+    String email = userPrincipal.getEmail();
+    String name = userPrincipal.getUsername();
+    return "User Email: " + email + ", Name: " + name;
+  }
 }
