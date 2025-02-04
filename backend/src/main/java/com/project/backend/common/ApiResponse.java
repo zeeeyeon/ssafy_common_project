@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Getter
-@RequiredArgsConstructor
 public class ApiResponse<T> {
 
   private final ApiResponseHeader header;

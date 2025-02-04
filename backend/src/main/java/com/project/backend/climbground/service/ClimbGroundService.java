@@ -17,7 +17,7 @@ public interface ClimbGroundService {
     Optional<ClimbGroundDetailResponseDTO> findClimbGroundDetailById(Long climbground_id);
 
     // 클라이밍장 검색 조회
-//    List<ClimbGroundAllResponseDTO> searchClimbGroundByKeyword(ClimbGroundSearchRequestDTO requestDTO);
+    List<ClimbGroundAllResponseDTO> searchClimbGroundByKeyword(ClimbGroundSearchRequestDTO requestDTO);
 
     // 내가 방문한 클라이밍장 리스트 조회
     List<MyClimGroundResponseDTO> myClimbGroundWithIds(MyClimbGroundRequestDTO requestDTO);
