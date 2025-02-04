@@ -1,10 +1,13 @@
 package com.project.backend.common;
 
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+
 import java.util.HashMap;
 import java.util.Map;
 
 @Getter
+@RequiredArgsConstructor
 public class ApiResponse<T> {
 
   private final ApiResponseHeader header;
@@ -28,13 +31,12 @@ public class ApiResponse<T> {
     this.body = map;
   }
 
-
   public static <T> ApiResponse<T> success() {
     return new ApiResponse<>(new ApiResponseHeader(ResponseType.SUCCESS), null);
   }
 
   public static <T> ApiResponse<T> success(T dto) {
-    return new ApiResponse<>(new ApiResponseHeader(ResponseType.SUCCESS), dto);
+    return new ApiResponse<>(new ApiResponseHeader(ResponseType.SUCCESS), "", dto);
   }
 
   // 바디를 담은 성공 응답
@@ -60,6 +62,22 @@ public class ApiResponse<T> {
 
   public static <T> ApiResponse<T> notExpiredTokenYet() {
     return new ApiResponse<>(new ApiResponseHeader(ResponseType.NOT_EXPIRED_TOKEN_YET), null);
+  }
+
+  public static ApiResponse<Boolean> existedUserEmail() {
+    return new ApiResponse<>(new ApiResponseHeader(ResponseType.EXISTED_USER_EMAIL), null);
+  }
+
+  public static ApiResponse<Boolean> noExistedUserEmail() {
+    return new ApiResponse<>(new ApiResponseHeader(ResponseType.NO_EXISTED_USER_EMAIL), null);
+  }
+
+  public static ApiResponse<Boolean> existedUserNickname() {
+    return new ApiResponse<>(new ApiResponseHeader(ResponseType.EXISTED_USER_NICKNAME), null);
+  }
+
+  public static ApiResponse<Boolean> noExistedUserNickname() {
+    return new ApiResponse<>(new ApiResponseHeader(ResponseType.NO_EXISTED_USER_NICKNAME), null);
   }
 
   // 클라이밍장 조회시 일치 내역 없음
