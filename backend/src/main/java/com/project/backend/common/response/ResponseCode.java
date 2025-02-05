@@ -53,7 +53,13 @@ public enum ResponseCode {
     NOT_FOUND_CLIMB_GROUND_OR_USER(404, HttpStatus.NOT_FOUND, "클라이밍장 혹은 유저 정보를 찾을 수 없습니다.."),
 
     POST_USER_DATE(201,HttpStatus.CREATED,"오늘의 현재 클라이밍장 방문 일지가 생성되었습니다"),
-    ALEADY_USER_DATE(208, HttpStatus.ALREADY_REPORTED,"이미 오늘의 현재 클라이밍장 방문 일지가 생성되어 있습니다.");
+    ALEADY_USER_DATE(208, HttpStatus.ALREADY_REPORTED,"이미 오늘의 현재 클라이밍장 방문 일지가 생성되어 있습니다."),
+
+    SUCCESS_FILE_UPLOAD(successCode(), HttpStatus.OK, "파일을 성공적으로 로드했습니다."),
+    INVALID_FILETYPE(4400, HttpStatus.BAD_REQUEST, "지원하지 않는 파일 형식 입니다."),
+    FILE_SIZE_EXCEEDED(4401, HttpStatus.BAD_REQUEST, "파일 크가가 최대 크기를 초과했습니다."),
+    FILE_UPLOAD_FAILED(4502, HttpStatus.BAD_REQUEST, "파일 업로드에 실패하였습니다."),
+    EMPTY_FILE(4403, HttpStatus.NOT_FOUND, "파일이 비어있습니다.");
 
     private int code;
     private HttpStatus httpStatus;
