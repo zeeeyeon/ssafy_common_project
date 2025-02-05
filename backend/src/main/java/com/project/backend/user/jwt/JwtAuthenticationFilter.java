@@ -3,7 +3,7 @@ package com.project.backend.user.jwt;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.backend.common.response.Response;
 import com.project.backend.user.auth.CustomUserDetails;
-import com.project.backend.user.dto.LoginRequestDto;
+import com.project.backend.user.dto.request.LoginRequestDto;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

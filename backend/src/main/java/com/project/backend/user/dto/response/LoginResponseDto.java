@@ -1,4 +1,4 @@
-package com.project.backend.user.dto;
+package com.project.backend.user.dto.response;
 
 import com.project.backend.user.entity.User;
 import lombok.Data;
