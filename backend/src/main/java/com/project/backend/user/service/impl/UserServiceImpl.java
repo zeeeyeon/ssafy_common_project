@@ -2,8 +2,10 @@ package com.project.backend.user.service.impl;
 
 import com.project.backend.common.advice.exception.CustomException;
 import com.project.backend.common.response.ResponseCode;
+import com.project.backend.user.dto.UserTierRequestDto;
 import com.project.backend.user.dto.request.SignUpRequestDto;
 import com.project.backend.user.dto.request.UserInfoRequestDto;
+import com.project.backend.user.dto.response.UserTierResponseDto;
 import com.project.backend.user.entity.User;
 import com.project.backend.user.repository.jpa.UserRepository;
 import com.project.backend.user.service.UserService;
@@ -63,7 +65,7 @@ public class UserServiceImpl implements UserService {
     return userRepository.findByNickname(nickname);
   }
 
-  public User userInfofindById(Long id) {
+  public User userFindById(Long id) {
     return userRepository.findById(id).orElseThrow(() -> new CustomException(ResponseCode.NOT_FOUND_USER));
   }
 
@@ -71,5 +73,15 @@ public class UserServiceImpl implements UserService {
     User findUser = userRepository.findById(id).orElseThrow(() -> new CustomException(ResponseCode.NOT_FOUND_USER));
 
     return userRepository.save(findUser.setUserInfoRquestDto(requestDto));
+  }
+
+  public UserTierResponseDto userTierFindById(Long id) {
+    User user = userRepository.findById(id).orElseThrow();
+    return new UserTierResponseDto(user);
+  }
+
+  public User insertUserTier(Long id, UserTierRequestDto requestDto) {
+    User findUser = userRepository.findById(id).orElseThrow(() -> new CustomException(ResponseCode.NOT_FOUND_USER));
+    return userRepository.save(findUser.setUserTierRequestDto(requestDto));
   }
 }
