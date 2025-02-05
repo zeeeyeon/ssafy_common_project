@@ -25,11 +25,4 @@ public class DailyClimbingRecordResponse {
     private Map<HoldColorEnum, Long> colorAttempts;
     // 색상별 성공 횟수
     private Map<HoldColorEnum, Long> colorSuccesses;
-
-    public static DailyClimbingRecordResponse toDto(UserDate userDate) {
-        return DailyClimbingRecordResponse.builder()
-
-                .build();
-    }
-
 }
