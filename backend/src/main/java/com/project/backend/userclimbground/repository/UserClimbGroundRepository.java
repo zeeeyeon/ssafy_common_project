@@ -117,5 +117,6 @@ public interface UserClimbGroundRepository extends JpaRepository<UserClimbGround
             "WHERE ucg.user.id = :userId " +
             "AND ucg.climbGround.Id = :climbGroundId")
     Optional<UserClimbGround> findUserClimbGroundByUserIDAndClimbGroundID(Long userId, Long climbGroundId);
+
 }
 
