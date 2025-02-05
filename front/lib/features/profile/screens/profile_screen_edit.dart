@@ -190,7 +190,8 @@ class _ProfileScreenEditState extends ConsumerState<ProfileScreenEdit> {
                           ),
                           child: TextField(
                             controller: _heightController,
-                            keyboardType: TextInputType.number,
+                            keyboardType: const TextInputType.numberWithOptions(
+                                decimal: true),
                             decoration: const InputDecoration(
                               hintText: '-CM',
                               hintStyle: TextStyle(
