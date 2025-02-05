@@ -5,6 +5,7 @@ import com.project.backend.common.response.Response;
 import com.project.backend.common.response.ResponseCode;
 import com.project.backend.user.auth.CustomUserDetails;
 import com.project.backend.user.dto.request.SignUpRequestDto;
+import com.project.backend.user.dto.request.UserInfoRequestDto;
 import com.project.backend.user.dto.response.UserInfoResponseDto;
 import com.project.backend.user.entity.User;
 import com.project.backend.user.service.UserService;
@@ -54,16 +55,18 @@ public class UserController {
 
   // 사용자 정보 조회 ( 이름, 클라이밍 시작일, 키, 팔길이)
   @GetMapping("/info")
-  public ResponseEntity<?> selectUserInfo(@AuthenticationPrincipal CustomUserDetails userDetails) {
+  public ResponseEntity<?> findUserInfo(@AuthenticationPrincipal CustomUserDetails userDetails) {
     Long userId = userDetails.getUser().getId();
-    Optional<User> userPS = userService.userInfofindById(userId);
-
-    if(userPS.isEmpty()) {
-      throw new CustomException(NO_EXISTED_USER_NICKNAME);
-    }
-
-    User user = userPS.get();
+    User user = userService.userInfofindById(userId);
     UserInfoResponseDto responseDto = new UserInfoResponseDto(user);
+    return new ResponseEntity<>(Response.create(ResponseCode.GET_USER_INFO, responseDto), GET_USER_INFO.getHttpStatus());
+  }
+
+  @PutMapping("/info")
+  public ResponseEntity<?> updateUserInfo(@AuthenticationPrincipal CustomUserDetails userDetails, @RequestBody UserInfoRequestDto requestDto) {
+    Long userId = userDetails.getUser().getId();
+    User findUser = userService.updateUserInfoById(userId, requestDto);
+    UserInfoResponseDto responseDto = new UserInfoResponseDto(findUser);
     return new ResponseEntity<>(Response.create(ResponseCode.GET_USER_INFO, responseDto), GET_USER_INFO.getHttpStatus());
   }
 
