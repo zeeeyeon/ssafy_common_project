@@ -30,7 +30,7 @@ public class JwtProcess {
                     .withExpiresAt(new Date(System.currentTimeMillis() + JwtVO.EXPIRATION_TIME))
                     .withClaim("id", loginUser.getUser().getId())
                     .withClaim("username", loginUser.getUser().getUsername())
-//                    .withClaim("role", loginUser.getUser().getRoleType().name())
+                    .withClaim("role", loginUser.getUser().getRoleType().name())
                     .sign(Algorithm.HMAC512(JwtVO.SECRET));
 
             log.debug("디버그 : 생성된 토큰 = {}", jwtToken);
