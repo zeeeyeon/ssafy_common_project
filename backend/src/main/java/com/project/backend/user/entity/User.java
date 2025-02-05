@@ -1,5 +1,6 @@
 package com.project.backend.user.entity;
 import com.project.backend.record.entity.ClimbingRecord;
+import com.project.backend.user.dto.UserTierRequestDto;
 import com.project.backend.user.dto.request.UserInfoRequestDto;
 import com.project.backend.userclimbground.entity.UserClimbGround;
 import jakarta.persistence.*;
@@ -112,6 +113,11 @@ public class User {
         this.reach = requestDto.getReach();
         this.startDate = requestDto.getStartDate();
 
+        return this;
+    }
+
+    public User setUserTierRequestDto(UserTierRequestDto requestDto) {
+        this.tier = requestDto.getUserTier();
         return this;
     }
 }
