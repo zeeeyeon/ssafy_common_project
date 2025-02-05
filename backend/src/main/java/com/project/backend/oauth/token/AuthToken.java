@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.security.Key;
+import java.util.Base64;
 import java.util.Date;
 
 @Slf4j
@@ -18,29 +19,45 @@ public class AuthToken {
   private final String token;
   private final Key key;
 
-  private static final String AUTHORITIES_KEY = "role";
+  static final String AUTHORITIES_KEY = "role";
   private static final String PROVIDER_TYPE_KEY = "provider";
 
-  public AuthToken(String token, Key key) {
-      this.token = token;
-      this.key = key;
+  // 생성자: 기존 토큰과 비밀키를 받아 초기화
+  public AuthToken(String token, String secretKeyString) {
+    this.token = token;
+    this.key = getKeyFromString(secretKeyString);
   }
 
-  AuthToken(String id, Date expiry, Key key) {
-    this.key = key;
+  // 생성자: ID와 만료 시간, 비밀키로 토큰 생성
+  public AuthToken(String id, Date expiry, String secretKeyString) {
+    this.key = getKeyFromString(secretKeyString);
     this.token = createAuthToken(id, expiry);
   }
 
-  AuthToken(String id, String role, Date expiry, Key key) {
-    this.key = key;
+  // 생성자: ID, 역할(role), 만료 시간, 비밀키로 토큰 생성
+  public AuthToken(String id, String role, Date expiry, String secretKeyString) {
+    this.key = getKeyFromString(secretKeyString);
     this.token = createAuthToken(id, role, expiry);
   }
 
-  AuthToken(String id, UserInfo userInfo, Date expiry, Key key) {
-    this.key = key;
+  // 생성자: ID, 사용자 정보(UserInfo), 만료 시간, 비밀키로 토큰 생성
+  public AuthToken(String id, UserInfo userInfo, Date expiry, String secretKeyString) {
+    this.key = getKeyFromString(secretKeyString);
     this.token = createAuthToken(id, userInfo, expiry);
   }
 
+  // String 형태의 비밀키를 Key 객체로 변환
+  private Key getKeyFromString(String secretKeyString) {
+    try {
+      byte[] keyBytes = Base64.getDecoder().decode(secretKeyString);
+      return Keys.hmacShaKeyFor(keyBytes);
+    } catch (IllegalArgumentException e) {
+      log.error("비밀키(Base64) 디코딩 실패: 비밀키 형식을 확인하세요.", e);
+      throw new RuntimeException("비밀키 디코딩 실패: Base64 형식을 확인하세요.");
+    }
+  }
+
+  // 기본 토큰 생성 (ID, 만료 시간)
   private String createAuthToken(String id, Date expiry) {
     return Jwts.builder()
             .setSubject(id)
@@ -49,6 +66,7 @@ public class AuthToken {
             .compact();
   }
 
+  // 역할(role)을 포함한 토큰 생성
   private String createAuthToken(String id, String role, Date expiry) {
     return Jwts.builder()
             .setSubject(id)
@@ -58,6 +76,7 @@ public class AuthToken {
             .compact();
   }
 
+  // 사용자 정보를 포함한 토큰 생성
   private String createAuthToken(String id, UserInfo userInfo, Date expiry) {
     return Jwts.builder()
             .setSubject(id)
@@ -72,22 +91,12 @@ public class AuthToken {
             .compact();
   }
 
-  // UserInfo DTO 클래스 추가
-  @Getter
-  @AllArgsConstructor
-  public static class UserInfo {
-    private String username;
-    private String email;
-    private String emailVerifiedYn;
-    private String profileImageUrl;
-    private UserProviderEnum providerType;
-    private String role;
-  }
-
+  // 토큰 유효성 검사
   public boolean validate() {
     return this.getTokenClaims() != null;
   }
 
+  // 토큰에서 클레임(Claims) 추출
   public Claims getTokenClaims() {
     try {
       return Jwts.parserBuilder()
@@ -95,20 +104,13 @@ public class AuthToken {
               .build()
               .parseClaimsJws(token)
               .getBody();
-    } catch (SecurityException e) {
-      log.info("Invalid JWT signature.");
-    } catch (MalformedJwtException e) {
-      log.info("Invalid JWT toekn.");
-    } catch (ExpiredJwtException e) {
-      log.info("Expired JWT token.");
-    } catch (UnsupportedJwtException e) {
-      log.info("Unsupported JWT token.");
-    } catch (IllegalArgumentException e) {
-      log.info("JWT token compact of handler are invalid.");
+    } catch (JwtException e) {
+      log.info("Invalid JWT token: {}", e.getMessage());
     }
     return null;
   }
 
+  // 만료된 토큰에서 클레임 추출
   public Claims getExpiredTokenClaims() {
     try {
       Jwts.parserBuilder()
@@ -123,4 +125,15 @@ public class AuthToken {
     return null;
   }
 
+  // UserInfo DTO 클래스
+  @Getter
+  @AllArgsConstructor
+  public static class UserInfo {
+    private String username;
+    private String email;
+    private String emailVerifiedYn;
+    private String profileImageUrl;
+    private UserProviderEnum providerType;
+    private String role;
+  }
 }

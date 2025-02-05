@@ -1,7 +1,5 @@
 package com.project.backend.userclimbground.controller;
 
-import com.project.backend.common.ApiResponse;
-import com.project.backend.common.ResponseType;
 import com.project.backend.common.response.Response;
 import com.project.backend.common.response.ResponseCode;
 import com.project.backend.userclimbground.dto.requestDTO.ClimbGroundRecordRequestDTO;
@@ -25,7 +23,7 @@ public class UserClimbGroundController {
 
     // 통계 페이지 년별 조회
     @GetMapping("/year")
-    public ResponseEntity<?> getClimbRecordsYear(@ModelAttribute ClimbRecordRequestDTO requestDTO) {
+    public ResponseEntity<?> getClimbRecordsYear(@RequestBody ClimbRecordRequestDTO requestDTO) {
         ClimbRecordResponseDTO responseDTO = userClimbGroundService.getUserClimbRecordYear(requestDTO);
 
         return new ResponseEntity<>(Response.create(GET_RECORD_YEAR, responseDTO), GET_RECORD_YEAR.getHttpStatus());
@@ -33,7 +31,7 @@ public class UserClimbGroundController {
 
     // 통계 페이지 달별 조회
     @GetMapping("/monthly")
-    public ResponseEntity<?> getClimbRecordsMonth(@ModelAttribute ClimbRecordRequestDTO requestDTO) {
+    public ResponseEntity<?> getClimbRecordsMonth(@RequestBody ClimbRecordRequestDTO requestDTO) {
         ClimbRecordResponseDTO responseDTO = userClimbGroundService.getUserClimbRecordMonth(requestDTO);
 
         return new ResponseEntity<>(Response.create(GET_RECORD_MONTH, responseDTO), GET_RECORD_MONTH.getHttpStatus());
@@ -41,7 +39,7 @@ public class UserClimbGroundController {
     }
 
     @GetMapping("/weekly")
-    public ResponseEntity<?> getClimbRecordsWeek(@ModelAttribute ClimbRecordRequestDTO requestDTO) {
+    public ResponseEntity<?> getClimbRecordsWeek(@RequestBody ClimbRecordRequestDTO requestDTO) {
         ClimbRecordResponseDTO responseDTO = userClimbGroundService.getUserClimbRecordWeek(requestDTO);
 
         return new ResponseEntity<>(Response.create(GET_RECORD_WEEKLY, responseDTO), GET_RECORD_WEEKLY.getHttpStatus());
@@ -49,7 +47,7 @@ public class UserClimbGroundController {
     }
 
     @GetMapping("/daily")
-    public ResponseEntity<?> getClimbRecordsDay(@ModelAttribute ClimbRecordRequestDTO requestDTO) {
+    public ResponseEntity<?> getClimbRecordsDay(@RequestBody ClimbRecordRequestDTO requestDTO) {
         ClimbRecordResponseDTO responseDTO = userClimbGroundService.getUserClimbRecordDay(requestDTO);
 
         return new ResponseEntity<>(Response.create(GET_RECORD_DAILY, responseDTO), GET_RECORD_DAILY.getHttpStatus());
@@ -63,27 +61,27 @@ public class UserClimbGroundController {
     }
 
     @GetMapping("/climb/year")
-    public ResponseEntity<?> getClimbGroundRecordYear(@ModelAttribute ClimbGroundRecordRequestDTO requestDTO) {
+    public ResponseEntity<?> getClimbGroundRecordYear(@RequestBody ClimbGroundRecordRequestDTO requestDTO) {
         ClimbGroundRecordResponseDTO responseDTO= userClimbGroundService.getUserClimbGroundRecordYear(requestDTO);
         return new ResponseEntity<>(Response.create(GET_CLIMBGROUND_RECORD_YEAR, responseDTO), GET_CLIMBGROUND_RECORD_YEAR.getHttpStatus());
     }
 
     @GetMapping("/climb/monthly")
-    public ResponseEntity<?> getClimbGroundRecordMonth(@ModelAttribute ClimbGroundRecordRequestDTO requestDTO) {
+    public ResponseEntity<?> getClimbGroundRecordMonth(@RequestBody ClimbGroundRecordRequestDTO requestDTO) {
         ClimbGroundRecordResponseDTO responseDTO= userClimbGroundService.getUserClimbGroundRecordMonth(requestDTO);
         return new ResponseEntity<>(Response.create(GET_CLIMBGROUND_RECORD_MONTH, responseDTO), GET_CLIMBGROUND_RECORD_MONTH.getHttpStatus());
 
     }
 
     @GetMapping("/climb/weekly")
-    public ResponseEntity<?> getClimbGroundRecordWeek(@ModelAttribute ClimbGroundRecordRequestDTO requestDTO) {
+    public ResponseEntity<?> getClimbGroundRecordWeek(@RequestBody ClimbGroundRecordRequestDTO requestDTO) {
         ClimbGroundRecordResponseDTO responseDTO= userClimbGroundService.getUserClimbGroundRecordWeek(requestDTO);
         return new ResponseEntity<>(Response.create(GET_CLIMBGROUND_RECORD_WEEKLY, responseDTO), GET_CLIMBGROUND_RECORD_WEEKLY.getHttpStatus());
 
     }
 
     @GetMapping("/climb/daily")
-    public ResponseEntity<?> getClimbGroundRecordDaily(@ModelAttribute ClimbGroundRecordRequestDTO requestDTO) {
+    public ResponseEntity<?> getClimbGroundRecordDaily(@RequestBody ClimbGroundRecordRequestDTO requestDTO) {
         ClimbGroundRecordResponseDTO responseDTO= userClimbGroundService.getUserClimbGroundRecordDay(requestDTO);
         return new ResponseEntity<>(Response.create(GET_CLIMBGROUND_RECORD_DAILY, responseDTO), GET_CLIMBGROUND_RECORD_DAILY.getHttpStatus());
 

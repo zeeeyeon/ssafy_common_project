@@ -1,81 +1,73 @@
 package com.project.backend.user.controller;
 
-import com.project.backend.common.ApiResponse;
-import com.project.backend.oauth.entity.UserPrincipal;
-import com.project.backend.user.dto.request.SendOneRequestDto;
+import com.project.backend.common.advice.exception.CustomException;
+import com.project.backend.common.response.Response;
+import com.project.backend.common.response.ResponseCode;
+import com.project.backend.user.auth.CustomUserDetails;
 import com.project.backend.user.dto.request.SignUpRequestDto;
+import com.project.backend.user.dto.request.UserInfoRequestDto;
+import com.project.backend.user.dto.response.UserInfoResponseDto;
 import com.project.backend.user.entity.User;
 import com.project.backend.user.service.UserService;
-import jakarta.annotation.PostConstruct;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import net.nurigo.sdk.NurigoApp;
-import net.nurigo.sdk.message.model.Message;
-import net.nurigo.sdk.message.request.SingleMessageSendingRequest;
-import net.nurigo.sdk.message.response.SingleMessageSentResponse;
-import net.nurigo.sdk.message.service.DefaultMessageService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Optional;
+
+import static com.project.backend.common.response.ResponseCode.*;
+
 @RestController
-@RequestMapping("/api/v1/users")
+@RequestMapping("/api/user")
 @RequiredArgsConstructor
 public class UserController {
 
   private final UserService userService;
 
-  @GetMapping
-  public ApiResponse getUser() {
-    Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-
-    if (principal instanceof UserPrincipal userPrincipal) {
-      User user = userService.getUserByUserName(userPrincipal.getUsername());
-      return ApiResponse.success("user", user);
-    } else if (principal instanceof User user) {
-      return ApiResponse.success("user", user);
-    } else if (principal instanceof String username) { // principal이 String인 경우 처리
-      User user = userService.getUserByUserName(username); // username 기반으로 User 조회
-      return ApiResponse.success("user", user);
-    }
-
-    throw new RuntimeException("Unexpected principal type: " + principal.getClass());
-  }
-
-
-
-  @Value("${solapi.api.key}") // solapi 에서 발급받은 key
-  private String apiKey;
-
-  @Value("${solapi.api.secret}")
-  private String secretKey; // solapi 메서 발급받은 secret key
-
-  private DefaultMessageService messageService;
-
-  @PostConstruct
-  public void init() {
-    // 반드시 계정 내 등록된 유효한 API 키, API Secret Key를 입력해주셔야 합니다!
-    this.messageService = NurigoApp.INSTANCE.initialize(apiKey, secretKey, "https://api.solapi.com");
-  }
-
-  @PostMapping("/send-one")
-  public SingleMessageSentResponse sendOne(@RequestBody SendOneRequestDto sendOneRequestDto) {
-    Message message = new Message();
-    message.setFrom("01086167589"); // 발신
-    message.setTo(sendOneRequestDto.getPhone()); // 수신
-    message.setText("SMS 인증 테스트 문자입니다."); // 텍스트
-
-    SingleMessageSentResponse response = this.messageService.sendOne(new SingleMessageSendingRequest(message));
-    return response;
-  }
-
   // 일반 사용자 회원가입
-  @PostMapping("/sign-up")
+  @PostMapping("/signup")
   public ResponseEntity<?> signUp(@RequestBody @Valid SignUpRequestDto signUpRequestDto) {
-    ResponseEntity<?> response = userService.signUp(signUpRequestDto);
-    return response;
+    userService.signUp(signUpRequestDto);
+    return new ResponseEntity<>(Response.create(SUCCESS_SIGNUP, null), SUCCESS_SIGNUP.getHttpStatus());
+  }
+
+  // 이메일 중복 체크
+  @GetMapping("/email-check")
+  public ResponseEntity<?> emailDuplicationCheck(@RequestParam(name = "email") String email) {
+    Optional<User> user = userService.checkEmailDuplication(email);
+    if(user.isPresent()) {
+      throw new CustomException(EXISTED_USER_EMAIL);
+    }
+    return new ResponseEntity<>(Response.create(NO_EXISTED_USER_EMAIL, null), NO_EXISTED_USER_EMAIL.getHttpStatus());
+  }
+
+  // 닉네임 중복 체크
+  @GetMapping("/nickname-check")
+  public ResponseEntity<?> nicknameDuplicationCheck(@RequestParam(name = "nickname") String nickname) {
+    Optional<User> user = userService.checkNicknameDuplication(nickname);
+    if(user.isPresent()) {
+      throw new CustomException(EXISTED_USER_NICKNAME);
+    }
+    return new ResponseEntity<>(Response.create(NO_EXISTED_USER_NICKNAME, null), NO_EXISTED_USER_NICKNAME.getHttpStatus());
+  }
+
+  // 사용자 정보 조회 ( 이름, 클라이밍 시작일, 키, 팔길이)
+  @GetMapping("/info")
+  public ResponseEntity<?> findUserInfo(@AuthenticationPrincipal CustomUserDetails userDetails) {
+    Long userId = userDetails.getUser().getId();
+    User user = userService.userInfofindById(userId);
+    UserInfoResponseDto responseDto = new UserInfoResponseDto(user);
+    return new ResponseEntity<>(Response.create(ResponseCode.GET_USER_INFO, responseDto), GET_USER_INFO.getHttpStatus());
+  }
+
+  @PutMapping("/info")
+  public ResponseEntity<?> updateUserInfo(@AuthenticationPrincipal CustomUserDetails userDetails, @RequestBody UserInfoRequestDto requestDto) {
+    Long userId = userDetails.getUser().getId();
+    User findUser = userService.updateUserInfoById(userId, requestDto);
+    UserInfoResponseDto responseDto = new UserInfoResponseDto(findUser);
+    return new ResponseEntity<>(Response.create(ResponseCode.GET_USER_INFO, responseDto), GET_USER_INFO.getHttpStatus());
   }
 
 }

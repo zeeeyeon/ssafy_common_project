@@ -5,7 +5,6 @@ import com.project.backend.climbground.dto.requsetDTO.ClimbGroundSearchRequestDT
 import com.project.backend.climbground.dto.requsetDTO.LockClimbGroundAllRequsetDTO;
 import com.project.backend.climbground.dto.requsetDTO.MyClimbGroundRequestDTO;
 import com.project.backend.climbground.dto.responseDTO.*;
-
 import java.util.List;
 import java.util.Optional;
 
