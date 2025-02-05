@@ -88,7 +88,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> {
                     auth
                             .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
-                            .requestMatchers("/api/user/sign-up").permitAll()
+                            .requestMatchers("/api/user/signup").permitAll()
                             .requestMatchers("/api/user/**").authenticated()
                             .anyRequest().permitAll();
                 })
