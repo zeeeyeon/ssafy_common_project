@@ -33,11 +33,7 @@ public class ClimbGroundController {
     // 클라이밍장 상세 조회
     @GetMapping("/detail/{climbground_id}")
     public ResponseEntity<?> getCLimbDetail(@PathVariable Long climbground_id) {
-
-        System.out.println("test!");
         Optional<ClimbGroundDetailResponseDTO> climbGroundDetail = ClimbGroundService.findClimbGroundDetailById(climbground_id);
-
-
 
         if(!climbGroundDetail.isEmpty()) {
             return new ResponseEntity<>(Response.create(GET_CLIMB_GROUND_DETAIL, climbGroundDetail), GET_CLIMB_GROUND_DETAIL.getHttpStatus());
