@@ -15,7 +15,7 @@ class _ProfileScreenEditState extends ConsumerState<ProfileScreenEdit> {
   DateTime? _selectedDay;
   bool _isCalendarVisible = false;
 
-  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _nicknameController = TextEditingController();
   final TextEditingController _heightController = TextEditingController();
   final TextEditingController _armSpanController = TextEditingController();
 
@@ -24,19 +24,20 @@ class _ProfileScreenEditState extends ConsumerState<ProfileScreenEdit> {
     super.initState();
     final userProfile = ref.read(profileProvider);
 
-    _nameController.text = userProfile.name; // 🛠️ 이름 필드 초기화
-    _heightController.text = userProfile.height;
-    _armSpanController.text = userProfile.armSpan;
+    _nicknameController.text = userProfile.nickname; // 🛠️ 이름 필드 초기화
+    _heightController.text = userProfile.height.toString();
+    _armSpanController.text = userProfile.armSpan.toString();
   }
 
   void _saveProfile() {
-    ref
-        .read(profileProvider.notifier)
-        .updateName(_nameController.text); // 🛠️ 이름 업데이트 추가
-    ref.read(profileProvider.notifier).updateBodyInfo(
-          _heightController.text,
-          _armSpanController.text,
-        );
+    final userProfile = ref.read(profileProvider);
+    final double newHeight =
+        double.tryParse(_heightController.text) ?? userProfile.height;
+    final double newArmSpan =
+        double.tryParse(_armSpanController.text) ?? userProfile.armSpan;
+
+    ref.read(profileProvider.notifier).updateNickname(_nicknameController.text);
+    ref.read(profileProvider.notifier).updateBodyInfo(newHeight, newArmSpan);
 
     if (_selectedDay != null) {
       ref.read(profileProvider.notifier).updateStartDate(_selectedDay!);
@@ -74,13 +75,13 @@ class _ProfileScreenEditState extends ConsumerState<ProfileScreenEdit> {
                   borderRadius: BorderRadius.circular(8.0),
                 ),
                 child: TextField(
-                  controller: _nameController, // 🛠️ 수정 가능하도록 컨트롤러 사용
+                  controller: _nicknameController, // 🛠️ 수정 가능하도록 컨트롤러 사용
                   decoration: const InputDecoration(
                     hintText: '닉네임을 입력하세요.',
                     border: InputBorder.none, // 내부 박스의 기본 테두리 제거
                   ),
                   onTap: () {
-                    _nameController.clear();
+                    _nicknameController.clear();
                   },
                 ),
               ),
