@@ -1,10 +1,20 @@
 // place_form.dart
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:kkulkkulk/features/place/data/models/place_all_model.dart';
+import 'package:kkulkkulk/features/place/data/repositories/place_repository.dart';
 import 'package:kkulkkulk/features/place/view_models/search_place_view_model.dart';
+import 'package:kkulkkulk/common/gps/gps.dart';  // gps.dart 파일을 임포트
+import 'package:logger/logger.dart';
+
+var logger = Logger();
 
 class PlaceForm extends ConsumerWidget {
-  const PlaceForm({super.key});
+  PlaceForm({super.key});
+
+  final PlaceRepository _placeRepository = PlaceRepository();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -18,14 +28,11 @@ class PlaceForm extends ConsumerWidget {
           shadowColor: WidgetStatePropertyAll(Colors.white),
           overlayColor: WidgetStatePropertyAll(Colors.white),
           trailing: [
-            // 'X' 버튼은 keywordController.text가 비어있지 않으면 보이도록 설정
             if (searchPlaceViewModel.keywordController.text.isNotEmpty)
               IconButton(
                 onPressed: () {
                   print(searchPlaceViewModel.keywordController.text);
-                  // X 버튼 클릭 시 텍스트 초기화
                   searchPlaceViewModel.clearKeyword();
-
                   print(searchPlaceViewModel.keywordController.text);
                 },
                 icon: Icon(Icons.close),
@@ -50,7 +57,28 @@ class PlaceForm extends ConsumerWidget {
           onChanged: (value) {
             searchPlaceViewModel.updateKeyword(value);
           },
-        
+        ),
+        SizedBox(height: 30,),
+        // 위치 버튼 추가
+        ElevatedButton(
+          onPressed: () async {
+            try {
+              // 위치 가져오기 
+              // Position position = await determinePosition();
+
+              // logger.d("현재 위치: ${position.latitude}, ${position.longitude}");
+
+              final PlaceAllModel placeAllModel = PlaceAllModel(
+                latitude: 35.0964114,
+                longitude: 128.8539711,
+              );
+              logger.d(_placeRepository.getAllDisCLimbs(placeAllModel));
+            } catch (e) {
+              // 오류 처리
+              logger.d("오류 발생: $e");
+            }
+          },
+          child: Text('현재 위치 확인'),
         ),
       ],
     );
