@@ -2,9 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:kkulkkulk/common/widgets/layout/custom_app_bar.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:kkulkkulk/features/calendar/data/models/calendar_model.dart';
+import 'package:kkulkkulk/features/calendar/view_models/calendar_view_model.dart';
 import 'package:logger/logger.dart';
+import 'package:intl/intl.dart';
 
 final logger = Logger();
+
+// 유저 id 가져오기 (임시)
+final userIdProvider = StateProvider<int>((ref) => 1);
 
 class CalendarScreen extends ConsumerStatefulWidget {
   const CalendarScreen({super.key});
@@ -15,14 +21,16 @@ class CalendarScreen extends ConsumerStatefulWidget {
 
 class CalendarScreenState extends ConsumerState<CalendarScreen> {
   late DateTime currentMonth;
-  bool showFAB = false;
   late PageController pageController;
+  int previousPage = 0;
 
   @override
   void initState() {
     super.initState();
     currentMonth = DateTime.now();
-    pageController = PageController(initialPage: 0);
+    pageController = PageController(initialPage: 500);
+    previousPage = 500; // 초기값을 init 으로 맞춰줌
+    _initializeDate(); // 📌 화면 진입 시 API 요청
   }
 
   @override
@@ -31,8 +39,40 @@ class CalendarScreenState extends ConsumerState<CalendarScreen> {
     super.dispose();
   }
 
+  // 📌 초기 데이터 로드 및 달 변경 시 호출
+  void _initializeDate() {
+    final userId = ref.read(userIdProvider);
+    ref.read(calendarProvider.notifier).fetchCalendarData(userId, currentMonth);
+  }
+
+  // 📌 월 변경 시 API 요청 (setState 이후 호출)
+  void handleMonthChange(int pageIndex) {
+    int monthDiff = pageIndex - previousPage; // 🔹 이전 페이지와 현재 페이지 비교
+    previousPage = pageIndex; // 🔹 이전 페이지 값 업데이트
+
+    final userId = ref.read(userIdProvider);
+    setState(() {
+      int newYear = currentMonth.year;
+      int newMonth = currentMonth.month + monthDiff;
+
+      if (newMonth < 1) {
+        newYear -= 1;
+        newMonth = 12; // 🔹 이전 해의 12월로 변경
+      } else if (newMonth > 12) {
+        newYear += 1;
+        newMonth = 1; // 🔹 다음 해의 1월로 변경
+      }
+
+      currentMonth = DateTime(newYear, newMonth);
+    });
+
+    ref.read(calendarProvider.notifier).fetchCalendarData(userId, currentMonth);
+  }
+
   @override
   Widget build(BuildContext context) {
+    final calendarData = ref.watch(calendarProvider);
+
     return Scaffold(
       appBar: CustomAppBar(
         title: '${currentMonth.year}년 ${currentMonth.month}월',
@@ -41,109 +81,68 @@ class CalendarScreenState extends ConsumerState<CalendarScreen> {
           icon: const Icon(Icons.calendar_today),
           onPressed: () => selectDate(context),
         ),
-        actions: const [],
       ),
       body: SafeArea(
         child: Column(
           children: [
-            // 공지사항 영역
-            Container(
-              padding: const EdgeInsets.all(16.0),
-              color: Colors.yellow[100],
-              child: const Text(
-                '공지사항: 다음 주에 중요한 업데이트가 있습니다!',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-              ),
-            ),
             buildWeekdayHeader(),
             Expanded(
-              child: GestureDetector(
-                onVerticalDragEnd: (details) {
-                  if (details.primaryVelocity! > 0) {
-                    setState(() {
-                      currentMonth = DateTime(
-                        currentMonth.year,
-                        currentMonth.month - 1,
-                      );
-                    });
-                  } else if (details.primaryVelocity! < 0) {
-                    setState(() {
-                      currentMonth = DateTime(
-                        currentMonth.year,
-                        currentMonth.month + 1,
-                      );
-                    });
-                  }
+              child: PageView.builder(
+                controller: pageController,
+                onPageChanged:
+                    handleMonthChange, // 🔹 수정된 `handleMonthChange` 적용
+                itemBuilder: (context, index) {
+                  return calendarData == null
+                      ? const Center(
+                          child: CircularProgressIndicator()) // 📌 데이터 로딩 중 표시
+                      : GestureDetector(
+                          onVerticalDragEnd: (details) {
+                            if (details.primaryVelocity! > 0) {
+                              handleMonthChange(
+                                  previousPage - 1); // 🔹 아래로 스와이프 → 이전 달
+                            } else if (details.primaryVelocity! < 0) {
+                              handleMonthChange(
+                                  previousPage + 1); // 🔹 위로 스와이프 → 다음 달
+                            }
+                          },
+                          child: GridView.builder(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 8),
+                            gridDelegate:
+                                const SliverGridDelegateWithFixedCrossAxisCount(
+                                    crossAxisCount: 7,
+                                    mainAxisSpacing: 4,
+                                    crossAxisSpacing: 4,
+                                    childAspectRatio: 0.6),
+                            itemCount:
+                                getDaysInMonth() + getFirstWeekdayOfMonth() - 1,
+                            itemBuilder: (context, index) {
+                              if (index < getFirstWeekdayOfMonth() - 1) {
+                                return Container();
+                              }
+
+                              final dayNumber =
+                                  index - getFirstWeekdayOfMonth() + 2;
+                              final currentDate = DateTime(
+                                currentMonth.year,
+                                currentMonth.month,
+                                dayNumber,
+                              );
+
+                              final int dailyAttempts = _getDailyAttemptCount(
+                                  currentDate, calendarData);
+                              final bool hasRecord = dailyAttempts > 0;
+
+                              return buildDayCell(currentDate, hasRecord,
+                                  dailyAttempts: dailyAttempts);
+                            },
+                          ),
+                        );
                 },
-                child: GridView.builder(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 7,
-                    mainAxisSpacing: 4,
-                    crossAxisSpacing: 4,
-                    childAspectRatio: 0.7,
-                  ),
-                  itemCount: getDaysInMonth() + getFirstWeekdayOfMonth() - 1,
-                  itemBuilder: (context, index) {
-                    if (index < getFirstWeekdayOfMonth() - 1) {
-                      return Container();
-                    }
-
-                    final dayNumber = index - getFirstWeekdayOfMonth() + 2;
-                    final currentDate = DateTime(
-                      currentMonth.year,
-                      currentMonth.month,
-                      dayNumber,
-                    );
-
-                    final int dailyAttempts =
-                        _getDailyAttemptCount(currentDate);
-                    final bool hasRecord = dailyAttempts > 0;
-                    return buildDayCell(currentDate, hasRecord,
-                        dailyAttempts: dailyAttempts);
-                  },
-                ),
               ),
             ),
           ],
         ),
-      ),
-      floatingActionButton: Column(
-        mainAxisAlignment: MainAxisAlignment.end,
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          if (showFAB) ...[
-            FloatingActionButton(
-              heroTag: 'detail',
-              onPressed: () {
-                final now = DateTime.now();
-                final month = now.month.toString().padLeft(2, '0');
-                final day = now.day.toString().padLeft(2, '0');
-                context.push('/calendar/detail/${now.year}-$month-$day');
-              },
-              child: const Icon(Icons.note_add),
-            ),
-            const SizedBox(height: 10),
-            FloatingActionButton(
-              heroTag: 'camera',
-              onPressed: () {
-                context.go('/camera');
-              },
-              child: const Icon(Icons.camera_alt),
-            ),
-            const SizedBox(height: 10),
-          ],
-          FloatingActionButton(
-            heroTag: 'main',
-            onPressed: () {
-              setState(() {
-                showFAB = !showFAB;
-              });
-            },
-            child: Icon(showFAB ? Icons.close : Icons.add),
-          ),
-        ],
       ),
     );
   }
@@ -183,14 +182,15 @@ class CalendarScreenState extends ConsumerState<CalendarScreen> {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 4.0),
         decoration: BoxDecoration(
-          color: hasRecord ? const Color.fromRGBO(33, 150, 243, 0.1) : null,
+          color: hasRecord
+              ? const Color.fromRGBO(33, 150, 243, 0.1)
+              : null, // ✅ 배경색 변경
           border: isToday
               ? Border.all(color: Colors.blue, width: 2)
               : Border.all(color: Colors.grey[300]!, width: 0.5),
           borderRadius: BorderRadius.circular(8),
         ),
         child: Column(
-          mainAxisSize: MainAxisSize.min,
           children: [
             Padding(
               padding: const EdgeInsets.all(2.0),
@@ -204,26 +204,24 @@ class CalendarScreenState extends ConsumerState<CalendarScreen> {
             ),
             if (hasRecord)
               Expanded(
-                child: Container(
-                  margin: const EdgeInsets.only(left: 6, right: 6, bottom: 2),
-                  decoration: BoxDecoration(
-                    color: hasRecord
-                        ? Color.fromRGBO(33, 150, 243,
-                            _getOpacityFromAttempts(dailyAttempts))
-                        : null,
-                    borderRadius: const BorderRadius.vertical(
-                      bottom: Radius.circular(6),
-                    ),
-                  ),
+                  child: Container(
+                margin:
+                    const EdgeInsets.only(left: 6, right: 6, bottom: 2, top: 2),
+                decoration: BoxDecoration(
+                  color: hasRecord
+                      ? Color.fromRGBO(
+                          33, 150, 245, _getOpacityFromAttempts(dailyAttempts))
+                      : null,
+                  borderRadius:
+                      const BorderRadius.vertical(bottom: Radius.circular(6)),
                 ),
-              ),
+              ))
           ],
         ),
       ),
     );
   }
 
-  // ... rest of your methods remain the same
   Future<void> selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
       context: context,
@@ -236,12 +234,12 @@ class CalendarScreenState extends ConsumerState<CalendarScreen> {
       setState(() {
         currentMonth = picked;
       });
+      _initializeDate();
     }
   }
 
   void onDaySelected(DateTime date) {
-    final formattedDate =
-        '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+    final formattedDate = DateFormat('yyyy-MM-dd').format(date);
     logger.i('Navigating to: /calendar/detail/$formattedDate');
     context.push('/calendar/detail/$formattedDate');
   }
@@ -254,17 +252,29 @@ class CalendarScreenState extends ConsumerState<CalendarScreen> {
     return DateTime(currentMonth.year, currentMonth.month, 1).weekday;
   }
 
-  int _getDailyAttemptCount(DateTime date) {
-    if (date.day == 3 || date.day == 15 || date.day == 24) return 5;
-    if (date.day == 6 || date.day == 18) return 10;
-    if (date.day == 9 || date.day == 21) return 20;
-    return 0;
+  double _getOpacityFromAttempts(int attempts) {
+    if (attempts >= 20) return 1.0;
+    if (attempts >= 10) return 0.6;
+    if (attempts > 0) return 0.2;
+    return 0.0;
   }
 
-  double _getOpacityFromAttempts(int attempts) {
-    if (attempts >= 20) return 0.9;
-    if (attempts >= 10) return 0.6;
-    if (attempts > 0) return 0.3;
-    return 0.0;
+  int _getDailyAttemptCount(DateTime date, List<CalendarModel>? calendarData) {
+    if (calendarData == null) return 0;
+
+    final record = calendarData
+        .firstWhere(
+          (data) => data.year == date.year && data.month == date.month,
+          orElse: () =>
+              CalendarModel(year: date.year, month: date.month, records: []),
+        )
+        .records
+        .firstWhere(
+          (r) => r.day == date.day,
+          orElse: () =>
+              CalendarRecord(day: date.day, hasRecord: false, totalCount: 0),
+        );
+
+    return record.totalCount;
   }
 }
