@@ -4,16 +4,18 @@ import '../data/repositories/calendar_repository.dart';
 import '../data/models/calendar_model.dart';
 
 final calendarProvider =
-    StateNotifierProvider<CalendarViewModel, List<CalendarModel>?>(
-  (ref) => CalendarViewModel(ref),
-);
+    StateNotifierProvider<CalendarViewModel, List<CalendarModel>?>((
+  ref,
+) {
+  return CalendarViewModel(ref);
+});
 
 class CalendarViewModel extends StateNotifier<List<CalendarModel>?> {
   final Ref _ref;
   late final CalendarRepository _repository;
 
   CalendarViewModel(this._ref) : super(null) {
-    _repository = CalendarRepository();
+    _repository = _ref.read(calendarRepositoryProvider); // ✅ Riverpod을 통한 주입
   }
 
   Future<void> fetchCalendarData(int userId, DateTime date) async {
@@ -31,5 +33,5 @@ class CalendarViewModel extends StateNotifier<List<CalendarModel>?> {
   }
 }
 
-// 로거 프로바이더 추가 (기존 코드와 통합)
+// ✅ Logger Provider 유지
 final loggerProvider = Provider<Logger>((ref) => Logger());

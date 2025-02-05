@@ -1,52 +1,47 @@
 import 'package:dio/dio.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class DioClient {
-  static final DioClient _instance = DioClient._internal();
-  late final Dio dio;
+  final Dio dio;
 
-  factory DioClient() {
-    return _instance;
-  }
-
-  DioClient._internal() {
-    dio = Dio(
-      BaseOptions(
-        baseUrl: 'http://3.38.250.245:8080/api', // API 서버 URL
-        connectTimeout: const Duration(seconds: 5),
-        receiveTimeout: const Duration(seconds: 3),
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-      ),
-    );
-
+  DioClient({required String baseUrl, required String? token})
+      : dio = Dio(
+          BaseOptions(
+            baseUrl: baseUrl,
+            connectTimeout: const Duration(seconds: 5),
+            receiveTimeout: const Duration(seconds: 3),
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+              if (token != null) 'Authorization': 'Bearer $token',
+            },
+          ),
+        ) {
     // 인터셉터 설정
     dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) async {
-          // 요청 전에 토큰을 가져와서 헤더에 추가
-          String? token = await _getToken();
-          if (token != null) {
-            options.headers['Authorization'] = 'Bearer $token'; // Bearer 토큰 추가
-          }
           return handler.next(options);
         },
         onResponse: (response, handler) {
-          // 응답 처리
           return handler.next(response);
         },
         onError: (error, handler) {
-          // 에러 처리
           return handler.next(error);
         },
       ),
     );
   }
-  // 토큰을 가져오는 함수 (Riverpod 사용)
-  Future<String?> _getToken() async {
-    // 여기서 Riverpod 상태를 읽어서 토큰을 가져옵니다.
-    return Future.value(
-        DioClient._instance.dio.options.headers['Authorization']);
-  }
 }
+
+// 🔥 Riverpod Provider 추가 ✅
+final dioClientProvider = Provider<DioClient>((ref) {
+  final token = ref.watch(authTokenProvider); // 토큰 상태 감시
+  return DioClient(
+    baseUrl: 'http://3.38.250.245:8080/api',
+    token: token,
+  );
+});
+
+// 🔥 토큰 상태 관리 Provider ✅
+final authTokenProvider = StateProvider<String?>((ref) => null);
