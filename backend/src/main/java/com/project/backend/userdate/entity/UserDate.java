@@ -1,7 +1,7 @@
 package com.project.backend.userdate.entity;
 
 import com.project.backend.common.auditing.BaseEntity;
-import com.project.backend.record.entity.Record;
+import com.project.backend.record.entity.ClimbingRecord;
 import com.project.backend.userclimbground.entity.UserClimbGround;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -26,5 +26,5 @@ public class UserDate extends BaseEntity {
     private UserClimbGround userClimbGround;
 
     @OneToMany(mappedBy = "userDate", cascade = CascadeType.ALL)
-    private Set<Record> recordList = new HashSet<>();
+    private Set<ClimbingRecord> climbingRecordList = new HashSet<>();
 }

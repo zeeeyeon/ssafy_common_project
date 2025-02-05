@@ -1,7 +1,6 @@
 package com.project.backend.user.entity;
-import com.project.backend.record.entity.Record;
+import com.project.backend.record.entity.ClimbingRecord;
 import com.project.backend.userclimbground.entity.UserClimbGround;
-import com.project.backend.video.entity.Video;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -91,7 +90,7 @@ public class User {
 
     @Builder.Default
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-    private List<Record> userRecordList  = new ArrayList<>();
+    private List<ClimbingRecord> userClimbingRecordList = new ArrayList<>();
 
 
     @Builder
