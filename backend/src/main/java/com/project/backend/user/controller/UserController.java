@@ -4,13 +4,16 @@ import com.project.backend.common.advice.exception.CustomException;
 import com.project.backend.common.response.Response;
 import com.project.backend.common.response.ResponseCode;
 import com.project.backend.user.auth.CustomUserDetails;
+import com.project.backend.user.dto.UserTierRequestDto;
 import com.project.backend.user.dto.request.SignUpRequestDto;
 import com.project.backend.user.dto.request.UserInfoRequestDto;
 import com.project.backend.user.dto.response.UserInfoResponseDto;
+import com.project.backend.user.dto.response.UserTierResponseDto;
 import com.project.backend.user.entity.User;
 import com.project.backend.user.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -57,8 +60,8 @@ public class UserController {
   @GetMapping("/info")
   public ResponseEntity<?> findUserInfo(@AuthenticationPrincipal CustomUserDetails userDetails) {
     Long userId = userDetails.getUser().getId();
-    User user = userService.userInfofindById(userId);
-    UserInfoResponseDto responseDto = new UserInfoResponseDto(user);
+    User user = userService.userFindById(userId);
+    UserTierResponseDto responseDto = new UserTierResponseDto(user);
     return new ResponseEntity<>(Response.create(ResponseCode.GET_USER_INFO, responseDto), GET_USER_INFO.getHttpStatus());
   }
 
@@ -70,4 +73,18 @@ public class UserController {
     return new ResponseEntity<>(Response.create(ResponseCode.GET_USER_INFO, responseDto), GET_USER_INFO.getHttpStatus());
   }
 
+  @GetMapping("/tier")
+  public ResponseEntity<?> findUserTier(@AuthenticationPrincipal CustomUserDetails userDetails) {
+    Long userId = userDetails.getUser().getId();
+    UserTierResponseDto responseDto = userService.userTierFindById(userId);
+    return new ResponseEntity<>(Response.create(ResponseCode.GET_USER_INFO, responseDto), GET_USER_INFO.getHttpStatus());
+  }
+
+  @PatchMapping("/tier")
+  public ResponseEntity<?> insertUserTier(@AuthenticationPrincipal CustomUserDetails userDetails, @RequestBody UserTierRequestDto requestDto) {
+    Long userId = userDetails.getUser().getId();
+    User findUser = userService.insertUserTier(userId, requestDto);
+    UserTierResponseDto responseDto = new UserTierResponseDto(findUser);
+    return new ResponseEntity<>(Response.create(ResponseCode.GET_USER_INFO, responseDto), GET_USER_INFO.getHttpStatus());
+  }
 }
