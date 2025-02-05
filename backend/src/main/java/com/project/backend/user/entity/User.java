@@ -1,5 +1,6 @@
 package com.project.backend.user.entity;
 import com.project.backend.record.entity.ClimbingRecord;
+import com.project.backend.user.dto.request.UserInfoRequestDto;
 import com.project.backend.userclimbground.entity.UserClimbGround;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
@@ -56,6 +57,7 @@ public class User {
 
     private float reach;
 
+    private LocalDateTime startDate;
     private LocalDateTime createDate;
     private LocalDateTime updateDate;
 
@@ -102,5 +104,14 @@ public class User {
         this.providerType = provider;
         this.nickname = nickname;
         this.score = score;
+    }
+
+    public User setUserInfoRquestDto(UserInfoRequestDto requestDto) {
+        this.username = requestDto.getUsername();
+        this.height = requestDto.getHeight();
+        this.reach = requestDto.getReach();
+        this.startDate = requestDto.getStartDate();
+
+        return this;
     }
 }

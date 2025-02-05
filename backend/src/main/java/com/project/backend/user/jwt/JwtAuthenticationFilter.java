@@ -1,8 +1,9 @@
 package com.project.backend.user.jwt;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.project.backend.common.response.Response;
 import com.project.backend.user.auth.CustomUserDetails;
-import com.project.backend.user.dto.LoginRequestDto;
+import com.project.backend.user.dto.request.LoginRequestDto;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -20,6 +21,9 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 
 import java.io.IOException;
 
+import static com.project.backend.common.response.ResponseCode.FAIL_LOGIN;
+import static com.project.backend.common.response.ResponseCode.SUCCESS_LOGIN;
+
 
 public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
     private final Logger log = LoggerFactory.getLogger(getClass());
@@ -29,7 +33,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     public JwtAuthenticationFilter(AuthenticationManager authenticationManager) {
         this.authenticationManager = authenticationManager;
         this.objectMapper = new ObjectMapper();
-        setFilterProcessesUrl("/api/login");
+        setFilterProcessesUrl("/api/user/login");
     }
 
     @Override
@@ -52,7 +56,11 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
             // 추가 요청 데이터 설정
             authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
-            return authenticationManager.authenticate(authenticationToken);
+            try {
+                return authenticationManager.authenticate(authenticationToken);
+            } catch (BadCredentialsException e) {
+                throw new BadCredentialsException("비밀번호가 일치하지 않습니다.");
+            }
 
         } catch (IOException e) {
             log.error("로그인 요청 처리 중 오류 발생: ", e);
@@ -66,13 +74,26 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         CustomUserDetails userDetails = (CustomUserDetails) authResult.getPrincipal();
         String token = JwtProcess.create(userDetails);
 
+        Response<?> responseBody = Response.create(SUCCESS_LOGIN, null);
+
         response.addHeader("Authorization", token);
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
+        response.setStatus(SUCCESS_LOGIN.getHttpStatus().value());
 
-        // 필요 시 상태 코드와 메시지만 반환 (본문에는 아무 내용도 포함하지 않음)
-        response.setStatus(HttpServletResponse.SC_OK);
-        response.getWriter().flush();  // 응답을 즉시 클라이언트로 전송
+        objectMapper.writeValue(response.getWriter(), responseBody);
+    }
+
+    @Override
+    protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response,
+                                              AuthenticationException failed) throws IOException {
+        Response<?> errorResponse = Response.create(FAIL_LOGIN, null);
+
+        response.setStatus(FAIL_LOGIN.getHttpStatus().value());
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+
+        objectMapper.writeValue(response.getWriter(), errorResponse);
     }
 
 }
