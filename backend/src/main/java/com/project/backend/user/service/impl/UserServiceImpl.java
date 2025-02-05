@@ -61,4 +61,8 @@ public class UserServiceImpl implements UserService {
   public Optional<User> checkNicknameDuplication(String nickname) {
     return userRepository.findByNickname(nickname);
   }
+
+  public Optional<User> userInfofindById(Long id) {
+    return userRepository.findById(id);
+  }
 }

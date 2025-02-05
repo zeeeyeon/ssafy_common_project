@@ -1,9 +1,7 @@
 package com.project.backend.user.service;
 
-import com.project.backend.user.dto.request.LoginRequestDto;
 import com.project.backend.user.dto.request.SignUpRequestDto;
 import com.project.backend.user.entity.User;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -17,5 +15,5 @@ public interface UserService {
   public Optional<User> checkEmailDuplication(String email);
 
   public Optional<User> checkNicknameDuplication(String nickname);
-
+  public Optional<User> userInfofindById(Long id);
 }

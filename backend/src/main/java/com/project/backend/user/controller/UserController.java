@@ -1,26 +1,17 @@
 package com.project.backend.user.controller;
 
-import com.project.backend.common.ApiResponse;
 import com.project.backend.common.advice.exception.CustomException;
 import com.project.backend.common.response.Response;
-import com.project.backend.oauth.entity.UserPrincipal;
-import com.project.backend.user.dto.request.LoginRequestDto;
-import com.project.backend.user.dto.request.SendOneRequestDto;
+import com.project.backend.common.response.ResponseCode;
+import com.project.backend.user.auth.CustomUserDetails;
 import com.project.backend.user.dto.request.SignUpRequestDto;
-import com.project.backend.user.dto.response.SignUpResDto;
+import com.project.backend.user.dto.response.UserInfoResponseDto;
 import com.project.backend.user.entity.User;
 import com.project.backend.user.service.UserService;
-import jakarta.annotation.PostConstruct;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import net.nurigo.sdk.NurigoApp;
-import net.nurigo.sdk.message.model.Message;
-import net.nurigo.sdk.message.request.SingleMessageSendingRequest;
-import net.nurigo.sdk.message.response.SingleMessageSentResponse;
-import net.nurigo.sdk.message.service.DefaultMessageService;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
@@ -59,6 +50,21 @@ public class UserController {
       throw new CustomException(EXISTED_USER_NICKNAME);
     }
     return new ResponseEntity<>(Response.create(NO_EXISTED_USER_NICKNAME, null), NO_EXISTED_USER_NICKNAME.getHttpStatus());
+  }
+
+  // 사용자 정보 조회 ( 이름, 클라이밍 시작일, 키, 팔길이)
+  @GetMapping("/info")
+  public ResponseEntity<?> selectUserInfo(@AuthenticationPrincipal CustomUserDetails userDetails) {
+    Long userId = userDetails.getUser().getId();
+    Optional<User> userPS = userService.userInfofindById(userId);
+
+    if(userPS.isEmpty()) {
+      throw new CustomException(NO_EXISTED_USER_NICKNAME);
+    }
+
+    User user = userPS.get();
+    UserInfoResponseDto responseDto = new UserInfoResponseDto(user);
+    return new ResponseEntity<>(Response.create(ResponseCode.GET_USER_INFO, responseDto), GET_USER_INFO.getHttpStatus());
   }
 
 }

@@ -8,6 +8,11 @@ import org.springframework.http.HttpStatus;
 @AllArgsConstructor
 public enum ResponseCode {
 
+
+    SUCCESS_LOGIN(successCode(), HttpStatus.OK, "로그인이 성공적으로 완료되었습니다."),
+    FAIL_LOGIN(400, HttpStatus.BAD_REQUEST, "로그인에 실패했습니다."),
+    SUCCESS_SIGNUP(successCode(), HttpStatus.OK, "회원가입이 성공적으로 완료되었습니다."),
+
     EXISTED_USER_EMAIL(400, HttpStatus.BAD_REQUEST,"해당 이메일은 이미 존재하는 이메일 입니다."),
     NO_EXISTED_USER_EMAIL(200, HttpStatus.OK, "해당 이메일은 사용 가능합니다."),
     EXISTED_USER_NICKNAME(400, HttpStatus.BAD_REQUEST, "해당 닉네임은 이미 존재하는 닉네임 입니다."),
@@ -15,10 +20,14 @@ public enum ResponseCode {
     EXISTED_USER_PHONE(400, HttpStatus.BAD_REQUEST, "이미 존재하는 전화번호 입니다."),
     MISMATCH_PASSWORD(400, HttpStatus.BAD_REQUEST, "비밀번호가 일치하지 않습니다."),
 
+    GET_USER_INFO(successCode(), HttpStatus.OK, "사용자의 정보가 조회되었습니다."),
+    NOT_FOUND_USER(400, HttpStatus.NOT_FOUND, "사용자를 찾을 수 없습니다."),
+    UNAUTHORIZED(401, HttpStatus.UNAUTHORIZED, "권한이 없습니다."),
+    INVALID_TOKEN_FORMAT(401, HttpStatus.UNAUTHORIZED, "유효하지 않은 토큰 형식입니다."),
+    MISSING_MANDATORY_CLAIMS(400, HttpStatus.NOT_FOUND, "토큰에 필수 클레임이 없습니다."),
 
-    SUCCESS_LOGIN(successCode(), HttpStatus.OK, "로그인이 성공적으로 완료되었습니다."),
-    FAIL_LOGIN(400, HttpStatus.BAD_REQUEST, "로그인에 실패했습니다."),
-    SUCCESS_SIGNUP(successCode(), HttpStatus.OK, "회원가입이 성공적으로 완료되었습니다."),
+
+
 
     GET_CLIMB_GROUND_DETAIL(successCode(), HttpStatus.OK, "해당 클라이밍장의 정보가 조회되었습니다. "),
     GET_CLIMB_GROUND_List(successCode(), HttpStatus.OK, "해당 클라이밍장 리스트 정보가 조회되었습니다. "),

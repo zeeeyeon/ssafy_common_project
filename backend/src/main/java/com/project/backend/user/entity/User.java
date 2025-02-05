@@ -1,7 +1,6 @@
 package com.project.backend.user.entity;
 import com.project.backend.record.entity.Record;
 import com.project.backend.userclimbground.entity.UserClimbGround;
-import com.project.backend.video.entity.Video;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -57,6 +56,7 @@ public class User {
 
     private float reach;
 
+    private LocalDateTime startDate;
     private LocalDateTime createDate;
     private LocalDateTime updateDate;
 
