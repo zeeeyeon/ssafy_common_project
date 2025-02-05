@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 public interface UserClimbGroundRepository extends JpaRepository<UserClimbGround, Long> {
 
@@ -111,5 +112,10 @@ public interface UserClimbGroundRepository extends JpaRepository<UserClimbGround
             "AND MONTH(ud.createdAt) = :month " +
             "AND DAY(ud.createdAt) = :day")
     List<UserClimbGround> findClimbRecordsByUserIdAndClimbGroundIdAndDay(Long userId,Long climbGroundId, int year, int month, int day);
+
+    @Query("SELECT ucg FROM UserClimbGround ucg " +
+            "WHERE ucg.user.id = :userId " +
+            "AND ucg.climbGround.Id = :climbGroundId")
+    Optional<UserClimbGround> findUserClimbGroundByUserIDAndClimbGroundID(Long userId, Long climbGroundId);
 }
 
