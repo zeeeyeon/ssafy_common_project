@@ -30,7 +30,7 @@ public interface UserDateRepository extends JpaRepository<UserDate, Long> {
             "COUNT(r)) " +
             "FROM UserDate ud " +
             "JOIN ud.userClimbGround ucg " +
-            "JOIN ud.recordList r " +
+            "JOIN ud.climbingRecordList r " +
             "WHERE ucg.user.id = :userId " +
             "AND YEAR(ud.createdAt) = :year " +
             "AND MONTH(ud.createdAt) = :month " +

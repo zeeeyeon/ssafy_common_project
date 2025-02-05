@@ -2,14 +2,13 @@ package com.project.backend.userclimbground.service;
 
 import com.project.backend.climbground.entity.ClimbGround;
 import com.project.backend.climbground.repository.ClimbGroundRepository;
-import com.project.backend.common.ResponseType;
 import com.project.backend.common.response.ResponseCode;
 import com.project.backend.user.entity.User;
 import com.project.backend.user.repository.jpa.UserRepository;
 import com.project.backend.userclimbground.dto.requestDTO.ClimbGroundRecordRequestDTO;
 import com.project.backend.userclimbground.dto.requestDTO.UnlockClimbGroundRequsetDTO;
 import com.project.backend.hold.entity.HoldColorEnum;
-import com.project.backend.record.entity.Record;
+import com.project.backend.record.entity.ClimbingRecord;
 import com.project.backend.userclimbground.dto.requestDTO.ClimbRecordRequestDTO;
 import com.project.backend.userclimbground.dto.responseDTO.ClimbGroundRecordResponseDTO;
 import com.project.backend.userclimbground.dto.responseDTO.ClimbGroundStatus;
@@ -79,7 +78,7 @@ public class UserClimbGroundServiceImp implements UserClimbGroundService{
 
             for (UserDate ud : uc.getUserDateList()){
                 totalVisited++;
-                for (Record r : ud.getRecordList()){
+                for (ClimbingRecord r : ud.getClimbingRecordList()){
                     totalTries++;
                     if (r.isSuccess()) totalSuccess++;
 
@@ -176,7 +175,7 @@ public class UserClimbGroundServiceImp implements UserClimbGroundService{
             name = uc.getClimbGround().getName();
             for (UserDate ud : uc.getUserDateList()){
                 totalVisited++;
-                for (Record r : ud.getRecordList()){
+                for (ClimbingRecord r : ud.getClimbingRecordList()){
                     totalTries++;
                     if (r.isSuccess()) totalSuccess++;
 
