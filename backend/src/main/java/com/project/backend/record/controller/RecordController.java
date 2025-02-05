@@ -12,5 +12,6 @@ public class RecordController {
     @GetMapping("/test")
     public ResponseEntity<String> test() {
         return ResponseEntity.ok("CORS 테스트 성공");
+
     }
 }
