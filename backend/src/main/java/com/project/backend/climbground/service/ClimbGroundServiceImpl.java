@@ -65,9 +65,9 @@ public class ClimbGroundServiceImpl implements ClimbGroundService {
     }
 
     @Override
-    public List<ClimbGroundAllResponseDTO> searchClimbGroundByKeyword(ClimbGroundSearchRequestDTO requestDTO) {
+    public List<ClimbGroundAllResponseDTO> searchClimbGroundByKeyword(String keyword, BigDecimal latitude, BigDecimal longitude) {
         //검색결과가 나올수도 안나올수도 여러 개일수도 한개 일수도 있음
-        List<ClimbGround> climbGrounds = climbGroundRepository.searchClimbGround(requestDTO.getKeyword());
+        List<ClimbGround> climbGrounds = climbGroundRepository.searchClimbGround(keyword);
 
         // 검색 결과 없으면 빈리스트 주기
         if (climbGrounds.isEmpty()) {
@@ -75,7 +75,7 @@ public class ClimbGroundServiceImpl implements ClimbGroundService {
         }
         List<ClimbGroundAllResponseDTO> responseList = climbGrounds.stream().map(climb -> {
 
-            double distance = calculateDistance(requestDTO.getLatitude(),requestDTO.getLongitude(),climb.getLatitude(),climb.getLongitude());
+            double distance = calculateDistance(latitude,longitude,climb.getLatitude(),climb.getLongitude());
 
             return new ClimbGroundAllResponseDTO(
                     climb.getId(),
@@ -93,11 +93,11 @@ public class ClimbGroundServiceImpl implements ClimbGroundService {
 
     // 클라이밍장 전체 조회 (거리별 정렬)
     @Override
-    public List<ClimbGroundAllResponseDTO> findAllClimbGround(ClimbGroundAllRequestDTO requestDTO) {
+    public List<ClimbGroundAllResponseDTO> findAllClimbGround(BigDecimal latitude, BigDecimal longitude) {
         List<ClimbGround> climbGrounds = climbGroundRepository.findAll();
         List<ClimbGroundAllResponseDTO> responseList = climbGrounds.stream().map(climb -> {
 
-            double distance = calculateDistance(requestDTO.getLatitude(),requestDTO.getLongitude(),climb.getLatitude(),climb.getLongitude());
+            double distance = calculateDistance(latitude,longitude,climb.getLatitude(),climb.getLongitude());
 
             return new ClimbGroundAllResponseDTO(
                     climb.getId(),
@@ -145,12 +145,12 @@ public class ClimbGroundServiceImpl implements ClimbGroundService {
     };
 
     @Override
-    public List<LockClimbGroundAllResponseDTO> findAllLockClimbGround(LockClimbGroundAllRequsetDTO requestDTO) {
-          List<MiddleLockClimbGroundResponseDTO> middleLockClimbGrounds = climbGroundRepository.findAllWithUnlockStatus(requestDTO.getUserId());
+    public List<LockClimbGroundAllResponseDTO> findAllLockClimbGround(Long userId, BigDecimal latitude, BigDecimal longitude) {
+          List<MiddleLockClimbGroundResponseDTO> middleLockClimbGrounds = climbGroundRepository.findAllWithUnlockStatus(userId);
 
           List<LockClimbGroundAllResponseDTO> responseList = middleLockClimbGrounds.stream().map(
                   middleLockClimbGround -> {
-                      double distance = calculateDistance(requestDTO.getLatitude(),requestDTO.getLongitude(), middleLockClimbGround.getLatitude(),middleLockClimbGround.getLongitude());
+                      double distance = calculateDistance(latitude,longitude, middleLockClimbGround.getLatitude(),middleLockClimbGround.getLongitude());
 
                       return new LockClimbGroundAllResponseDTO(
                               middleLockClimbGround.getClimbGroundId(),
@@ -166,12 +166,12 @@ public class ClimbGroundServiceImpl implements ClimbGroundService {
     };
 
     @Override
-    public List<LockClimbGroundAllResponseDTO> findAllLockClimbGroundLimitFive(LockClimbGroundAllRequsetDTO requestDTO) {
-        List<MiddleLockClimbGroundResponseDTO> middleLockClimbGrounds = climbGroundRepository.findAllWithUnlockStatus(requestDTO.getUserId());
+    public List<LockClimbGroundAllResponseDTO> findAllLockClimbGroundLimitFive(Long userId, BigDecimal latitude, BigDecimal longitude) {
+        List<MiddleLockClimbGroundResponseDTO> middleLockClimbGrounds = climbGroundRepository.findAllWithUnlockStatus(userId);
 
         List<LockClimbGroundAllResponseDTO> responseList = middleLockClimbGrounds.stream().map(
                 middleLockClimbGround -> {
-                    double distance = calculateDistance(requestDTO.getLatitude(), requestDTO.getLongitude(), middleLockClimbGround.getLatitude(), middleLockClimbGround.getLongitude());
+                    double distance = calculateDistance(latitude, longitude, middleLockClimbGround.getLatitude(), middleLockClimbGround.getLongitude());
 
                     return new LockClimbGroundAllResponseDTO(
                             middleLockClimbGround.getClimbGroundId(),
