@@ -159,14 +159,14 @@ class ProfileScreen extends ConsumerWidget {
                       height: 230,
                       child: ClipOval(
                         child: Image.asset(
-                          _getTierImage(userProfile.dDay),
+                          userProfile.tierImage,
                           fit: BoxFit.cover, // 꽉 차게 맞추기
                         ),
                       ),
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      _getTierText(userProfile.dDay),
+                      userProfile.tierText,
                       style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
@@ -212,39 +212,5 @@ class ProfileScreen extends ConsumerWidget {
         ],
       ),
     );
-  }
-
-  /// 클라이밍 D-Day에 따른 티어 결정 로직 (규칙에 맞게 수정이 필요함)
-  String _getTierImage(int dDay) {
-    if (dDay >= 365) {
-      return "assets/images/tier/diamond.webp";
-    } else if (dDay >= 270) {
-      return "assets/images/tier/platinum.webp";
-    } else if (dDay >= 180) {
-      return "assets/images/tier/gold.webp";
-    } else if (dDay >= 90) {
-      return "assets/images/tier/silver.webp";
-    } else if (dDay >= 30) {
-      return "assets/images/tier/bronze.webp";
-    } else {
-      return "assets/images/tier/unranked.webp"; // 기본값
-    }
-  }
-
-  /// D-Day에 따른 티어명 반환
-  String _getTierText(int dDay) {
-    if (dDay >= 365) {
-      return "다이아몬드"; // Diamond
-    } else if (dDay >= 270) {
-      return "플래티넘"; // Platinum
-    } else if (dDay >= 180) {
-      return "골드"; // Gold
-    } else if (dDay >= 90) {
-      return "실버"; // Silver
-    } else if (dDay >= 30) {
-      return "브론즈"; // Bronze
-    } else {
-      return "비기너"; // Unranked
-    }
   }
 }

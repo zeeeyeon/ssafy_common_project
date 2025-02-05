@@ -26,6 +26,26 @@ class UserProfile {
     return now.difference(startDate!).inDays;
   }
 
+  /// 🔹 D-Day에 따른 티어 이미지 반환
+  String get tierImage {
+    if (dDay >= 365) return "assets/images/tier/diamond.webp";
+    if (dDay >= 270) return "assets/images/tier/platinum.webp";
+    if (dDay >= 180) return "assets/images/tier/gold.webp";
+    if (dDay >= 90) return "assets/images/tier/silver.webp";
+    if (dDay >= 30) return "assets/images/tier/bronze.webp";
+    return "assets/images/tier/unranked.webp";
+  }
+
+  /// 🔹 D-Day에 따른 티어 이름 반환
+  String get tierText {
+    if (dDay >= 365) return "다이아몬드";
+    if (dDay >= 270) return "플래티넘";
+    if (dDay >= 180) return "골드";
+    if (dDay >= 90) return "실버";
+    if (dDay >= 30) return "브론즈";
+    return "비기너";
+  }
+
   /// 데이터 복사를 위한 copyWith 메서드 (불변 객체 패턴)
   UserProfile copyWith({
     String? name,
