@@ -47,7 +47,7 @@ class ProfileScreen extends ConsumerWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            userProfile.name,
+                            userProfile.nickname,
                             style: const TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
@@ -183,7 +183,8 @@ class ProfileScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildInfoCard(String title, String value) {
+  Widget _buildInfoCard(String title, double value) {
+    // 🔹 타입 변경: String → double
     return Container(
       padding: const EdgeInsets.all(16.0),
       decoration: BoxDecoration(
@@ -202,7 +203,7 @@ class ProfileScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            value,
+            "${value.toStringAsFixed(1)} CM", // 🔹 double을 String으로 변환
             style: const TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.bold,

@@ -5,14 +5,14 @@ const String defaultProfileImage = "assets/images/default_profile.png";
 
 /// 사용자 프로필 데이터 모델
 class UserProfile {
-  final String name; // 닉네임
+  final String nickname; // 닉네임
   final String profileImage; // 프로필 이미지 URL
   final DateTime? startDate; // 클라이밍 시작일
-  final String height; // 키
-  final String armSpan; // 팔길이
+  final double height; // 🔹 변경: String → double (키)
+  final double armSpan; // 🔹 변경: String → double (팔길이)
 
   UserProfile({
-    required this.name,
+    required this.nickname,
     required this.profileImage,
     this.startDate,
     required this.height,
@@ -48,14 +48,14 @@ class UserProfile {
 
   /// 데이터 복사를 위한 copyWith 메서드 (불변 객체 패턴)
   UserProfile copyWith({
-    String? name,
+    String? nickname,
     String? profileImage,
     DateTime? startDate,
-    String? height,
-    String? armSpan,
+    double? height, // 🔹 String → double
+    double? armSpan, // 🔹 String → double
   }) {
     return UserProfile(
-      name: name ?? this.name,
+      nickname: nickname ?? this.nickname,
       profileImage: profileImage ?? this.profileImage,
       startDate: startDate ?? this.startDate,
       height: height ?? this.height,
@@ -73,20 +73,20 @@ class UserProfile {
 class ProfileNotifier extends StateNotifier<UserProfile> {
   ProfileNotifier()
       : super(UserProfile(
-          name: "클라이밍 유저",
+          nickname: "클라이밍 유저",
           profileImage: "",
           startDate: null,
-          height: "-CM",
-          armSpan: "-CM",
+          height: 0.0, // 🔹 초기값 변경
+          armSpan: 0.0, // 🔹 초기값 변경
         ));
 
   /// 닉네임 업데이트
-  void updateName(String newName) {
-    state = state.copyWith(name: newName);
+  void updateNickname(String newNickname) {
+    state = state.copyWith(nickname: newNickname);
   }
 
   /// 키와 팔길이 업데이트
-  void updateBodyInfo(String newHeight, String newArmSpan) {
+  void updateBodyInfo(double newHeight, double newArmSpan) {
     state = state.copyWith(height: newHeight, armSpan: newArmSpan);
   }
 
@@ -95,7 +95,7 @@ class ProfileNotifier extends StateNotifier<UserProfile> {
     state = state.copyWith(startDate: newStartDate);
   }
 
-  /// 프로필 이미지 업데이트 (추후 카메라 연동 시 활용 가능)
+  /// 프로필 이미지 업데이트
   void updateProfileImage(String newImageUrl) {
     state = state.copyWith(profileImage: newImageUrl);
   }
