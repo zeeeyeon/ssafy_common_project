@@ -8,29 +8,31 @@ import com.project.backend.userclimbground.dto.requestDTO.ClimbRecordRequestDTO;
 import com.project.backend.userclimbground.dto.responseDTO.ClimbGroundRecordResponseDTO;
 import com.project.backend.userclimbground.dto.responseDTO.ClimbRecordResponseDTO;
 
+import java.time.LocalDate;
+
 public interface UserClimbGroundService {
 
-    ClimbRecordResponseDTO getUserClimbRecordYear(ClimbRecordRequestDTO requestDTO);
+    ClimbRecordResponseDTO getUserClimbRecordYear(Long userId , LocalDate date);
 
-    ClimbRecordResponseDTO getUserClimbRecordMonth(ClimbRecordRequestDTO requestDTO);
+    ClimbRecordResponseDTO getUserClimbRecordMonth(Long userId , LocalDate date);
 
-    ClimbRecordResponseDTO getUserClimbRecordWeek(ClimbRecordRequestDTO requestDTO);
+    ClimbRecordResponseDTO getUserClimbRecordWeek(Long userId , LocalDate date);
 
-    ClimbRecordResponseDTO getUserClimbRecordDay(ClimbRecordRequestDTO requestDTO);
+    ClimbRecordResponseDTO getUserClimbRecordDay(Long userId , LocalDate date);
 
     // 클라이밍장 해금 요청
     ResponseCode saveUnlockClimbGround(UnlockClimbGroundRequsetDTO requestDTO);
 
     // 클라이밍장별 통계(년별)
-    ClimbGroundRecordResponseDTO getUserClimbGroundRecordYear(ClimbGroundRecordRequestDTO requestDTO);
+    ClimbGroundRecordResponseDTO getUserClimbGroundRecordYear(Long userId , Long climbGroundId,LocalDate date);
 
     // 클라이밍장별 통계(월별)
-    ClimbGroundRecordResponseDTO getUserClimbGroundRecordMonth(ClimbGroundRecordRequestDTO requestDTO);
+    ClimbGroundRecordResponseDTO getUserClimbGroundRecordMonth(Long userId , Long climbGroundId,LocalDate date);
 
     // 클라이밍장별 통계(주별)
-    ClimbGroundRecordResponseDTO getUserClimbGroundRecordWeek(ClimbGroundRecordRequestDTO requestDTO);
+    ClimbGroundRecordResponseDTO getUserClimbGroundRecordWeek(Long userId , Long climbGroundId,LocalDate date);
 
     // 클라이밍장별 통계(일별)
-    ClimbGroundRecordResponseDTO getUserClimbGroundRecordDay(ClimbGroundRecordRequestDTO requestDTO);
+    ClimbGroundRecordResponseDTO getUserClimbGroundRecordDay(Long userId , Long climbGroundId,LocalDate date);
 
 }
