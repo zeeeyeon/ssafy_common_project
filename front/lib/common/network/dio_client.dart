@@ -11,7 +11,7 @@ class DioClient {
   DioClient._internal() {
     dio = Dio(
       BaseOptions(
-        baseUrl: 'https://api.kkulkkulk.com', // API 서버 URL
+        baseUrl: 'http://3.38.250.245:8080/api', // API 서버 URL
         connectTimeout: const Duration(seconds: 5),
         receiveTimeout: const Duration(seconds: 3),
         headers: {
@@ -24,8 +24,12 @@ class DioClient {
     // 인터셉터 설정
     dio.interceptors.add(
       InterceptorsWrapper(
-        onRequest: (options, handler) {
-          // 요청 전 처리
+        onRequest: (options, handler) async {
+          // 요청 전에 토큰을 가져와서 헤더에 추가
+          String? token = await _getToken();
+          if (token != null) {
+            options.headers['Authorization'] = 'Bearer $token'; // Bearer 토큰 추가
+          }
           return handler.next(options);
         },
         onResponse: (response, handler) {
@@ -38,5 +42,11 @@ class DioClient {
         },
       ),
     );
+  }
+  // 토큰을 가져오는 함수 (Riverpod 사용)
+  Future<String?> _getToken() async {
+    // 여기서 Riverpod 상태를 읽어서 토큰을 가져옵니다.
+    return Future.value(
+        DioClient._instance.dio.options.headers['Authorization']);
   }
 }

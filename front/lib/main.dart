@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:kkulkkulk/common/api/dio_client.dart';
+import 'package:kkulkkulk/common/network/dio_client.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:kkulkkulk/common/routes/app_router.dart';
 
 // Dio 인스턴스를 전역적으로 제공하는 provider
-final dioProvider = Provider((ref) => DioClient.getInstance());
+final dioProvider = Provider((ref) => DioClient().dio);
 
 void main() {
   // Flutter 바인딩 초기화 추가
