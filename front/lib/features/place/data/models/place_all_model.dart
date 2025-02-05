@@ -7,12 +7,4 @@ class PlaceAllModel {
     required this.latitude,
     required this.longitude}
   );
-
-  Map<String, dynamic> toJson() {
-    return {
-      'latitude': latitude,
-      'longitude': longitude,
-    };
-  }
-  
 }
