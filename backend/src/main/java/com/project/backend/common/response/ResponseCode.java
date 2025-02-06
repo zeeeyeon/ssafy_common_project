@@ -20,18 +20,24 @@ public enum ResponseCode {
     EXISTED_USER_PHONE(400, HttpStatus.BAD_REQUEST, "이미 존재하는 전화번호 입니다."),
     MISMATCH_PASSWORD(400, HttpStatus.BAD_REQUEST, "비밀번호가 일치하지 않습니다."),
 
-    GET_USER_INFO(successCode(), HttpStatus.OK, "사용자의 정보가 조회되었습니다."),
+    GET_USER_PROFILE(successCode(), HttpStatus.OK, "사용자의 정보가 조회되었습니다."),
+    UPDATE_USER_PROFILE(successCode(), HttpStatus.OK, "사용자의 정보가 갱신되었습니다."),
+
+    GET_USER_TIER(successCode(), HttpStatus.OK, "사용자의 티어가 조회되었습니다."),
+    UPDATE_USER_TIER(successCode(), HttpStatus.OK, "사용자의 티어가 갱신되었습니다."),
+
+
+    GET_USER_CLIMB_GROUND_MEDAL(successCode(), HttpStatus.OK, "사용자의 해당 클라이밍장에 대한 메달이 조회되었습니다."),
     NOT_FOUND_USER(400, HttpStatus.NOT_FOUND, "사용자를 찾을 수 없습니다."),
     UNAUTHORIZED(401, HttpStatus.UNAUTHORIZED, "권한이 없습니다."),
     INVALID_TOKEN_FORMAT(401, HttpStatus.UNAUTHORIZED, "유효하지 않은 토큰 형식입니다."),
-    MISSING_MANDATORY_CLAIMS(400, HttpStatus.NOT_FOUND, "토큰에 필수 클레임이 없습니다."),
+    MISSING_MANDATORY_CLAIMS(400, HttpStatus.BAD_REQUEST, "토큰에 필수 클레임이 없습니다."),
 
-
-
+    NOT_FOUND_CLIMBGOUND(400, HttpStatus.BAD_REQUEST, "클라이밍장을 찾을 수 없습니다."),
+    NOT_FOUND_USER_CLIMBGROUND(400, HttpStatus.BAD_REQUEST, "사용자가 방문한 클라이밍장을 찾을 수 없습니다."),
 
     GET_CLIMB_GROUND_DETAIL(successCode(), HttpStatus.OK, "해당 클라이밍장의 정보가 조회되었습니다. "),
     GET_CLIMB_GROUND_List(successCode(), HttpStatus.OK, "해당 클라이밍장 리스트 정보가 조회되었습니다. "),
-
     BINDING_ERROR(2000, HttpStatus.BAD_REQUEST, "입력값 중 검증에 실패한 값이 있습니다."),
     BAD_REQUEST(2001, HttpStatus.BAD_REQUEST, "올바르지 않은 요청입니다."),
     ENTITY_NOT_FOUND(404, HttpStatus.NOT_FOUND, "요청하신 데이터를 찾을 수 없습니다."),
@@ -47,6 +53,9 @@ public enum ResponseCode {
     GET_CLIMBGROUND_RECORD_MONTH(successCode(),HttpStatus.OK,"사용자가 요청한 클라이밍장 월간 통계 기록이 조회되었습니다."),
     GET_CLIMBGROUND_RECORD_WEEKLY(successCode(),HttpStatus.OK,"사용자가 요청한 클라이밍장 주간 통계 기록이 조회되었습니다."),
     GET_CLIMBGROUND_RECORD_DAILY(successCode(),HttpStatus.OK,"사용자의 요청한 클라이밍장 일간 통계 기록이 조회되었습니다."),
+
+    GET_DAILY_RECORD(successCode(), HttpStatus.OK, "해당 날짜의 클라이밍 기록이 조회되었습니다."),
+    GET_MONTHLY_RECORD(successCode(), HttpStatus.OK, "한달 클라이밍 기록이 조회되었습니다."),
 
     POST_UNLUCK_CLIMB_GROUND(201,HttpStatus.CREATED,"클라이밍장 해금에 성공했습니다"),
     ALEADY_UNLUCKED(208, HttpStatus.ALREADY_REPORTED,"이미 해금된 클라이밍장입니다."),

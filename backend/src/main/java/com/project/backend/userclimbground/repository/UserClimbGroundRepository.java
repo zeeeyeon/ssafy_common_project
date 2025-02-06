@@ -1,5 +1,7 @@
 package com.project.backend.userclimbground.repository;
 
+import com.project.backend.climbground.entity.ClimbGround;
+import com.project.backend.user.entity.User;
 import com.project.backend.userclimbground.entity.UserClimbGround;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -118,5 +120,7 @@ public interface UserClimbGroundRepository extends JpaRepository<UserClimbGround
             "AND ucg.climbGround.Id = :climbGroundId")
     Optional<UserClimbGround> findUserClimbGroundByUserIDAndClimbGroundID(Long userId, Long climbGroundId);
 
+
+    Optional<UserClimbGround> findByUserAndClimbGround(User user, ClimbGround climbGround);
 }
 
