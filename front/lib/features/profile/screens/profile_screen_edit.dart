@@ -24,30 +24,36 @@ class _ProfileScreenEditState extends ConsumerState<ProfileScreenEdit> {
     super.initState();
     final userProfile = ref.read(profileProvider);
 
-    _nicknameController.text = userProfile.nickname; // 🛠️ 이름 필드 초기화
+    _nicknameController.text = userProfile.nickname;
     _heightController.text = userProfile.height.toString();
     _armSpanController.text = userProfile.armSpan.toString();
   }
 
   void _saveProfile() {
-    final userProfile = ref.read(profileProvider);
-    final double newHeight =
-        double.tryParse(_heightController.text) ?? userProfile.height;
-    final double newArmSpan =
-        double.tryParse(_armSpanController.text) ?? userProfile.armSpan;
+    final double? newHeight = double.tryParse(_heightController.text);
+    final double? newArmSpan = double.tryParse(_armSpanController.text);
 
-    ref.read(profileProvider.notifier).updateNickname(_nicknameController.text);
-    ref.read(profileProvider.notifier).updateBodyInfo(newHeight, newArmSpan);
+    if (newHeight != null && newArmSpan != null) {
+      ref
+          .read(profileProvider.notifier)
+          .updateNickname(_nicknameController.text);
+      ref.read(profileProvider.notifier).updateBodyInfo(newHeight, newArmSpan);
 
-    if (_selectedDay != null) {
-      ref.read(profileProvider.notifier).updateStartDate(_selectedDay!);
+      if (_selectedDay != null) {
+        ref.read(profileProvider.notifier).updateStartDate(_selectedDay!);
+      }
+
+      Navigator.pop(context);
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("키와 팔길이를 올바르게 입력하세요!")),
+      );
     }
-    Navigator.pop(context);
   }
 
   @override
   Widget build(BuildContext context) {
-    final userProfile = ref.watch(profileProvider);
+    final userProfile = ref.watch(profileProvider); // UI 변경 감지
 
     return Scaffold(
       appBar: AppBar(
@@ -62,27 +68,14 @@ class _ProfileScreenEditState extends ConsumerState<ProfileScreenEdit> {
             children: [
               const Text(
                 '닉네임',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
-              const SizedBox(height: 8), // 텍스트와 박스 사이 간격
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey),
-                  borderRadius: BorderRadius.circular(8.0),
-                ),
-                child: TextField(
-                  controller: _nicknameController, // 🛠️ 수정 가능하도록 컨트롤러 사용
-                  decoration: const InputDecoration(
-                    hintText: '닉네임을 입력하세요.',
-                    border: InputBorder.none, // 내부 박스의 기본 테두리 제거
-                  ),
-                  onTap: () {
-                    _nicknameController.clear();
-                  },
+              const SizedBox(height: 8),
+              TextField(
+                controller: _nicknameController,
+                decoration: const InputDecoration(
+                  border: OutlineInputBorder(),
+                  hintText: '닉네임을 입력하세요.',
                 ),
               ),
               const SizedBox(height: 24),
@@ -112,9 +105,8 @@ class _ProfileScreenEditState extends ConsumerState<ProfileScreenEdit> {
                         _selectedDay != null
                             ? "${_selectedDay?.year}-${_selectedDay?.month}-${_selectedDay?.day}"
                             : "클라이밍 시작일을 선택해주세요.",
-                        style: const TextStyle(
-                            fontSize: 16,
-                            color: Color.fromARGB(255, 187, 184, 184)),
+                        style:
+                            const TextStyle(fontSize: 16, color: Colors.grey),
                       ),
                       const Icon(Icons.arrow_drop_down),
                     ],
@@ -125,7 +117,7 @@ class _ProfileScreenEditState extends ConsumerState<ProfileScreenEdit> {
 
               // 달력 표시/숨기기
               AnimatedCrossFade(
-                firstChild: const SizedBox.shrink(), // 숨겨진 상태
+                firstChild: const SizedBox.shrink(),
                 secondChild: Container(
                   padding: const EdgeInsets.all(8.0),
                   decoration: BoxDecoration(
@@ -176,48 +168,18 @@ class _ProfileScreenEditState extends ConsumerState<ProfileScreenEdit> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const Text(
-                          '키',
+                          '키 (cm)',
                           style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
+                              fontSize: 16, fontWeight: FontWeight.bold),
                         ),
-                        const SizedBox(height: 8), // 텍스트와 박스 사이 간격
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                          decoration: BoxDecoration(
-                            border: Border.all(color: Colors.grey),
-                            borderRadius: BorderRadius.circular(8.0),
-                          ),
-                          child: TextField(
-                            controller: _heightController,
-                            keyboardType: const TextInputType.numberWithOptions(
-                                decimal: true),
-                            decoration: const InputDecoration(
-                              hintText: '-CM',
-                              hintStyle: TextStyle(
-                                color: Colors.grey,
-                              ),
-                              border: InputBorder.none, // 내부 박스의 기본 테두리 제거
-                            ),
-                            onTap: () {
-                              // 입력 필드를 클릭하면 기존 값 제거
-                              if (_heightController.text.endsWith('CM')) {
-                                _heightController.clear();
-                              }
-                            },
-                            onChanged: (value) {
-                              // 숫자만 입력 가능하도록 필터링하고, CM을 자동 추가
-                              String newValue =
-                                  value.replaceAll(RegExp(r'[^0-9]'), '');
-                              if (newValue.isNotEmpty) {
-                                _heightController.value = TextEditingValue(
-                                  text: '$newValue CM',
-                                  selection: TextSelection.collapsed(
-                                      offset: newValue.length),
-                                );
-                              }
-                            },
+                        const SizedBox(height: 8),
+                        TextField(
+                          controller: _heightController,
+                          keyboardType: const TextInputType.numberWithOptions(
+                              decimal: true),
+                          decoration: const InputDecoration(
+                            border: OutlineInputBorder(),
+                            hintText: '키 입력',
                           ),
                         ),
                       ],
@@ -229,47 +191,18 @@ class _ProfileScreenEditState extends ConsumerState<ProfileScreenEdit> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const Text(
-                          '팔길이',
+                          '팔길이 (cm)',
                           style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
+                              fontSize: 16, fontWeight: FontWeight.bold),
                         ),
-                        const SizedBox(height: 8), // 텍스트와 박스 사이 간격
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                          decoration: BoxDecoration(
-                            border: Border.all(color: Colors.grey),
-                            borderRadius: BorderRadius.circular(8.0),
-                          ),
-                          child: TextField(
-                            controller: _armSpanController,
-                            keyboardType: TextInputType.number,
-                            decoration: const InputDecoration(
-                              hintText: '-CM',
-                              hintStyle: TextStyle(
-                                color: Colors.grey,
-                              ),
-                              border: InputBorder.none, // 내부 박스의 기본 테두리 제거
-                            ),
-                            onTap: () {
-                              // 입력 필드를 클릭하면 기존 값 제거
-                              if (_armSpanController.text.endsWith('CM')) {
-                                _armSpanController.clear();
-                              }
-                            },
-                            onChanged: (value) {
-                              // 숫자만 입력 가능하도록 필터링하고, CM을 자동 추가
-                              String newValue =
-                                  value.replaceAll(RegExp(r'[^0-9]'), '');
-                              if (newValue.isNotEmpty) {
-                                _armSpanController.value = TextEditingValue(
-                                  text: '$newValue CM',
-                                  selection: TextSelection.collapsed(
-                                      offset: newValue.length),
-                                );
-                              }
-                            },
+                        const SizedBox(height: 8),
+                        TextField(
+                          controller: _armSpanController,
+                          keyboardType: const TextInputType.numberWithOptions(
+                              decimal: true),
+                          decoration: const InputDecoration(
+                            border: OutlineInputBorder(),
+                            hintText: '팔길이 입력',
                           ),
                         ),
                       ],
@@ -280,22 +213,18 @@ class _ProfileScreenEditState extends ConsumerState<ProfileScreenEdit> {
               const SizedBox(height: 24),
 
               // 저장 버튼
-              // 저장 버튼
               Center(
                 child: SizedBox(
-                  width: double.infinity, // 🔹 반응형으로 너비 조절
+                  width: double.infinity,
                   child: ElevatedButton(
                     onPressed: _saveProfile,
                     style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 16.0),
-                      backgroundColor: const Color.fromARGB(255, 80, 118, 232),
+                      backgroundColor: Colors.blueAccent,
                     ),
                     child: const Text(
                       '저장',
-                      style: TextStyle(
-                        fontSize: 18,
-                        color: Color.fromARGB(220, 255, 255, 255),
-                      ),
+                      style: TextStyle(fontSize: 18, color: Colors.white),
                     ),
                   ),
                 ),

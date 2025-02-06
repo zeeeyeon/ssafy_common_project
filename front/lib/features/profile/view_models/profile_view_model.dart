@@ -56,8 +56,8 @@ class UserProfile {
   }) {
     return UserProfile(
       nickname: nickname ?? this.nickname,
-      profileImage: profileImage ?? this.profileImage,
       startDate: startDate ?? this.startDate,
+      profileImage: profileImage ?? this.profileImage,
       height: height ?? this.height,
       armSpan: armSpan ?? this.armSpan,
     );
