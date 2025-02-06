@@ -11,6 +11,6 @@ public interface HoldRepository extends JpaRepository<Hold, Long> {
 
     @Query("SELECT new com.project.backend.hold.dto.HoldColorLevelDto(h.color, h.level) " +
             "FROM Hold h " +
-            "WHERE h.climbGround.Id = :climbgroundId")
+            "WHERE h.climbGround.Id = :climbGroundId")
     List<HoldColorLevelDto> findHoldColorLevelByClimbGroundId(Long climbGroundId);
 }
