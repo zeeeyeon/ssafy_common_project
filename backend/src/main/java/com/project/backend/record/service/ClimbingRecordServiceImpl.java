@@ -11,15 +11,19 @@ import com.project.backend.userdate.entity.UserDate;
 import com.project.backend.userdate.repository.UserDateRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
+@Service
+@RequiredArgsConstructor
 public class ClimbingRecordServiceImpl implements ClimbingRecordService {
 
-    HoldRepository holdRepository;
-    UserRepository userRepository;
-    UserDateRepository userDateRepository;
-    ClimbingRecordRepository climbingRecordRepository;
+    private final HoldRepository holdRepository;
+    private final UserRepository userRepository;
+    private final UserDateRepository userDateRepository;
+    private final ClimbingRecordRepository climbingRecordRepository;
 
     @Override
     @Transactional
@@ -36,7 +40,7 @@ public class ClimbingRecordServiceImpl implements ClimbingRecordService {
         newClimbingRecord.setHold(hold);
         newClimbingRecord.setUser(user);
         newClimbingRecord.setUserDate(userDate);
-//        recordRepository.save( (com.project.backend.record.entity.Record) newRecord);
+        climbingRecordRepository.save(newClimbingRecord);
 
         return Optional.of(newClimbingRecord);
 

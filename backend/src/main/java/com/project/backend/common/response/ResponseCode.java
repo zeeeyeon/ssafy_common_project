@@ -20,7 +20,13 @@ public enum ResponseCode {
     EXISTED_USER_PHONE(400, HttpStatus.BAD_REQUEST, "이미 존재하는 전화번호 입니다."),
     MISMATCH_PASSWORD(400, HttpStatus.BAD_REQUEST, "비밀번호가 일치하지 않습니다."),
 
-    GET_USER_INFO(successCode(), HttpStatus.OK, "사용자의 정보가 조회되었습니다."),
+    GET_USER_PROFILE(successCode(), HttpStatus.OK, "사용자의 정보가 조회되었습니다."),
+    UPDATE_USER_PROFILE(successCode(), HttpStatus.OK, "사용자의 정보가 갱신되었습니다."),
+
+    GET_USER_TIER(successCode(), HttpStatus.OK, "사용자의 티어가 조회되었습니다."),
+    UPDATE_USER_TIER(successCode(), HttpStatus.OK, "사용자의 티어가 갱신되었습니다."),
+
+
     GET_USER_CLIMB_GROUND_MEDAL(successCode(), HttpStatus.OK, "사용자의 해당 클라이밍장에 대한 메달이 조회되었습니다."),
     NOT_FOUND_USER(400, HttpStatus.NOT_FOUND, "사용자를 찾을 수 없습니다."),
     UNAUTHORIZED(401, HttpStatus.UNAUTHORIZED, "권한이 없습니다."),
@@ -48,6 +54,9 @@ public enum ResponseCode {
     GET_CLIMBGROUND_RECORD_WEEKLY(successCode(),HttpStatus.OK,"사용자가 요청한 클라이밍장 주간 통계 기록이 조회되었습니다."),
     GET_CLIMBGROUND_RECORD_DAILY(successCode(),HttpStatus.OK,"사용자의 요청한 클라이밍장 일간 통계 기록이 조회되었습니다."),
 
+    GET_DAILY_RECORD(successCode(), HttpStatus.OK, "해당 날짜의 클라이밍 기록이 조회되었습니다."),
+    GET_MONTHLY_RECORD(successCode(), HttpStatus.OK, "한달 클라이밍 기록이 조회되었습니다."),
+
     POST_UNLUCK_CLIMB_GROUND(201,HttpStatus.CREATED,"클라이밍장 해금에 성공했습니다"),
     ALEADY_UNLUCKED(208, HttpStatus.ALREADY_REPORTED,"이미 해금된 클라이밍장입니다."),
     NOT_FOUND_CLIMB_GROUND_OR_USER(404, HttpStatus.NOT_FOUND, "클라이밍장 혹은 유저 정보를 찾을 수 없습니다.."),
@@ -55,11 +64,13 @@ public enum ResponseCode {
     POST_USER_DATE(201,HttpStatus.CREATED,"오늘의 현재 클라이밍장 방문 일지가 생성되었습니다"),
     ALEADY_USER_DATE(208, HttpStatus.ALREADY_REPORTED,"이미 오늘의 현재 클라이밍장 방문 일지가 생성되어 있습니다."),
 
-    SUCCESS_FILE_UPLOAD(successCode(), HttpStatus.OK, "파일을 성공적으로 로드했습니다."),
+    SUCCESS_FILE_UPLOAD(201, HttpStatus.OK, "파일을 성공적으로 로드했습니다."),
     INVALID_FILETYPE(4400, HttpStatus.BAD_REQUEST, "지원하지 않는 파일 형식 입니다."),
     FILE_SIZE_EXCEEDED(4401, HttpStatus.BAD_REQUEST, "파일 크가가 최대 크기를 초과했습니다."),
     FILE_UPLOAD_FAILED(4502, HttpStatus.BAD_REQUEST, "파일 업로드에 실패하였습니다."),
-    EMPTY_FILE(4403, HttpStatus.NOT_FOUND, "파일이 비어있습니다.");
+    EMPTY_FILE(4403, HttpStatus.NOT_FOUND, "파일이 비어있습니다."),
+    NOT_FOUND_CLIMB_RECORD(404, HttpStatus.BAD_REQUEST, "영상저장을 위한 기록을 찾을 수 없습니다."),
+    SUCCESS_RECORD_UPLOAD(201, HttpStatus.OK, "클라이밍 기록을 성공적으로 로드했습니다.");
 
     private int code;
     private HttpStatus httpStatus;
