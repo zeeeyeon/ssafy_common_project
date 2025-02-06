@@ -16,7 +16,6 @@ import lombok.RequiredArgsConstructor;
 
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -65,7 +64,7 @@ public class ClimbGroundServiceImpl implements ClimbGroundService {
     }
 
     @Override
-    public List<ClimbGroundAllResponseDTO> searchClimbGroundByKeyword(String keyword, BigDecimal latitude, BigDecimal longitude) {
+    public List<ClimbGroundAllResponseDTO> searchClimbGroundByKeyword(String keyword, double latitude, double longitude) {
         //검색결과가 나올수도 안나올수도 여러 개일수도 한개 일수도 있음
         List<ClimbGround> climbGrounds = climbGroundRepository.searchClimbGround(keyword);
 
@@ -93,7 +92,7 @@ public class ClimbGroundServiceImpl implements ClimbGroundService {
 
     // 클라이밍장 전체 조회 (거리별 정렬)
     @Override
-    public List<ClimbGroundAllResponseDTO> findAllClimbGround(BigDecimal latitude, BigDecimal longitude) {
+    public List<ClimbGroundAllResponseDTO> findAllClimbGround(double latitude, double longitude) {
         List<ClimbGround> climbGrounds = climbGroundRepository.findAll();
         List<ClimbGroundAllResponseDTO> responseList = climbGrounds.stream().map(climb -> {
 
@@ -128,14 +127,14 @@ public class ClimbGroundServiceImpl implements ClimbGroundService {
     }
 
     // 클라이밍장별 거리 계산
-    public double calculateDistance(BigDecimal lat1, BigDecimal lon1, BigDecimal lat2, BigDecimal lon2){
+    public double calculateDistance(double lat1, double lon1, double lat2, double lon2){
         final int EARTH_RADIUS = 6371; // 지구 반지름 (km)
 
-        double latDistance = Math.toRadians(lat2.doubleValue() - lat1.doubleValue());
-        double lonDistance = Math.toRadians(lon2.doubleValue() - lon1.doubleValue());
+        double latDistance = Math.toRadians(lat2 - lat1);
+        double lonDistance = Math.toRadians(lon2 - lon1);
 
         double a = Math.sin(latDistance / 2) * Math.sin(latDistance / 2)
-                + Math.cos(Math.toRadians(lat1.doubleValue())) * Math.cos(Math.toRadians(lat2.doubleValue()))
+                + Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2))
                 * Math.sin(lonDistance / 2) * Math.sin(lonDistance / 2);
 
         double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
@@ -145,7 +144,7 @@ public class ClimbGroundServiceImpl implements ClimbGroundService {
     };
 
     @Override
-    public List<LockClimbGroundAllResponseDTO> findAllLockClimbGround(Long userId, BigDecimal latitude, BigDecimal longitude) {
+    public List<LockClimbGroundAllResponseDTO> findAllLockClimbGround(Long userId, double latitude, double longitude) {
           List<MiddleLockClimbGroundResponseDTO> middleLockClimbGrounds = climbGroundRepository.findAllWithUnlockStatus(userId);
 
           List<LockClimbGroundAllResponseDTO> responseList = middleLockClimbGrounds.stream().map(
@@ -166,7 +165,7 @@ public class ClimbGroundServiceImpl implements ClimbGroundService {
     };
 
     @Override
-    public List<LockClimbGroundAllResponseDTO> findAllLockClimbGroundLimitFive(Long userId, BigDecimal latitude, BigDecimal longitude) {
+    public List<LockClimbGroundAllResponseDTO> findAllLockClimbGroundLimitFive(Long userId, double latitude, double longitude) {
         List<MiddleLockClimbGroundResponseDTO> middleLockClimbGrounds = climbGroundRepository.findAllWithUnlockStatus(userId);
 
         List<LockClimbGroundAllResponseDTO> responseList = middleLockClimbGrounds.stream().map(
