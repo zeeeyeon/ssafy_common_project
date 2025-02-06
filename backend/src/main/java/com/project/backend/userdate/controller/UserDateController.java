@@ -10,9 +10,7 @@ import com.project.backend.userdate.dto.response.UserDateCheckAndAddResponseDTO;
 import com.project.backend.userdate.service.UserDateService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -20,13 +18,17 @@ import java.time.YearMonth;
 
 import static com.project.backend.common.response.ResponseCode.*;
 
+import static com.project.backend.common.response.ResponseCode.GET_DAILY_RECORD;
+import static com.project.backend.common.response.ResponseCode.GET_MONTHLY_RECORD;
+
 @RestController
 @RequestMapping("/api/record")
 @RequiredArgsConstructor
 public class UserDateController {
     private final UserDateService userDateService;
 
-    @GetMapping("/daily/{userId}")
+    // user 가져오는 방법 물어보기
+    @GetMapping("daily/{userId}")
     public ResponseEntity<?> getDailyRecord (
             @RequestParam("date") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate selectedDate,
             @PathVariable Long userId) {
