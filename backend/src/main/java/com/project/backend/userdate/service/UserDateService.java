@@ -6,7 +6,7 @@ import com.project.backend.hold.dto.responseDTO.HoldResponseDTO;
 import com.project.backend.hold.entity.HoldColorEnum;
 import com.project.backend.hold.entity.HoldLevelEnum;
 import com.project.backend.hold.repository.HoldRepository;
-import com.project.backend.record.entity.Record;
+import com.project.backend.record.entity.ClimbingRecord;
 import com.project.backend.userclimbground.entity.UserClimbGround;
 import com.project.backend.userclimbground.repository.UserClimbGroundRepository;
 import com.project.backend.userdate.dto.MonthlyRecordDto;
@@ -56,10 +56,10 @@ public class UserDateService {
         int visitCount = userDateRepository.countVisits(startOfDay, endOfDay, userDate.get().getUserClimbGround().getClimbGround().getId());
 
         // 완등 횟수
-        Set<Record> records = userDate.get().getRecordList();
-        int totalCount = records.size();
-        long successCount = records.stream()
-                .filter(Record::isSuccess)
+        Set<ClimbingRecord> climbingRecords = userDate.get().getClimbingRecordList();
+        int totalCount = climbingRecords.size();
+        long successCount = climbingRecords.stream()
+                .filter(ClimbingRecord::isSuccess)
                 .count();
 
         // 완등률
@@ -81,15 +81,15 @@ public class UserDateService {
 
         // 해당 난이도 완등률
         // 색상별 시도 횟수
-        Map<HoldColorEnum, Long> colorAttempts = records.stream()
+        Map<HoldColorEnum, Long> colorAttempts = climbingRecords.stream()
                 .collect(Collectors.groupingBy(
                         record -> record.getHold().getColor(),
                         Collectors.counting()
                 ));
 
         // 색상별 성공 횟수
-        Map<HoldColorEnum, Long> colorSuccesses = records.stream()
-                .filter(Record::isSuccess)
+        Map<HoldColorEnum, Long> colorSuccesses = climbingRecords.stream()
+                .filter(ClimbingRecord::isSuccess)
                 .collect(Collectors.groupingBy(
                         record -> record.getHold().getColor(),
                         Collectors.counting()
@@ -168,9 +168,11 @@ public class UserDateService {
                     .map(hold -> new HoldResponseDTO(hold.getId(),hold.getLevel(),hold.getColor()))
                     .sorted(Comparator.comparing(HoldResponseDTO::getLevel))
                     .collect(Collectors.toList());
+            responseDTO.setName(userClimbGround.getClimbGround().getName());
             responseDTO.setHolds(holds);
             responseDTO.setNewlyCreated(true);
             userDateRepository.save(newUserDate); // 다넣었으면 저장
+            responseDTO.setUserDateId(newUserDate.getId());
 
         }
 
