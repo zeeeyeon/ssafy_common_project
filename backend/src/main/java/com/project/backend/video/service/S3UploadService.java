@@ -5,6 +5,10 @@ import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.project.backend.common.advice.exception.CustomException;
 import com.project.backend.common.response.ResponseCode;
+import com.project.backend.record.entity.ClimbingRecord;
+import com.project.backend.video.dto.responseDTO.VideoSaveResponseDTO;
+import com.project.backend.video.entity.Video;
+import com.project.backend.video.repository.VideoRepository;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +22,7 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class S3UploadService {
 
+    private final VideoRepository videoRepository;
 
     private final AmazonS3 amazonS3;
 
@@ -26,7 +31,7 @@ public class S3UploadService {
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
 
-    public String saveFile(MultipartFile multipartFile) throws IOException {
+    public VideoSaveResponseDTO saveFile(MultipartFile multipartFile, ClimbingRecord climbingRecord) throws IOException {
 
         checkFileTypeOrThrow(multipartFile); // 파일 타입 체크
         checkFileSizeOrThrow(multipartFile); // 파일 크기 체크
@@ -38,7 +43,18 @@ public class S3UploadService {
         objectMetadata.setContentType(multipartFile.getContentType());
 
         amazonS3.putObject(bucket, originalFilename, multipartFile.getInputStream(), objectMetadata);
-        return amazonS3.getUrl(bucket, originalFilename).toString();
+        String url = amazonS3.getUrl(bucket, originalFilename).toString();
+
+        //비디오 테이블에 영상 url 저장
+        Video newVideo = new Video();
+        newVideo.setClimbingRecord(climbingRecord);
+        newVideo.setUrl(url);
+        VideoSaveResponseDTO videoSaveResponseDTO = new VideoSaveResponseDTO(
+                newVideo.getId(), url, climbingRecord.getId()
+        );
+        videoRepository.save(newVideo);
+
+        return videoSaveResponseDTO;
     }
 
     /*
