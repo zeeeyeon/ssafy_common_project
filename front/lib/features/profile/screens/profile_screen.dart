@@ -11,7 +11,6 @@ class ProfileScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     // Riverpod 상태 읽기
     final userProfile = ref.watch(profileProvider);
-
     return Scaffold(
       appBar: CustomAppBar(
         title: 'My',
