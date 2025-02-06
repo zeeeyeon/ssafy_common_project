@@ -13,8 +13,8 @@ class PlaceRepository {
       final response = await _dio.get(
         '/api/climbground/all/user-location',
         queryParameters: {
-          "latitude": placeAllModel.latitude.toString(),
-          "longitude": placeAllModel.longitude.toString(),
+          "latitude": placeAllModel.latitude,
+          "longitude": placeAllModel.longitude,
         }
       );
       List<dynamic> data = response.data['content'];
@@ -25,18 +25,22 @@ class PlaceRepository {
   }
 
   // 클라이밍 장소 검색어 조회(GPS 거리순)
-  Future<List<PlaceResponseModel>> searchClimbGround(SearchPlaceAllModel SearchPlaceAllModel) async {
+  Future<List<PlaceResponseModel>> searchClimbGround(SearchPlaceAllModel searchPlaceAllModel) async {
     try {
       final response = await _dio.get(
         '/api/climbground/search',
         queryParameters: {
-          "keyword": SearchPlaceAllModel.keyword,
-          "latitude": SearchPlaceAllModel.latitude.toString(),
-          "longitude": SearchPlaceAllModel.longitude.toString(),
+          "keyword": searchPlaceAllModel.keyword,
+          "latitude": searchPlaceAllModel.latitude,
+          "longitude": searchPlaceAllModel.longitude,
         }
       );
-      List<dynamic> data = response.data['content'];
-      return data.map((json) => PlaceResponseModel.fromJson(json)).toList();
+      if(response.statusCode == 200) {
+        List<dynamic> data = response.data['content'];
+        return data.map((json) => PlaceResponseModel.fromJson(json)).toList();
+      }else {
+        return [];
+      }
     } catch(e) {
       rethrow;
     }

@@ -1,9 +1,7 @@
-import 'package:big_decimal/big_decimal.dart';
-
 class SearchPlaceAllModel {
   final String keyword;
-  final BigDecimal latitude;
-  final BigDecimal longitude;
+  final double latitude;
+  final double longitude;
 
   SearchPlaceAllModel({
     required this.keyword,

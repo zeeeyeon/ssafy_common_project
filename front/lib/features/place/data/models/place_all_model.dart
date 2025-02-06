@@ -1,7 +1,6 @@
-import 'package:big_decimal/big_decimal.dart';
 class PlaceAllModel {
-  final BigDecimal latitude;
-  final BigDecimal longitude;
+  final double latitude;
+  final double longitude;
 
   PlaceAllModel({
     required this.latitude,

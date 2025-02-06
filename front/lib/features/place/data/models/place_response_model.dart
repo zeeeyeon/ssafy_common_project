@@ -1,12 +1,12 @@
 class PlaceResponseModel {
-  final int Id;
+  final int id;
   final String name;
   final String image;
   final String address;
   final double distance;
 
   PlaceResponseModel({
-    required this.Id,
+    required this.id,
     required this.name,
     required this.image,
     required this.address,
@@ -15,11 +15,11 @@ class PlaceResponseModel {
 
   factory PlaceResponseModel.fromJson(Map<String, dynamic> json) {
     return PlaceResponseModel(
-      Id: json['Id'],
+      id: json['id'],
       name: json['name'],
       image: json['image'],
       address: json['address'],
-      distance: json['distance'],
+      distance: (json['distance']),
     );
   }
 }

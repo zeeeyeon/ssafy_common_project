@@ -11,7 +11,7 @@ class PlaceScreen extends StatelessWidget {
       appBar: CustomAppBar(title: '장소'),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: PlaceForm(),
+        // child: PlaceForm(),
       ),
     );
   }
