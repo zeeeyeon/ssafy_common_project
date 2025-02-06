@@ -10,6 +10,7 @@ import com.project.backend.user.dto.request.SignUpRequestDto;
 import com.project.backend.user.dto.request.UserInfoRequestDto;
 import com.project.backend.user.dto.response.UserTierResponseDto;
 import com.project.backend.user.entity.User;
+import com.project.backend.user.entity.UserTierEnum;
 import com.project.backend.user.repository.jpa.UserRepository;
 import com.project.backend.user.service.UserService;
 import com.project.backend.userclimbground.entity.UserClimbGround;
@@ -20,6 +21,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @RequiredArgsConstructor
@@ -73,11 +75,11 @@ public class UserServiceImpl implements UserService {
     return userRepository.findByNickname(nickname);
   }
 
-  public User userFindById(Long id) {
+  public User userProfileFindById(Long id) {
     return userRepository.findById(id).orElseThrow(() -> new CustomException(ResponseCode.NOT_FOUND_USER));
   }
 
-  public User updateUserInfoById(Long id, UserInfoRequestDto requestDto) {
+  public User updateUserProfileById(Long id, UserInfoRequestDto requestDto) {
     User findUser = userRepository.findById(id).orElseThrow(() -> new CustomException(ResponseCode.NOT_FOUND_USER));
 
     return userRepository.save(findUser.setUserInfoRquestDto(requestDto));
@@ -88,9 +90,19 @@ public class UserServiceImpl implements UserService {
     return new UserTierResponseDto(user);
   }
 
-  public User insertUserTier(Long id, UserTierRequestDto requestDto) {
-    User findUser = userRepository.findById(id).orElseThrow(() -> new CustomException(ResponseCode.NOT_FOUND_USER));
-    return userRepository.save(findUser.setUserTierRequestDto(requestDto));
+  public User updateUserTier(Long id) {
+    User findUser = userRepository.findById(id)
+            .orElseThrow(() -> new CustomException(ResponseCode.NOT_FOUND_USER));
+
+    int totalScore = findUser.getUserClimbGroundList().stream()
+            .map(UserClimbGround::getMedal)
+            .mapToInt(UserClimbGroundMedalEnum::getScore)
+            .sum();
+
+    UserTierEnum newTier = UserTierEnum.getTierByScore(totalScore);
+    findUser.setTier(newTier);
+
+    return userRepository.save(findUser);
   }
 
   public UserClimbGroundMedalEnum findMedalPerClimbGround(Long userId, Long climbId) {
