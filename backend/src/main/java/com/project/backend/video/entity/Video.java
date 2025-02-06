@@ -4,9 +4,11 @@ import com.project.backend.common.auditing.BaseEntity;
 import com.project.backend.record.entity.ClimbingRecord;
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.Setter;
 
 @Getter
 @Entity
+@Setter
 @AttributeOverride(name="Id", column=@Column(name="video_id"))
 public class Video extends BaseEntity {
 //    @Id
