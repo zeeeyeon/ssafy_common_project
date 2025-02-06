@@ -8,6 +8,8 @@ import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.exceptions.SignatureVerificationException;
 import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import com.project.backend.common.advice.exception.CustomException;
+import com.project.backend.common.response.ResponseCode;
 import com.project.backend.user.auth.CustomUserDetails;
 import com.project.backend.user.entity.User;
 import com.project.backend.user.entity.UserRoleEnum;
@@ -15,6 +17,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Date;
+
+import static com.project.backend.common.response.ResponseCode.MISSING_MANDATORY_CLAIMS;
 
 public class JwtProcess {
     private static final Logger log = LoggerFactory.getLogger(JwtProcess.class);
@@ -30,7 +34,7 @@ public class JwtProcess {
                     .withExpiresAt(new Date(System.currentTimeMillis() + JwtVO.EXPIRATION_TIME))
                     .withClaim("id", loginUser.getUser().getId())
                     .withClaim("username", loginUser.getUser().getUsername())
-//                    .withClaim("role", loginUser.getUser().getRoleType().name())
+                    .withClaim("role", loginUser.getUser().getRoleType().name())
                     .sign(Algorithm.HMAC512(JwtVO.SECRET));
 
             log.debug("디버그 : 생성된 토큰 = {}", jwtToken);
@@ -46,7 +50,7 @@ public class JwtProcess {
     public static CustomUserDetails verify(String token) {
         if (token == null || !token.startsWith(JwtVO.TOKEN_PREFIX)) {
             log.error("토큰이 null이거나 Bearer로 시작하지 않습니다. token: {}", token);
-            throw new RuntimeException("유효하지 않은 토큰 형식입니다.");
+            throw new CustomException(ResponseCode.INVALID_TOKEN_FORMAT);
         }
 
         try {
@@ -80,7 +84,7 @@ public class JwtProcess {
                     id, username, role);
 
             if (id == null || username == null || role == null) {
-                throw new RuntimeException("토큰에 필수 클레임이 없습니다.");
+                throw new CustomException(MISSING_MANDATORY_CLAIMS);
             }
 
             User user = User.builder()

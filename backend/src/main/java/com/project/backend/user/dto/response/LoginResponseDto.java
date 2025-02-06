@@ -1,18 +1,15 @@
 package com.project.backend.user.dto.response;
 
 import com.project.backend.user.entity.User;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
-@Getter
-@Setter
+@Data
 public class LoginResponseDto {
-  private Long id;
-  private String username;
-  private String createdAt;
 
-  public LoginResponseDto(User user) {
-    this.id = user.getId();
-    this.username = user.getUsername();
-  }
+    private String userName;
+    private String userPassword;
+    public LoginResponseDto(User user) {
+        this.userName = user.getUsername();
+        this.userPassword = user.getPassword();
+    }
 }

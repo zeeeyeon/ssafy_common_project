@@ -1,11 +1,14 @@
 package com.project.backend.userclimbground.repository;
 
+import com.project.backend.climbground.entity.ClimbGround;
+import com.project.backend.user.entity.User;
 import com.project.backend.userclimbground.entity.UserClimbGround;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 public interface UserClimbGroundRepository extends JpaRepository<UserClimbGround, Long> {
 
@@ -14,7 +17,7 @@ public interface UserClimbGroundRepository extends JpaRepository<UserClimbGround
             "LEFT JOIN FETCH uc.user " +
             "LEFT JOIN FETCH uc.climbGround " +
             "LEFT JOIN FETCH uc.userDateList ud " +
-            "LEFT JOIN FETCH ud.recordList r " +
+            "LEFT JOIN FETCH ud.climbingRecordList r " +
             "LEFT JOIN FETCH r.hold h " +
             "WHERE r.user.id = :userId " +
             "AND FUNCTION('YEAR', ud.createdAt) = :year")
@@ -25,7 +28,7 @@ public interface UserClimbGroundRepository extends JpaRepository<UserClimbGround
             "LEFT JOIN FETCH uc.user " +
             "LEFT JOIN FETCH uc.climbGround " +
             "LEFT JOIN FETCH uc.userDateList ud " +
-            "LEFT JOIN FETCH ud.recordList r " +
+            "LEFT JOIN FETCH ud.climbingRecordList r " +
             "LEFT JOIN FETCH r.hold h " +
             "WHERE r.user.id = :userId " +
             "AND YEAR(ud.createdAt) = :year " +
@@ -37,7 +40,7 @@ public interface UserClimbGroundRepository extends JpaRepository<UserClimbGround
             "LEFT JOIN FETCH uc.user " +
             "LEFT JOIN FETCH uc.climbGround " +
             "LEFT JOIN FETCH uc.userDateList ud " +
-            "LEFT JOIN FETCH ud.recordList r " +
+            "LEFT JOIN FETCH ud.climbingRecordList r " +
             "LEFT JOIN FETCH r.hold h " +
             "WHERE r.user.id = :userId " +
             "AND YEAR(ud.createdAt) = :year " +
@@ -49,7 +52,7 @@ public interface UserClimbGroundRepository extends JpaRepository<UserClimbGround
             "LEFT JOIN FETCH uc.user " +
             "LEFT JOIN FETCH uc.climbGround " +
             "LEFT JOIN FETCH uc.userDateList ud " +
-            "LEFT JOIN FETCH ud.recordList r " +
+            "LEFT JOIN FETCH ud.climbingRecordList r " +
             "LEFT JOIN FETCH r.hold h " +
             "WHERE r.user.id = :userId " +
             "AND YEAR(ud.createdAt) = :year " +
@@ -65,7 +68,7 @@ public interface UserClimbGroundRepository extends JpaRepository<UserClimbGround
             "LEFT JOIN FETCH uc.user " +
             "LEFT JOIN FETCH uc.climbGround " +
             "LEFT JOIN FETCH uc.userDateList ud " +
-            "LEFT JOIN FETCH ud.recordList r " +
+            "LEFT JOIN FETCH ud.climbingRecordList r " +
             "LEFT JOIN FETCH r.hold h " +
             "WHERE uc.user.id = :userId " +
             "AND uc.climbGround.Id = :climbGroundId " +
@@ -77,7 +80,7 @@ public interface UserClimbGroundRepository extends JpaRepository<UserClimbGround
             "LEFT JOIN FETCH uc.user " +
             "LEFT JOIN FETCH uc.climbGround " +
             "LEFT JOIN FETCH uc.userDateList ud " +
-            "LEFT JOIN FETCH ud.recordList r " +
+            "LEFT JOIN FETCH ud.climbingRecordList r " +
             "LEFT JOIN FETCH r.hold h " +
             "WHERE uc.user.id = :userId " +
             "AND uc.climbGround.Id = :climbGroundId " +
@@ -90,7 +93,7 @@ public interface UserClimbGroundRepository extends JpaRepository<UserClimbGround
             "LEFT JOIN FETCH uc.user " +
             "LEFT JOIN FETCH uc.climbGround " +
             "LEFT JOIN FETCH uc.userDateList ud " +
-            "LEFT JOIN FETCH ud.recordList r " +
+            "LEFT JOIN FETCH ud.climbingRecordList r " +
             "LEFT JOIN FETCH r.hold h " +
             "WHERE uc.user.id = :userId " +
             "AND uc.climbGround.Id = :climbGroundId " +
@@ -103,7 +106,7 @@ public interface UserClimbGroundRepository extends JpaRepository<UserClimbGround
             "LEFT JOIN FETCH uc.user " +
             "LEFT JOIN FETCH uc.climbGround " +
             "LEFT JOIN FETCH uc.userDateList ud " +
-            "LEFT JOIN FETCH ud.recordList r " +
+            "LEFT JOIN FETCH ud.climbingRecordList r " +
             "LEFT JOIN FETCH r.hold h " +
             "WHERE uc.user.id = :userId " +
             "AND uc.climbGround.Id = :climbGroundId " +
@@ -111,5 +114,13 @@ public interface UserClimbGroundRepository extends JpaRepository<UserClimbGround
             "AND MONTH(ud.createdAt) = :month " +
             "AND DAY(ud.createdAt) = :day")
     List<UserClimbGround> findClimbRecordsByUserIdAndClimbGroundIdAndDay(Long userId,Long climbGroundId, int year, int month, int day);
+
+    @Query("SELECT ucg FROM UserClimbGround ucg " +
+            "WHERE ucg.user.id = :userId " +
+            "AND ucg.climbGround.Id = :climbGroundId")
+    Optional<UserClimbGround> findUserClimbGroundByUserIDAndClimbGroundID(Long userId, Long climbGroundId);
+
+
+    Optional<UserClimbGround> findByUserAndClimbGround(User user, ClimbGround climbGround);
 }
 

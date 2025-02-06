@@ -2,14 +2,13 @@ package com.project.backend.userclimbground.service;
 
 import com.project.backend.climbground.entity.ClimbGround;
 import com.project.backend.climbground.repository.ClimbGroundRepository;
-import com.project.backend.common.ResponseType;
 import com.project.backend.common.response.ResponseCode;
 import com.project.backend.user.entity.User;
 import com.project.backend.user.repository.jpa.UserRepository;
 import com.project.backend.userclimbground.dto.requestDTO.ClimbGroundRecordRequestDTO;
 import com.project.backend.userclimbground.dto.requestDTO.UnlockClimbGroundRequsetDTO;
 import com.project.backend.hold.entity.HoldColorEnum;
-import com.project.backend.record.entity.Record;
+import com.project.backend.record.entity.ClimbingRecord;
 import com.project.backend.userclimbground.dto.requestDTO.ClimbRecordRequestDTO;
 import com.project.backend.userclimbground.dto.responseDTO.ClimbGroundRecordResponseDTO;
 import com.project.backend.userclimbground.dto.responseDTO.ClimbGroundStatus;
@@ -23,6 +22,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 
+import java.time.LocalDate;
+import java.time.temporal.ChronoField;
 import java.util.*;
 
 @Service
@@ -35,32 +36,32 @@ public class UserClimbGroundServiceImp implements UserClimbGroundService{
 
     // 년별 통계 조회
     @Override
-    public ClimbRecordResponseDTO getUserClimbRecordYear(ClimbRecordRequestDTO requestDTO){
-        List<UserClimbGround> userClimbGrounds = userClimbGroundRepository.findClimbRecordsByUserIdAndYear(requestDTO.getUserId(),requestDTO.getYear());
+    public ClimbRecordResponseDTO getUserClimbRecordYear(Long userId ,LocalDate date){
+        List<UserClimbGround> userClimbGrounds = userClimbGroundRepository.findClimbRecordsByUserIdAndYear(userId,date.getYear());
         return makeClimbRecordResponseDTO(userClimbGrounds);
     };
 
     // 월별 통계 조회
     @Override
-    public  ClimbRecordResponseDTO getUserClimbRecordMonth(ClimbRecordRequestDTO requestDTO){
+    public  ClimbRecordResponseDTO getUserClimbRecordMonth(Long userId ,LocalDate date){
 
-        List<UserClimbGround> userClimbGrounds = userClimbGroundRepository.findClimbRecordsByUserIdAndMonth(requestDTO.getUserId(),requestDTO.getYear(), requestDTO.getMonth());
+        List<UserClimbGround> userClimbGrounds = userClimbGroundRepository.findClimbRecordsByUserIdAndMonth(userId,date.getYear(), date.getMonthValue());
         return makeClimbRecordResponseDTO(userClimbGrounds);
     }
 
     // 주별 통계 조회
     @Override
-    public  ClimbRecordResponseDTO getUserClimbRecordWeek(ClimbRecordRequestDTO requestDTO){
+    public  ClimbRecordResponseDTO getUserClimbRecordWeek(Long userId ,LocalDate date){
 
-        List<UserClimbGround> userClimbGrounds = userClimbGroundRepository.findClimbRecordsByUserIdAndWeek(requestDTO.getUserId(),requestDTO.getYear(), requestDTO.getWeek());
+        List<UserClimbGround> userClimbGrounds = userClimbGroundRepository.findClimbRecordsByUserIdAndWeek(userId,date.getYear(),date.get(ChronoField.ALIGNED_WEEK_OF_MONTH) );
         return makeClimbRecordResponseDTO(userClimbGrounds);
     }
 
     // 일별 통계 조회
     @Override
-    public  ClimbRecordResponseDTO getUserClimbRecordDay(ClimbRecordRequestDTO requestDTO){
+    public  ClimbRecordResponseDTO getUserClimbRecordDay(Long userId ,LocalDate date){
 
-        List<UserClimbGround> userClimbGrounds = userClimbGroundRepository.findClimbRecordsByUserIdAndDay(requestDTO.getUserId(),requestDTO.getYear(), requestDTO.getMonth(), requestDTO.getDay());
+        List<UserClimbGround> userClimbGrounds = userClimbGroundRepository.findClimbRecordsByUserIdAndDay(userId,date.getYear(),date.getMonthValue(), date.getDayOfMonth());
         return makeClimbRecordResponseDTO(userClimbGrounds);
     }
 
@@ -79,7 +80,7 @@ public class UserClimbGroundServiceImp implements UserClimbGroundService{
 
             for (UserDate ud : uc.getUserDateList()){
                 totalVisited++;
-                for (Record r : ud.getRecordList()){
+                for (ClimbingRecord r : ud.getClimbingRecordList()){
                     totalTries++;
                     if (r.isSuccess()) totalSuccess++;
 
@@ -132,33 +133,33 @@ public class UserClimbGroundServiceImp implements UserClimbGroundService{
     };
 
     @Override
-    public ClimbGroundRecordResponseDTO getUserClimbGroundRecordYear(ClimbGroundRecordRequestDTO requestDTO){
+    public ClimbGroundRecordResponseDTO getUserClimbGroundRecordYear(Long userId , Long climbGroundId,LocalDate date){
         List<UserClimbGround> userClimbGrounds = userClimbGroundRepository.findClimbRecordsByUserIdAndClimbGroundIdAndYear(
-                requestDTO.getUserId(), requestDTO.getClimbGroundId(), requestDTO.getYear());
+                userId,climbGroundId,date.getYear());
 
         return makeClimbGroundRecordResponseDTO(userClimbGrounds);
     }
 
     @Override
-    public ClimbGroundRecordResponseDTO getUserClimbGroundRecordMonth(ClimbGroundRecordRequestDTO requestDTO){
+    public ClimbGroundRecordResponseDTO getUserClimbGroundRecordMonth(Long userId , Long climbGroundId,LocalDate date){
         List<UserClimbGround> userClimbGrounds = userClimbGroundRepository.findClimbRecordsByUserIdAndClimbGroundIdAndMonth(
-                requestDTO.getUserId(), requestDTO.getClimbGroundId(), requestDTO.getYear(), requestDTO.getMonth());
+                userId,climbGroundId,date.getYear(), date.getMonthValue());
 
         return makeClimbGroundRecordResponseDTO(userClimbGrounds);
     }
 
     @Override
-    public ClimbGroundRecordResponseDTO getUserClimbGroundRecordWeek(ClimbGroundRecordRequestDTO requestDTO){
+    public ClimbGroundRecordResponseDTO getUserClimbGroundRecordWeek(Long userId , Long climbGroundId,LocalDate date){
         List<UserClimbGround> userClimbGrounds = userClimbGroundRepository.findClimbRecordsByUserIdAndClimbGroundIdAndWeek(
-                requestDTO.getUserId(), requestDTO.getClimbGroundId(), requestDTO.getYear(), requestDTO.getWeek());
+                userId,climbGroundId,date.getYear(),date.get(ChronoField.ALIGNED_WEEK_OF_MONTH));
 
         return makeClimbGroundRecordResponseDTO(userClimbGrounds);
     }
 
     @Override
-    public ClimbGroundRecordResponseDTO getUserClimbGroundRecordDay(ClimbGroundRecordRequestDTO requestDTO){
+    public ClimbGroundRecordResponseDTO getUserClimbGroundRecordDay(Long userId , Long climbGroundId, LocalDate date){
         List<UserClimbGround> userClimbGrounds = userClimbGroundRepository.findClimbRecordsByUserIdAndClimbGroundIdAndDay(
-                requestDTO.getUserId(), requestDTO.getClimbGroundId(), requestDTO.getYear(), requestDTO.getMonth(), requestDTO.getDay());
+                userId,climbGroundId,date.getYear(), date.getMonthValue(), date.getDayOfMonth());
 
         return makeClimbGroundRecordResponseDTO(userClimbGrounds);
     }
@@ -176,7 +177,7 @@ public class UserClimbGroundServiceImp implements UserClimbGroundService{
             name = uc.getClimbGround().getName();
             for (UserDate ud : uc.getUserDateList()){
                 totalVisited++;
-                for (Record r : ud.getRecordList()){
+                for (ClimbingRecord r : ud.getClimbingRecordList()){
                     totalTries++;
                     if (r.isSuccess()) totalSuccess++;
 
