@@ -65,7 +65,6 @@ public class UserDateService {
         // 완등률
         double completionRate = totalCount > 0 ? (double) successCount / totalCount * 100 : 0;
 
-        
         // 클라이밍장 난이도
         // 클라이밍장 홀드 정보 조회
         Long climbingHoldGround = userDate.get().getUserClimbGround().getClimbGround().getId();
