@@ -1,19 +1,26 @@
 package com.project.backend.user.service;
 
-import com.project.backend.user.dto.request.LoginRequestDto;
+import com.project.backend.user.dto.UserTierRequestDto;
 import com.project.backend.user.dto.request.SignUpRequestDto;
+import com.project.backend.user.dto.request.UserInfoRequestDto;
+import com.project.backend.user.dto.response.UserTierResponseDto;
 import com.project.backend.user.entity.User;
-import org.springframework.http.ResponseEntity;
+import com.project.backend.userclimbground.entity.UserClimbGroundMedalEnum;
 import org.springframework.stereotype.Service;
+
+import java.util.Optional;
 
 @Service
 public interface UserService {
   public User getUserByUserName(String userName);
+  public void signUp(SignUpRequestDto signUpRequestDto);
+  public Optional<User> checkEmailDuplication(String email);
+  public Optional<User> checkNicknameDuplication(String nickname);
+  public User userFindById(Long id);
+  public User updateUserInfoById(Long id, UserInfoRequestDto requestDto);
+  public UserTierResponseDto userTierFindById(Long id);
+  public User insertUserTier(Long id, UserTierRequestDto requestDto);
+  public UserClimbGroundMedalEnum findMedalPerClimbGround(Long userId, Long climbId);
 
-  public ResponseEntity<?> signUp(SignUpRequestDto signUpRequestDto);
-
-  public boolean checkEmailDuplication(String email);
-
-  public boolean checkNicknameDuplication(String nickname);
-
+  public UserClimbGroundMedalEnum updateMedalPerClimbGround(Long userId, Long climbId);
 }

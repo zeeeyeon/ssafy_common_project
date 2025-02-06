@@ -1,7 +1,7 @@
 package com.project.backend.video.entity;
 
 import com.project.backend.common.auditing.BaseEntity;
-import com.project.backend.record.entity.Record;
+import com.project.backend.record.entity.ClimbingRecord;
 import jakarta.persistence.*;
 import lombok.Getter;
 
@@ -20,6 +20,6 @@ public class Video extends BaseEntity {
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "record_id")
-    private Record record;
+    private ClimbingRecord climbingRecord;
 
 }
