@@ -3,7 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:kkulkkulk/common/widgets/layout/main_layout.dart';
 import 'package:kkulkkulk/features/calendar/screens/calendar_screen.dart';
 import 'package:kkulkkulk/features/calendar/screens/calendar_detail_screen.dart';
-import 'package:kkulkkulk/features/camera/screens/albem_screen.dart';
+import 'package:kkulkkulk/features/camera/screens/album_screen.dart';
 import 'package:kkulkkulk/features/camera/screens/camera_screen.dart';
 import 'package:kkulkkulk/features/challenge/screens/challenge_screen.dart';
 import 'package:kkulkkulk/features/place/screens/place_screen.dart';
@@ -76,17 +76,17 @@ final router = GoRouter(
           path: '/profile',
           builder: (context, state) => const ProfileScreen(),
         ),
+        GoRoute(
+          path: '/album',
+          builder: (context, state) => const AlbumScreen(),
+        ),
       ],
     ),
     // 전체 화면으로 표시되는 라우트들
+
     GoRoute(
       path: '/camera',
       builder: (context, state) => const CameraScreen(),
-      parentNavigatorKey: _rootNavigatorKey,
-    ),
-    GoRoute(
-      path: '/album',
-      builder: (context, state) => const AlbumScreen(),
       parentNavigatorKey: _rootNavigatorKey,
     ),
   ],
