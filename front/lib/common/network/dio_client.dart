@@ -12,7 +12,8 @@ class DioClient {
     dio = Dio(
       BaseOptions(
         // baseUrl: 'http://3.38.250.245:8080', // API 서버 URL
-        baseUrl: 'http://192.168.30.158:8080',
+        // baseUrl: 'http://192.168.30.158:8080',
+        baseUrl: 'https://i12e206.p.ssafy.io',
         connectTimeout: const Duration(seconds: 10),
         receiveTimeout: const Duration(seconds: 10),
         headers: {

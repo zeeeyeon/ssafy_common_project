@@ -4,6 +4,6 @@ class PlaceAllModel {
 
   PlaceAllModel({
     required this.latitude,
-    required this.longitude}
-  );
+    required this.longitude
+  });
 }
