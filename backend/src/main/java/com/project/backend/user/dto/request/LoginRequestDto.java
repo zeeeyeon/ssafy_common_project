@@ -1,11 +1,16 @@
 package com.project.backend.user.dto.request;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-import lombok.Data;
-
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class LoginRequestDto {
 
-  private String username;
-  private String password;
+    private String email;
+    private String password;
 }

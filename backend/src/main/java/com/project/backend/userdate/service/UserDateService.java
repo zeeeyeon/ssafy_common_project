@@ -1,13 +1,18 @@
 package com.project.backend.userdate.service;
 
 import com.project.backend.hold.dto.HoldColorLevelDto;
+import com.project.backend.hold.dto.responseDTO.HoldResponseDTO;
 import com.project.backend.hold.entity.HoldColorEnum;
 import com.project.backend.hold.entity.HoldLevelEnum;
 import com.project.backend.hold.repository.HoldRepository;
-import com.project.backend.record.entity.Record;
+import com.project.backend.record.entity.ClimbingRecord;
+import com.project.backend.userclimbground.entity.UserClimbGround;
+import com.project.backend.userclimbground.repository.UserClimbGroundRepository;
 import com.project.backend.userdate.dto.MonthlyRecordDto;
+import com.project.backend.userdate.dto.request.UserDateCheckAndAddRequestDTO;
 import com.project.backend.userdate.dto.response.DailyClimbingRecordResponse;
 import com.project.backend.userdate.dto.response.MonthlyClimbingRecordResponse;
+import com.project.backend.userdate.dto.response.UserDateCheckAndAddResponseDTO;
 import com.project.backend.userdate.entity.UserDate;
 import com.project.backend.userdate.repository.UserDateRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -18,10 +23,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.YearMonth;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -30,6 +32,7 @@ public class UserDateService {
 
     private final UserDateRepository userDateRepository;
     private final HoldRepository holdRepository;
+    private final UserClimbGroundRepository userClimbGroundRepository;
 
     public DailyClimbingRecordResponse getDailyRecord(LocalDate selectedDate, Long userId) {
 
@@ -48,10 +51,10 @@ public class UserDateService {
         int visitCount = userDateRepository.countVisits(startOfDay, endOfDay, userDate.getUserClimbGround().getId());
 
         // 완등 횟수
-        Set<Record> records = userDate.getRecordList();
-        int totalCount = records.size();
-        long successCount = records.stream()
-                .filter(Record::isSuccess)
+        Set<ClimbingRecord> climbingRecords = userDate.getClimbingRecordList();
+        int totalCount = climbingRecords.size();
+        long successCount = climbingRecords.stream()
+                .filter(ClimbingRecord::isSuccess)
                 .count();
 
         // 완등률
@@ -71,15 +74,15 @@ public class UserDateService {
 
         // 해당 난이도 완등률
         // 색상별 시도 횟수
-        Map<HoldColorEnum, Long> colorAttempts = records.stream()
+        Map<HoldColorEnum, Long> colorAttempts = climbingRecords.stream()
                 .collect(Collectors.groupingBy(
                         record -> record.getHold().getColor(),
                         Collectors.counting()
                 ));
 
         // 색상별 성공 횟수
-        Map<HoldColorEnum, Long> colorSuccesses = records.stream()
-                .filter(Record::isSuccess)
+        Map<HoldColorEnum, Long> colorSuccesses = climbingRecords.stream()
+                .filter(ClimbingRecord::isSuccess)
                 .collect(Collectors.groupingBy(
                         record -> record.getHold().getColor(),
                         Collectors.counting()
@@ -132,5 +135,40 @@ public class UserDateService {
                 .month(month)
                 .records(dayRecords)
                 .build();
+    }
+
+    public UserDateCheckAndAddResponseDTO UserDateCheckAndAdd(UserDateCheckAndAddRequestDTO requestDTO) {
+        LocalDateTime startOfDay = requestDTO.getDate().atStartOfDay();
+        LocalDateTime endOfDay = requestDTO.getDate().atTime(LocalTime.MAX);
+
+        Optional<UserDate> userDate =userDateRepository.findUserDateByUserAndClimbgroundAndDate(requestDTO.getUserId(), requestDTO.getClimbGroundId(), startOfDay, endOfDay);
+        UserDateCheckAndAddResponseDTO responseDTO = new UserDateCheckAndAddResponseDTO();
+        if (userDate.isPresent()) { // 데이터가 있으면
+            responseDTO.setUserDateId(userDate.get().getId());
+            responseDTO.setName(userDate.get().getUserClimbGround().getClimbGround().getName());
+            List<HoldResponseDTO> holds = userDate.get().getUserClimbGround().getClimbGround().getHoldList().stream()
+                    .map(hold -> new HoldResponseDTO(hold.getId(),hold.getLevel(),hold.getColor()))
+                    .sorted(Comparator.comparing(HoldResponseDTO::getLevel))
+                    .collect(Collectors.toList());
+            responseDTO.setHolds(holds);
+            responseDTO.setNewlyCreated(false);
+        } else{
+            UserClimbGround userClimbGround = userClimbGroundRepository.findUserClimbGroundByUserIDAndClimbGroundID(requestDTO.getUserId(),requestDTO.getClimbGroundId())
+                    .orElseThrow(() -> new EntityNotFoundException("아직 해금되지 않은 클라이밍장 입니다"));
+            UserDate newUserDate = new UserDate();
+            newUserDate.setUserClimbGround(userClimbGround);
+            List<HoldResponseDTO> holds = userClimbGround.getClimbGround().getHoldList().stream()
+                    .map(hold -> new HoldResponseDTO(hold.getId(),hold.getLevel(),hold.getColor()))
+                    .sorted(Comparator.comparing(HoldResponseDTO::getLevel))
+                    .collect(Collectors.toList());
+            responseDTO.setName(userClimbGround.getClimbGround().getName());
+            responseDTO.setHolds(holds);
+            responseDTO.setNewlyCreated(true);
+            userDateRepository.save(newUserDate); // 다넣었으면 저장
+            responseDTO.setUserDateId(newUserDate.getId());
+
+        }
+
+        return responseDTO;
     }
 }
