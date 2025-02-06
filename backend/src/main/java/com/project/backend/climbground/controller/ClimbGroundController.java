@@ -16,7 +16,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -46,7 +45,7 @@ public class ClimbGroundController {
 
     // 클라이밍장 검색
     @GetMapping("/search")
-    public ResponseEntity<?> searchClimbGround(@RequestParam("keyword") String keyword, @RequestParam(name = "latitude") BigDecimal latitude, @RequestParam(name = "longitude") BigDecimal longitude) {
+    public ResponseEntity<?> searchClimbGround(@RequestParam("keyword") String keyword, @RequestParam(name = "latitude") double latitude, @RequestParam(name = "longitude") double longitude) {
         List<ClimbGroundAllResponseDTO> climbGrounds = ClimbGroundService.searchClimbGroundByKeyword(keyword,latitude,longitude);
 
         if (!climbGrounds.isEmpty()) {
@@ -57,7 +56,7 @@ public class ClimbGroundController {
     }
     // 클라이밍장 리스트 조회 (거리별 정렬)
     @GetMapping("/all/user-location")
-    public ResponseEntity<?> getAllDisCLimbs(@RequestParam(name = "latitude") BigDecimal latitude, @RequestParam(name = "longitude") BigDecimal longitude) {
+    public ResponseEntity<?> getAllDisCLimbs(@RequestParam(name = "latitude") double latitude, @RequestParam(name = "longitude") double longitude) {
         List<ClimbGroundAllResponseDTO> climbGrounds = ClimbGroundService.findAllClimbGround(latitude,longitude);
         if (!climbGrounds.isEmpty()) {
             return new ResponseEntity<>(Response.create(GET_CLIMB_GROUND_List, climbGrounds), GET_CLIMB_GROUND_List.getHttpStatus());
@@ -75,7 +74,7 @@ public class ClimbGroundController {
     }
 
     @GetMapping("/lock-climbground/list")
-    public ResponseEntity<?> getLockCimbGroundList(@RequestParam(name = "userId") Long userId, @RequestParam(name = "latitude") BigDecimal latitude, @RequestParam(name = "longitude") BigDecimal longitude) {
+    public ResponseEntity<?> getLockCimbGroundList(@RequestParam(name = "userId") Long userId, @RequestParam(name = "latitude") double latitude, @RequestParam(name = "longitude") double longitude) {
         List<LockClimbGroundAllResponseDTO> lockClimbGrounds = ClimbGroundService.findAllLockClimbGround(userId, latitude, longitude);
 
         if (!lockClimbGrounds.isEmpty()) {
@@ -85,7 +84,7 @@ public class ClimbGroundController {
     }
 
     @GetMapping("/lock-climbground/limit-five")
-    public ResponseEntity<?> getLockCimbGroundLimitFive(@RequestParam(name = "userId") Long userId, @RequestParam(name = "latitude") BigDecimal latitude, @RequestParam(name = "longitude") BigDecimal longitude) {
+    public ResponseEntity<?> getLockCimbGroundLimitFive(@RequestParam(name = "userId") Long userId, @RequestParam(name = "latitude") double latitude, @RequestParam(name = "longitude") double longitude) {
         List<LockClimbGroundAllResponseDTO> lockClimbGrounds = ClimbGroundService.findAllLockClimbGroundLimitFive(userId, latitude, longitude);
 
         if (!lockClimbGrounds.isEmpty()) {
