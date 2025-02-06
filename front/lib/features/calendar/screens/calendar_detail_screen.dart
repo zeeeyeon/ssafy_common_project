@@ -125,13 +125,37 @@ class CalendarDetailScreenState extends ConsumerState<CalendarDetailScreen> {
       // 난이도 업데이트 (holdColorLevel 사용)
       List<Map<String, dynamic>> difficulties = [];
       final List<String> colorOrder = [
-        'YELLOW',
-        'PINK',
-        'GREEN',
-        'GRAY',
-        'BLUE',
         'RED',
-        'BLACK'
+        'ORANGE',
+        'YELLOW',
+        'GREEN',
+        'BLUE',
+        'NAVY',
+        'PURPLE',
+        'PINK',
+        'SKYBLUE',
+        'CYAN',
+        'TEAL',
+        'LIME',
+        'AMBER',
+        'DEEPORANGE',
+        'DEEPPURPLE',
+        'LIGHTGREEN',
+        'BROWN',
+        'GRAY', // 또는 'GREY'
+        'BLACK',
+        'WHITE',
+        'INDIGO',
+        'BLUEGREY',
+        'SODOMY',
+        'MAROON',
+        'OLIVE',
+        'CORAL',
+        'VIOLET',
+        'MAGENTA',
+        'AQUA',
+        'GOLD',
+        'SILVER'
       ];
       for (var color in colorOrder) {
         if (detail.holdColorLevel.containsKey(color)) {
@@ -412,6 +436,8 @@ class CalendarDetailScreenState extends ConsumerState<CalendarDetailScreen> {
         return Colors.indigo;
       case 'BLUEGREY':
         return Colors.blueGrey;
+      case 'SODOMY':
+        return const Color(0xFF000000);
       case 'MAROON':
         return const Color(0xFF800000);
       case 'OLIVE':
