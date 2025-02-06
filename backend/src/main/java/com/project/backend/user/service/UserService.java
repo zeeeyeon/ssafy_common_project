@@ -5,6 +5,7 @@ import com.project.backend.user.dto.request.SignUpRequestDto;
 import com.project.backend.user.dto.request.UserInfoRequestDto;
 import com.project.backend.user.dto.response.UserTierResponseDto;
 import com.project.backend.user.entity.User;
+import com.project.backend.userclimbground.entity.UserClimbGroundMedalEnum;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -19,5 +20,7 @@ public interface UserService {
   public User updateUserInfoById(Long id, UserInfoRequestDto requestDto);
   public UserTierResponseDto userTierFindById(Long id);
   public User insertUserTier(Long id, UserTierRequestDto requestDto);
+  public UserClimbGroundMedalEnum findMedalPerClimbGround(Long userId, Long climbId);
 
+  public UserClimbGroundMedalEnum updateMedalPerClimbGround(Long userId, Long climbId);
 }
