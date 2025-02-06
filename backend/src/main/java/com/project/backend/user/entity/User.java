@@ -1,7 +1,8 @@
 package com.project.backend.user.entity;
-import com.project.backend.record.entity.Record;
+import com.project.backend.record.entity.ClimbingRecord;
+import com.project.backend.user.dto.UserTierRequestDto;
+import com.project.backend.user.dto.request.UserInfoRequestDto;
 import com.project.backend.userclimbground.entity.UserClimbGround;
-import com.project.backend.video.entity.Video;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -57,6 +58,7 @@ public class User {
 
     private float reach;
 
+    private LocalDateTime startDate;
     private LocalDateTime createDate;
     private LocalDateTime updateDate;
 
@@ -91,7 +93,7 @@ public class User {
 
     @Builder.Default
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-    private List<Record> userRecordList  = new ArrayList<>();
+    private List<ClimbingRecord> userClimbingRecordList = new ArrayList<>();
 
 
     @Builder
@@ -103,5 +105,19 @@ public class User {
         this.providerType = provider;
         this.nickname = nickname;
         this.score = score;
+    }
+
+    public User setUserInfoRquestDto(UserInfoRequestDto requestDto) {
+        this.username = requestDto.getUsername();
+        this.height = requestDto.getHeight();
+        this.reach = requestDto.getReach();
+        this.startDate = requestDto.getStartDate();
+
+        return this;
+    }
+
+    public User setUserTierRequestDto(UserTierRequestDto requestDto) {
+        this.tier = requestDto.getUserTier();
+        return this;
     }
 }

@@ -1,6 +1,7 @@
 package com.project.backend.user.dto.request;
 
 import com.project.backend.user.entity.User;
+import com.project.backend.user.entity.UserRoleEnum;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
@@ -15,6 +16,8 @@ public class SignUpRequestDto {
     private String email;
     @Pattern(regexp = "^(?=.*[a-zA-Z])((?=.*\\d)|(?=.*\\W)).{7,128}+$", message = "대소문자, 숫자, 특수문자 조합으로 8 ~ 128자리여야 합니다.")
     private String password;
+    @Pattern(regexp = "^(?=.*[a-zA-Z])((?=.*\\d)|(?=.*\\W)).{7,128}+$", message = "대소문자, 숫자, 특수문자 조합으로 8 ~ 128자리여야 합니다.")
+    private String passwordConfirm;
     @NotBlank(message = "이름은 공백일 수 없습니다.")
     private String username;
     @NotBlank(message = "전화번호는 공백일 수 없습니다.")
@@ -30,6 +33,7 @@ public class SignUpRequestDto {
                 .username(username)
                 .phone(phone)
                 .nickname(nickname)
+                .roleType(UserRoleEnum.USER)
                 .createDate(LocalDateTime.now())
                 .updateDate(LocalDateTime.now())
                 .build();
