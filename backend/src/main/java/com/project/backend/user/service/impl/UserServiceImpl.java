@@ -1,17 +1,27 @@
 package com.project.backend.user.service.impl;
 
+import com.project.backend.climbground.entity.ClimbGround;
+import com.project.backend.climbground.repository.ClimbGroundRepository;
 import com.project.backend.common.advice.exception.CustomException;
 import com.project.backend.common.response.ResponseCode;
+import com.project.backend.record.entity.ClimbingRecord;
+import com.project.backend.user.dto.UserTierRequestDto;
 import com.project.backend.user.dto.request.SignUpRequestDto;
 import com.project.backend.user.dto.request.UserInfoRequestDto;
+import com.project.backend.user.dto.response.UserTierResponseDto;
 import com.project.backend.user.entity.User;
+import com.project.backend.user.entity.UserTierEnum;
 import com.project.backend.user.repository.jpa.UserRepository;
 import com.project.backend.user.service.UserService;
+import com.project.backend.userclimbground.entity.UserClimbGround;
+import com.project.backend.userclimbground.entity.UserClimbGroundMedalEnum;
+import com.project.backend.userclimbground.repository.UserClimbGroundRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @RequiredArgsConstructor
@@ -20,6 +30,8 @@ import java.util.Optional;
 public class UserServiceImpl implements UserService {
 
   private final UserRepository userRepository;
+  private final ClimbGroundRepository climbGroundRepository;
+  private final UserClimbGroundRepository userClimbGroundRepository;
   private final BCryptPasswordEncoder passwordEncoder;
 
   public User getUserByUserName(String userName){
@@ -63,13 +75,89 @@ public class UserServiceImpl implements UserService {
     return userRepository.findByNickname(nickname);
   }
 
-  public User userInfofindById(Long id) {
+  public User userProfileFindById(Long id) {
     return userRepository.findById(id).orElseThrow(() -> new CustomException(ResponseCode.NOT_FOUND_USER));
   }
 
-  public User updateUserInfoById(Long id, UserInfoRequestDto requestDto) {
+  public User updateUserProfileById(Long id, UserInfoRequestDto requestDto) {
     User findUser = userRepository.findById(id).orElseThrow(() -> new CustomException(ResponseCode.NOT_FOUND_USER));
 
     return userRepository.save(findUser.setUserInfoRquestDto(requestDto));
+  }
+
+  public UserTierResponseDto userTierFindById(Long id) {
+    User user = userRepository.findById(id).orElseThrow();
+    return new UserTierResponseDto(user);
+  }
+
+  public User updateUserTier(Long id) {
+    User findUser = userRepository.findById(id)
+            .orElseThrow(() -> new CustomException(ResponseCode.NOT_FOUND_USER));
+
+    int totalScore = findUser.getUserClimbGroundList().stream()
+            .map(UserClimbGround::getMedal)
+            .mapToInt(UserClimbGroundMedalEnum::getScore)
+            .sum();
+
+    UserTierEnum newTier = UserTierEnum.getTierByScore(totalScore);
+    findUser.setTier(newTier);
+
+    return userRepository.save(findUser);
+  }
+
+  public UserClimbGroundMedalEnum findMedalPerClimbGround(Long userId, Long climbId) {
+    User findUser = userRepository.findById(userId).orElseThrow(() -> new CustomException(ResponseCode.NOT_FOUND_USER));
+    ClimbGround findClimbGround = climbGroundRepository.findById(climbId).orElseThrow(() -> new CustomException(ResponseCode.NOT_FOUND_CLIMBGOUND));
+
+    UserClimbGround userClimbGround = userClimbGroundRepository.findByUserAndClimbGround(findUser, findClimbGround)
+            .orElseThrow(() -> new CustomException(ResponseCode.NOT_FOUND_USER_CLIMBGROUND));
+
+    return userClimbGround.getMedal();
+  }
+
+  @Override
+  public UserClimbGroundMedalEnum updateMedalPerClimbGround(Long userId, Long climbId) {
+    User findUser = userRepository.findById(userId)
+            .orElseThrow(() -> new CustomException(ResponseCode.NOT_FOUND_USER));
+    ClimbGround findClimbGround = climbGroundRepository.findById(climbId)
+            .orElseThrow(() -> new CustomException(ResponseCode.NOT_FOUND_CLIMBGOUND));
+
+    UserClimbGround userClimbGround = userClimbGroundRepository
+            .findByUserAndClimbGround(findUser, findClimbGround)
+            .orElse(UserClimbGround.builder()
+                    .user(findUser)
+                    .climbGround(findClimbGround)
+                    .medal(UserClimbGroundMedalEnum.BRONZE)  // 동메달로 초기화
+                    .build());
+
+    // 시도 횟수 계산
+    long totalAttempts = userClimbGround.getUserDateList().stream()
+            .flatMap(userDate -> userDate.getClimbingRecordList().stream())
+            .count();
+
+    // 성공 횟수 계산
+    long successfulAttempts = userClimbGround.getUserDateList().stream()
+            .flatMap(userDate -> userDate.getClimbingRecordList().stream())
+            .filter(ClimbingRecord::isSuccess)
+            .count();
+
+    // 메달 업데이트 로직
+    UserClimbGroundMedalEnum newMedal = UserClimbGroundMedalEnum.BRONZE;
+
+    if (totalAttempts >= 5) {
+      if (totalAttempts > 0 && (double) successfulAttempts / totalAttempts >= 0.5) {
+        newMedal = UserClimbGroundMedalEnum.GOLD;
+      } else {
+        newMedal = UserClimbGroundMedalEnum.SILVER;
+      }
+    }
+
+    // 메달 업데이트 및 저장
+    if (userClimbGround.getId() == null || !userClimbGround.getMedal().equals(newMedal)) {
+      userClimbGround.updateMedal(newMedal);
+      userClimbGroundRepository.save(userClimbGround);
+    }
+
+    return userClimbGround.getMedal();
   }
 }

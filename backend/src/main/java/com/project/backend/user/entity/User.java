@@ -1,5 +1,6 @@
 package com.project.backend.user.entity;
 import com.project.backend.record.entity.ClimbingRecord;
+import com.project.backend.user.dto.UserTierRequestDto;
 import com.project.backend.user.dto.request.UserInfoRequestDto;
 import com.project.backend.userclimbground.entity.UserClimbGround;
 import jakarta.persistence.*;
@@ -72,8 +73,8 @@ public class User {
     private String profileImageUrl;
 
 //    @NotNull
-    @Column(length = 20)
-    // USER
+//    @Column(length = 20)
+    @Enumerated(EnumType.STRING)
     private UserRoleEnum roleType;
 
 //    @NotNull
@@ -84,6 +85,7 @@ public class User {
     private int score;
 
     // tier
+    @Enumerated(EnumType.STRING)
     private UserTierEnum tier;
 
     @Builder.Default
@@ -96,7 +98,7 @@ public class User {
 
 
     @Builder
-    public User(Long id, String username, String email, UserRoleEnum role, UserProviderEnum provider, String nickname, int score) {
+    public User(Long id, String username, String email, UserRoleEnum role, UserProviderEnum provider, String nickname, int score, UserTierEnum tier) {
         this.id = id;
         this.username = username;
         this.email = email;
@@ -104,6 +106,7 @@ public class User {
         this.providerType = provider;
         this.nickname = nickname;
         this.score = score;
+        this.tier = tier;
     }
 
     public User setUserInfoRquestDto(UserInfoRequestDto requestDto) {

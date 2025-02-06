@@ -18,29 +18,31 @@ import java.time.YearMonth;
 
 import static com.project.backend.common.response.ResponseCode.*;
 
+import static com.project.backend.common.response.ResponseCode.GET_DAILY_RECORD;
+import static com.project.backend.common.response.ResponseCode.GET_MONTHLY_RECORD;
+
 @RestController
 @RequestMapping("/api/record")
 @RequiredArgsConstructor
 public class UserDateController {
     private final UserDateService userDateService;
 
-    // user 가져오는 방법 물어보기
-    @GetMapping("/daily/{userId}")
-    public ResponseEntity<DailyClimbingRecordResponse> getDailyRecord (
-            @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate selectedDate,
+    @GetMapping("daily/{userId}")
+    public ResponseEntity<?> getDailyRecord (
+            @RequestParam("date") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate selectedDate,
             @PathVariable Long userId) {
 
         DailyClimbingRecordResponse dailyRecord = userDateService.getDailyRecord(selectedDate, userId);
-        return null;
+        return new ResponseEntity<>(Response.create(GET_DAILY_RECORD, dailyRecord), GET_DAILY_RECORD.getHttpStatus());
     }
 
     @GetMapping("/monthly/{userId}")
-    public ResponseEntity<MonthlyClimbingRecordResponse> getMonthlyRecords(
+    public ResponseEntity<?> getMonthlyRecords(
             @RequestParam("date") @DateTimeFormat(pattern = "yyyy-MM") YearMonth selectedMonth,
             @PathVariable Long userId) {
 
         MonthlyClimbingRecordResponse monthlyRecords = userDateService.getMonthlyRecords(selectedMonth, userId);
-        return null;
+        return new ResponseEntity<>(Response.create(GET_MONTHLY_RECORD, monthlyRecords), GET_MONTHLY_RECORD.getHttpStatus());
     }
 
     // user_date 생성
