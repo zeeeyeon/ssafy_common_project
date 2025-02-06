@@ -27,7 +27,6 @@ import static com.project.backend.common.response.ResponseCode.GET_MONTHLY_RECOR
 public class UserDateController {
     private final UserDateService userDateService;
 
-    // user 가져오는 방법 물어보기
     @GetMapping("daily/{userId}")
     public ResponseEntity<?> getDailyRecord (
             @RequestParam("date") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate selectedDate,
