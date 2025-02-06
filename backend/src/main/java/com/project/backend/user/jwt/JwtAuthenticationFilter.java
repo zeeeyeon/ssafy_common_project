@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.backend.common.response.Response;
 import com.project.backend.user.auth.CustomUserDetails;
 import com.project.backend.user.dto.request.LoginRequestDto;
+import com.project.backend.user.entity.User;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

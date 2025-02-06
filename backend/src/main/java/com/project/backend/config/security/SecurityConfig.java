@@ -2,17 +2,9 @@ package com.project.backend.config.security;
 
 import com.project.backend.config.properties.AppProperties;
 import com.project.backend.config.properties.CorsProperties;
-//import com.project.backend.oauth.filter.TokenAuthenticationFilter;
-import com.project.backend.oauth.handler.OAuth2AuthenticationFailureHandler;
-import com.project.backend.oauth.handler.OAuth2AuthenticationSuccessHandler;
-import com.project.backend.oauth.handler.TokenAccessDeniedHandler;
-import com.project.backend.oauth.repository.OAuth2AuthorizationRequestBasedOnCookieRepository;
-import com.project.backend.oauth.service.CustomOAuth2UserService;
-import com.project.backend.oauth.token.AuthTokenProvider;
 import com.project.backend.user.auth.CustomUserDetailsService;
 import com.project.backend.user.jwt.JwtAuthenticationFilter;
 import com.project.backend.user.jwt.JwtAuthorizationFilter;
-import com.project.backend.user.repository.redis.UserRefreshTokenRepository;
 import com.project.backend.user.repository.jpa.UserRepository;
 import com.project.backend.user.util.CustomResponseUtil;
 import lombok.RequiredArgsConstructor;
@@ -43,13 +35,9 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 public class SecurityConfig {
 
     private final UserRepository userRepository;  // 필드 추가
-    private final CorsProperties corsProperties;
     private final AppProperties appProperties;
-    private final AuthTokenProvider tokenProvider;
     private final CustomUserDetailsService userDetailsService;
-    private final CustomOAuth2UserService oAuth2UserService;
-    private final TokenAccessDeniedHandler tokenAccessDeniedHandler;
-    private final UserRefreshTokenRepository userRefreshTokenRepository;
+    private final CorsProperties corsProperties;
     private final Logger log = LoggerFactory.getLogger(getClass());
 
     @Bean
@@ -76,9 +64,7 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
-                .headers(headers ->
-                        headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable)
-                )
+
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
@@ -88,7 +74,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> {
                     auth
                             .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
-                            .requestMatchers("/api/user/signup").permitAll()
+                            .requestMatchers("/api/user/signup", "/api/user/social/**").permitAll()
                             .requestMatchers("/api/user/**").authenticated()
                             .anyRequest().permitAll();
                 })
@@ -114,30 +100,6 @@ public class SecurityConfig {
                 .passwordEncoder(passwordEncoder());
         return authenticationManagerBuilder.build();
     }
-//    @Bean
-//    public TokenAuthenticationFilter tokenAuthenticationFilter() {
-//        return new TokenAuthenticationFilter(tokenProvider);
-//    }
-
-    @Bean
-    public OAuth2AuthorizationRequestBasedOnCookieRepository oAuth2AuthorizationRequestBasedOnCookieRepository() {
-        return new OAuth2AuthorizationRequestBasedOnCookieRepository();
-    }
-
-    @Bean
-    public OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler() {
-        return new OAuth2AuthenticationSuccessHandler(
-                tokenProvider,
-                appProperties,
-                userRefreshTokenRepository,
-                oAuth2AuthorizationRequestBasedOnCookieRepository()
-        );
-    }
-
-    @Bean
-    public OAuth2AuthenticationFailureHandler oAuth2AuthenticationFailureHandler() {
-        return new OAuth2AuthenticationFailureHandler(oAuth2AuthorizationRequestBasedOnCookieRepository());
-    }
 
     @Bean
     public CorsConfigurationSource configurationSource() {
@@ -148,6 +110,7 @@ public class SecurityConfig {
         configuration.addAllowedOriginPattern("*");
         configuration.setAllowCredentials(true);
         configuration.addExposedHeader("Authorization");
+        configuration.addExposedHeader("Refresh-Token");
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
