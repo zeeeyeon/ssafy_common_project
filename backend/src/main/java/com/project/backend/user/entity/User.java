@@ -1,6 +1,7 @@
 package com.project.backend.user.entity;
+import com.project.backend.oauth.entity.UserPrincipal;
 import com.project.backend.record.entity.ClimbingRecord;
-import com.project.backend.user.dto.UserTierRequestDto;
+import com.project.backend.user.auth.CustomUserDetails;
 import com.project.backend.user.dto.request.UserInfoRequestDto;
 import com.project.backend.userclimbground.entity.UserClimbGround;
 import jakarta.persistence.*;
@@ -44,6 +45,9 @@ public class User {
 //    @NotNull
     @Size(max = 100)
     private String username;
+
+    // 소셜 로그인 회원용 (카카오의 고유 ID 등)
+    private Long socialId;
 
 //    @NotNull
     private String phone;

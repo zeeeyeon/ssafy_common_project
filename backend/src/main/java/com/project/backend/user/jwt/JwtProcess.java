@@ -42,7 +42,22 @@ public class JwtProcess {
 
         } catch (Exception e) {
             log.error("JWT 토큰 생성 실패: ", e);
-            throw new RuntimeException("JWT 토큰 생성에 실패했습니다.");
+            throw new RuntimeException("JWT Access Token 생성 실패");
+        }
+    }
+
+    // Refresh Token 생성
+    public static String createRefreshToken(CustomUserDetails user) {
+        try {
+            String refreshToken = JWT.create()
+                    .withSubject(user.getUser().getId() + "")
+                    .withIssuedAt(new Date())
+                    .withExpiresAt(new Date(System.currentTimeMillis() + JwtVO.REFRESH_EXPIRATION_TIME))
+                    .sign(Algorithm.HMAC512(JwtVO.SECRET));
+            return JwtVO.TOKEN_PREFIX + refreshToken;
+        } catch (Exception e) {
+            log.error("JWT Refresh Token 생성 실패", e);
+            throw new RuntimeException("JWT Refresh Token 생성 실패");
         }
     }
 
