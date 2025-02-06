@@ -72,6 +72,9 @@ class CalendarScreenState extends ConsumerState<CalendarScreen> {
   @override
   Widget build(BuildContext context) {
     final calendarData = ref.watch(calendarProvider);
+    // 빈 칸 계산 (일요일부터 시작하도록 하였음)
+    final int blankCount = getFirstWeekdayOfMonth() % 7;
+    final int totalItems = getDaysInMonth() + blankCount;
 
     return Scaffold(
       appBar: CustomAppBar(
@@ -89,20 +92,16 @@ class CalendarScreenState extends ConsumerState<CalendarScreen> {
             Expanded(
               child: PageView.builder(
                 controller: pageController,
-                onPageChanged:
-                    handleMonthChange, // 🔹 수정된 `handleMonthChange` 적용
+                onPageChanged: handleMonthChange,
                 itemBuilder: (context, index) {
                   return calendarData == null
-                      ? const Center(
-                          child: CircularProgressIndicator()) // 📌 데이터 로딩 중 표시
+                      ? const Center(child: CircularProgressIndicator())
                       : GestureDetector(
                           onVerticalDragEnd: (details) {
                             if (details.primaryVelocity! > 0) {
-                              handleMonthChange(
-                                  previousPage - 1); // 🔹 아래로 스와이프 → 이전 달
+                              handleMonthChange(previousPage - 1);
                             } else if (details.primaryVelocity! < 0) {
-                              handleMonthChange(
-                                  previousPage + 1); // 🔹 위로 스와이프 → 다음 달
+                              handleMonthChange(previousPage + 1);
                             }
                           },
                           child: GridView.builder(
@@ -110,19 +109,17 @@ class CalendarScreenState extends ConsumerState<CalendarScreen> {
                                 horizontal: 16, vertical: 8),
                             gridDelegate:
                                 const SliverGridDelegateWithFixedCrossAxisCount(
-                                    crossAxisCount: 7,
-                                    mainAxisSpacing: 4,
-                                    crossAxisSpacing: 4,
-                                    childAspectRatio: 0.6),
-                            itemCount:
-                                getDaysInMonth() + getFirstWeekdayOfMonth() - 1,
+                              crossAxisCount: 7,
+                              mainAxisSpacing: 4,
+                              crossAxisSpacing: 4,
+                              childAspectRatio: 0.6,
+                            ),
+                            itemCount: totalItems,
                             itemBuilder: (context, index) {
-                              if (index < getFirstWeekdayOfMonth() - 1) {
+                              if (index < blankCount) {
                                 return Container();
                               }
-
-                              final dayNumber =
-                                  index - getFirstWeekdayOfMonth() + 2;
+                              final dayNumber = index - blankCount + 1;
                               final currentDate = DateTime(
                                 currentMonth.year,
                                 currentMonth.month,
@@ -143,6 +140,11 @@ class CalendarScreenState extends ConsumerState<CalendarScreen> {
             ),
           ],
         ),
+      ),
+      // FloatingActionButton을 누르면 하단에서 올라오는 custom dialog를 호출
+      floatingActionButton: FloatingActionButton(
+        child: const Icon(Icons.add),
+        onPressed: () => _showCustomDialog(context),
       ),
     );
   }
@@ -249,7 +251,8 @@ class CalendarScreenState extends ConsumerState<CalendarScreen> {
   }
 
   int getFirstWeekdayOfMonth() {
-    return DateTime(currentMonth.year, currentMonth.month, 1).weekday;
+    int weekday = DateTime(currentMonth.year, currentMonth.month, 1).weekday;
+    return (weekday % 7);
   }
 
   double _getOpacityFromAttempts(int attempts) {
@@ -276,5 +279,84 @@ class CalendarScreenState extends ConsumerState<CalendarScreen> {
         );
 
     return record.totalCount;
+  }
+
+  // 하단에서 슬라이드 업 하는 커스텀 다이얼로그 (Bottom Sheet) 호출 함수
+  void _showCustomDialog(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (BuildContext context) {
+        return Container(
+          width: 300,
+          margin: const EdgeInsets.only(bottom: 10),
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: Colors.blue.withOpacity(0.4), width: 2),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _buildCustomButton(
+                context,
+                '카메라',
+                Icons.camera_alt,
+                Colors.blue,
+                () {
+                  context.go('/camera');
+                },
+              ),
+              const SizedBox(height: 10),
+              _buildCustomButton(
+                context,
+                '앨범',
+                Icons.photo_album,
+                Colors.blue,
+                () {
+                  context.go('/album');
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  // custom bottom sheet 내 버튼 디자인 (ElevatedButton 스타일)
+  Widget _buildCustomButton(BuildContext context, String text, IconData icon,
+      Color color, Function() onPressed) {
+    return SizedBox(
+      width: double.infinity,
+      child: ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: color.withOpacity(0.9),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          padding: const EdgeInsets.symmetric(vertical: 20),
+        ),
+        onPressed: () {
+          Navigator.pop(context);
+          onPressed();
+          // TODO: 각 버튼에 대한 기능 구현 (예: 카메라 실행, 앨범 열기 등)
+        },
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, color: Colors.white),
+            const SizedBox(width: 10),
+            Text(
+              text,
+              style: const TextStyle(
+                  fontSize: 16,
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
