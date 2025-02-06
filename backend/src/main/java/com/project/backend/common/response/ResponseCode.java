@@ -20,7 +20,13 @@ public enum ResponseCode {
     EXISTED_USER_PHONE(400, HttpStatus.BAD_REQUEST, "이미 존재하는 전화번호 입니다."),
     MISMATCH_PASSWORD(400, HttpStatus.BAD_REQUEST, "비밀번호가 일치하지 않습니다."),
 
-    GET_USER_INFO(successCode(), HttpStatus.OK, "사용자의 정보가 조회되었습니다."),
+    GET_USER_PROFILE(successCode(), HttpStatus.OK, "사용자의 정보가 조회되었습니다."),
+    UPDATE_USER_PROFILE(successCode(), HttpStatus.OK, "사용자의 정보가 갱신되었습니다."),
+
+    GET_USER_TIER(successCode(), HttpStatus.OK, "사용자의 티어가 조회되었습니다."),
+    UPDATE_USER_TIER(successCode(), HttpStatus.OK, "사용자의 티어가 갱신되었습니다."),
+
+
     GET_USER_CLIMB_GROUND_MEDAL(successCode(), HttpStatus.OK, "사용자의 해당 클라이밍장에 대한 메달이 조회되었습니다."),
     NOT_FOUND_USER(400, HttpStatus.NOT_FOUND, "사용자를 찾을 수 없습니다."),
     UNAUTHORIZED(401, HttpStatus.UNAUTHORIZED, "권한이 없습니다."),
