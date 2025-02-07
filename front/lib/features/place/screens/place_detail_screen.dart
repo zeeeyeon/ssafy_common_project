@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:kkulkkulk/features/place/data/models/place_detail_model.dart';
 import 'package:kkulkkulk/features/place/data/repositories/place_repository.dart';
 import 'package:kkulkkulk/common/widgets/layout/custom_app_bar.dart'; // CustomAppBar 경로 수정
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class PlaceDetailScreen extends StatefulWidget {
   final int id;
@@ -25,10 +27,13 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CustomAppBar(title: '장소 상세 정보'),
+      appBar: CustomAppBar(
+        title: '장소 상세 정보',
+        
+      ),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: FutureBuilder<PlaceDetailModel>(
+        padding: const EdgeInsets.all(0),
+        child: FutureBuilder<PlaceDetailModel>( 
           future: placeDetail,
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
@@ -44,65 +49,91 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // 장소 이름
-                    Text(
-                      '장소 이름: ${place.name}',
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    Image.network(
+                      place.image,
+                      width: double.infinity,
+                      height: 250,
+                      fit: BoxFit.fill,
                     ),
-                    SizedBox(height: 8),
-                    // 주소
-                    Text(
-                      '주소: ${place.address}',
-                      style: TextStyle(fontSize: 16),
-                    ),
-                    SizedBox(height: 8),
-                    // 전화번호
-                    Text(
-                      '전화번호: ${place.number}',
-                      style: TextStyle(fontSize: 16),
-                    ),
-                    SizedBox(height: 8),
-                    // SNS 링크
-                    Text(
-                      'SNS: ${place.snsUrl}',
-                      style: TextStyle(fontSize: 16),
-                    ),
-                    SizedBox(height: 8),
-                    // 운영 시간
-                    Text(
-                      '운영 시간: ${place.open}',
-                      style: TextStyle(fontSize: 16),
-                    ),
-                    SizedBox(height: 8),
-                    // 위치 (위도, 경도)
-                    Text(
-                      '위도: ${place.latitude}',
-                      style: TextStyle(fontSize: 16),
-                    ),
-                    Text(
-                      '경도: ${place.longitude}',
-                      style: TextStyle(fontSize: 16),
-                    ),
-                    SizedBox(height: 16),
-                    // Holds 정보 출력
-                    Text(
-                      'Holds:',
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                    ),
-                    ...place.holds.map((hold) => Text(
-                          'Level: ${hold.level}, Color: ${hold.color}',
-                          style: TextStyle(fontSize: 16),
-                        )),
-                    SizedBox(height: 16),
-                    // Info 정보 출력
-                    Text(
-                      '기타 정보:',
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                    ),
-                    ...place.infos.map((info) => Text(
+                    Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                           Text(
+                            '${place.name}',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          Text(
+                            '${place.address}',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.grey
+                            ),
+                          ),
+                          SizedBox(height: 16),
+                          Row(
+                            children: [
+                              Icon(Icons.call),
+                              SizedBox(width: 16.0),
+                              Text(
+                                '${place.number}',
+                              )
+                            ],
+
+                          ),
+                          SizedBox(height: 8),
+                          Row(
+                            children: [
+                              FaIcon(
+                                FontAwesomeIcons.instagram,
+                                color: Colors.pinkAccent,
+                              ),
+                              SizedBox(width: 16.0),
+                              // Text(
+                              //   '${place.snsUrl}'
+                              // ),
+                              TextButton(
+                                onPressed: () {},
+                                child: Text('인스타그램'),
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: 16,),
+                          // Holds 정보 출력
+                          Text(
+                            '편의시절 및 서비스',
+                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                          ),
+                          ...place.infos.map((info) => Text(
                           info.info,
                           style: TextStyle(fontSize: 16),
-                        )),
+                          )),
+                          SizedBox(height: 16,),
+                          Text(
+                            '난이도',
+                            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                          ),
+                          Text(
+                            '총 ${place.holds.length}개의 난이도로 나뉘어 있어요',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.grey
+                            ),
+                          ),
+                          SizedBox(height: 8),
+                          // Hold 시각화: 각 Hold의 색상과 난이도를 그래픽으로 표현
+                          _buildHoldsGraph(place.holds),
+                          SizedBox(height: 16),
+                          // Info 정보 출력
+                        ],
+                      ),
+                    ),
                   ],
                 ),
               );
@@ -111,5 +142,95 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
         ),
       ),
     );
+  }
+
+  // 난이도 그래프를 위한 함수 (각 Hold 색상 표시)
+  Widget _buildHoldsGraph(List<HoldModel> holds) {
+    // 색상별로 배치된 난이도를 표시하는 Row 형태로 반환
+    return Row(
+      children: holds.map((hold) {
+        return Expanded(
+          child: Container(
+            height: 25,
+            margin: const EdgeInsets.symmetric(horizontal: 1),
+            decoration: BoxDecoration(
+              color: getColorFromName(hold.color), // 색상에 맞는 color 적용
+              borderRadius: BorderRadius.circular(4),
+            ),
+          ),
+        );
+      }).toList(),
+    );
+  }
+
+  // 헬퍼 함수: 색상 이름을 Color로 변환 (기존의 getColorFromName 함수 사용)
+  Color getColorFromName(String name) {
+    switch (name.toUpperCase()) {
+      case 'RED':
+        return Colors.red;
+      case 'ORANGE':
+        return Colors.orange;
+      case 'YELLOW':
+        return Colors.yellow;
+      case 'GREEN':
+        return Colors.green;
+      case 'BLUE':
+        return Colors.blue;
+      case 'NAVY':
+        return const Color(0xFF000080); // 네이비
+      case 'PURPLE':
+        return Colors.purple;
+      case 'PINK':
+        return Colors.pink;
+      case 'SKYBLUE':
+        return Colors.lightBlueAccent; // 스카이블루
+      case 'CYAN':
+        return Colors.cyan;
+      case 'TEAL':
+        return Colors.teal;
+      case 'LIME':
+        return Colors.lime;
+      case 'AMBER':
+        return Colors.amber;
+      case 'DEEPORANGE':
+        return Colors.deepOrange;
+      case 'DEEPPURPLE':
+        return Colors.deepPurple;
+      case 'LIGHTGREEN':
+        return Colors.lightGreen;
+      case 'BROWN':
+        return Colors.brown;
+      case 'GREY':
+      case 'GRAY':
+        return Colors.grey;
+      case 'BLACK':
+        return Colors.black;
+      case 'WHITE':
+        return Colors.white;
+      case 'INDIGO':
+        return Colors.indigo;
+      case 'BLUEGREY':
+        return Colors.blueGrey;
+      case 'SODOMY':
+        return const Color(0xFF000000);
+      case 'MAROON':
+        return const Color(0xFF800000);
+      case 'OLIVE':
+        return const Color(0xFF808000);
+      case 'CORAL':
+        return const Color(0xFFFF7F50);
+      case 'VIOLET':
+        return const Color(0xFF8F00FF);
+      case 'MAGENTA':
+        return const Color(0xFFFF00FF);
+      case 'AQUA':
+        return const Color(0xFF00FFFF);
+      case 'GOLD':
+        return const Color(0xFFFFD700);
+      case 'SILVER':
+        return const Color(0xFFC0C0C0);
+      default:
+        return Colors.grey;
+    }
   }
 }
