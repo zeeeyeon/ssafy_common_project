@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -28,4 +29,8 @@ public interface ClimbGroundRepository extends JpaRepository<ClimbGround, Long> 
             "FROM ClimbGround c " +
             "LEFT JOIN UserClimbGround uc ON c.Id = uc.climbGround.Id AND uc.user.id = :userId")
     List<MiddleLockClimbGroundResponseDTO> findAllWithUnlockStatus(Long userId);
+
+    //이거 만들어줄수 있어??
+    @Query(value = "SELECT * FROM ClimbGround ORDER BY ST_Distance_Sphere(point(longitude, latitude), point(:longitude, :latitude)) ASC LIMIT 1", nativeQuery = true)
+    ClimbGround findClimbGroundByDistance(BigDecimal latitude, BigDecimal longitude);
 }

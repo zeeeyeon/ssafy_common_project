@@ -33,8 +33,6 @@ public class S3UploadService {
 
     public VideoSaveResponseDTO saveFile(MultipartFile multipartFile, ClimbingRecord climbingRecord) throws IOException {
 
-        checkFileTypeOrThrow(multipartFile); // 파일 타입 체크
-        checkFileSizeOrThrow(multipartFile); // 파일 크기 체크
 
         String originalFilename = multipartFile.getOriginalFilename();
 
@@ -60,7 +58,7 @@ public class S3UploadService {
     /*
      * 파일 타입 MP4인지 확인
      */
-    private void checkFileTypeOrThrow(MultipartFile file) {
+    public void checkFileTypeOrThrow(MultipartFile file) {
         String contentType = file.getContentType();
         if (!contentType.equals("video/mp4")){
             throw new CustomException(ResponseCode.INVALID_FILETYPE);
@@ -70,7 +68,7 @@ public class S3UploadService {
     /*
      * 파일 사이즈가 10GB 이상인지 확인
      */
-    private void checkFileSizeOrThrow(MultipartFile file) {
+    public void checkFileSizeOrThrow(MultipartFile file) {
         long fileSize = file.getSize();
         if (fileSize > MAX_FILE_SIZE){
             throw new CustomException(ResponseCode.FILE_SIZE_EXCEEDED);
