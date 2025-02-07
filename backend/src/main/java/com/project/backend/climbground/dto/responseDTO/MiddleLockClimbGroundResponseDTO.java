@@ -4,7 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.math.BigDecimal;
 
 @Getter
 @Setter
@@ -15,8 +14,8 @@ public class MiddleLockClimbGroundResponseDTO {
     private String name;
     private String image;
     private String address;
-    private BigDecimal latitude;
-    private BigDecimal longitude;
+    private double latitude;
+    private double longitude;
     private boolean isLocked;
 
 }
