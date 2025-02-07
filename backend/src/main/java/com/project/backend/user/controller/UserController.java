@@ -59,9 +59,8 @@ public class UserController {
 
   // 사용자 프로필 조회 ( 이름, 클라이밍 시작일, 키, 팔길이)
   @GetMapping("/profile")
-  public ResponseEntity<?> findUserProfile(/*@AuthenticationPrincipal CustomUserDetails userDetails*/) {
-//    Long userId = userDetails.getUser().getId();
-    Long userId = 1L;
+  public ResponseEntity<?> findUserProfile(@AuthenticationPrincipal CustomUserDetails userDetails) {
+    Long userId = userDetails.getUser().getId();
     User user = userService.userProfileFindById(userId);
     UserTierResponseDto responseDto = new UserTierResponseDto(user);
     return new ResponseEntity<>(Response.create(ResponseCode.GET_USER_PROFILE, responseDto), GET_USER_PROFILE.getHttpStatus());
