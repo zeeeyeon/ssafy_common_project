@@ -8,8 +8,8 @@ class ProfileRepository {
   // 🔹 1. 프로필 조회 (GET)
   Future<ProfileModel> fetchUserProfile() async {
     try {
-      print("🔍 [API 요청] GET /api/user/info");
-      final response = await _dioClient.dio.get('/api/user/info');
+      print("🔍 [API 요청] GET /api/user/");
+      final response = await _dioClient.dio.get('/api/user/profile');
       print("✅ [API 응답] ${response.data}");
 
       return ProfileModel.fromJson(response.data);
