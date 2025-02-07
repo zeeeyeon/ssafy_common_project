@@ -58,12 +58,4 @@ public class UserDateController {
         }
         throw new CustomException(ResponseCode.BAD_REQUEST);
     }
-
-
-//    @GetMapping("/test")
-//    public void test(@AuthenticationPrincipal UserPrincipal userPrincipal) throws JsonProcessingException {
-//        ObjectMapper objectMapper = new ObjectMapper();
-//        System.out.println(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(userPrincipal));
-//    }
-
 }
