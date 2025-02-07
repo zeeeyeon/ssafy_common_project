@@ -95,7 +95,6 @@ public class UserDateService {
                         Collectors.counting()
                 ));
 
-
         return DailyClimbingRecordResponse.builder()
                 .climbGroundName(climbingGround)
                 .visitCount(visitCount)
