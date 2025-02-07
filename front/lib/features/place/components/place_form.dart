@@ -155,7 +155,7 @@ class _PlaceFormState extends State<PlaceForm> {
                                 place.image!,
                                 width: double.infinity,
                                 height: 200,
-                                fit: BoxFit.cover,
+                                fit: BoxFit.fill,
                               ),
                             )
                           : Container(
