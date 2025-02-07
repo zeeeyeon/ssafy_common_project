@@ -1,5 +1,7 @@
 package com.project.backend.record.service;
 
+import com.project.backend.common.advice.exception.CustomException;
+import com.project.backend.common.response.ResponseCode;
 import com.project.backend.hold.entity.Hold;
 import com.project.backend.hold.repository.HoldRepository;
 import com.project.backend.record.dto.requestDTO.RecordSaveRequestDTO;
@@ -31,7 +33,7 @@ public class ClimbingRecordServiceImpl implements ClimbingRecordService {
         ClimbingRecord newClimbingRecord = new ClimbingRecord();
         // Hold, User, UserDate 객체를 데이터베이스에서 찾고, 존재하지 않을 경우 예외 발생
         Hold hold = holdRepository.findById(requestDTO.getHoldId())
-                .orElseThrow(() -> new EntityNotFoundException("Hold not found with id: " + requestDTO.getHoldId()));
+                .orElseThrow(() -> new CustomException(ResponseCode.BAD_REQUEST));
         User user = userRepository.findById(requestDTO.getUserId())
                 .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + requestDTO.getUserId()));
         UserDate userDate = userDateRepository.findById(requestDTO.getUserDateId())

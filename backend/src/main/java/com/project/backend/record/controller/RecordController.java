@@ -32,9 +32,16 @@ public class RecordController {
     @PostMapping("/save")
     public ResponseEntity<?> saveRecord(@ModelAttribute RecordSaveRequestDTO requestDTO) {
 
+        s3UploadService.checkFileTypeOrThrow(requestDTO.getFile()); // 파일 타입 체크
+        s3UploadService.checkFileSizeOrThrow(requestDTO.getFile()); // 파일 크기 체크
+
+        // 파일 비어있으면 오류 추가
+        if (requestDTO.getFile().isEmpty()) {
+            throw new CustomException(ResponseCode.EMPTY_FILE);
+        }
+
         Optional<ClimbingRecord> optionalClimbingRecord = climbingRecordService.saveRecord(requestDTO); // 기록부터 일단 저장
         ClimbingRecord climbingRecord;
-
 
         if (optionalClimbingRecord.isPresent()) {
             climbingRecord = optionalClimbingRecord.get();
@@ -42,18 +49,13 @@ public class RecordController {
             throw new CustomException(ResponseCode.NOT_FOUND_CLIMB_RECORD);
         }
 
-        if (requestDTO.getIsSuccess()){ // 성공한 영상이면 video에도 저장
-            try {
-                VideoSaveResponseDTO responseDTO = s3UploadService.saveFile(requestDTO.getFile(),climbingRecord);
-                return new ResponseEntity<>(Response.create(SUCCESS_FILE_UPLOAD, responseDTO), SUCCESS_FILE_UPLOAD.getHttpStatus());
-            } catch (IOException e) {
+        try {
+            VideoSaveResponseDTO responseDTO = s3UploadService.saveFile(requestDTO.getFile(),climbingRecord);
+            return new ResponseEntity<>(Response.create(SUCCESS_FILE_UPLOAD, responseDTO), SUCCESS_FILE_UPLOAD.getHttpStatus());
+        } catch (IOException e) {
 //                e.printStackTrace();
-                throw new CustomException(ResponseCode.FILE_UPLOAD_FAILED);
-            }
-        } else { // 실패한 영상이면 저장할 필요 없음
-            return new ResponseEntity<>(Response.create(SUCCESS_RECORD_UPLOAD,null), SUCCESS_RECORD_UPLOAD.getHttpStatus());
+            throw new CustomException(ResponseCode.FILE_UPLOAD_FAILED);
         }
-
     }
 
 }
