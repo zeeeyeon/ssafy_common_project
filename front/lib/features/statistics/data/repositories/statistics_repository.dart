@@ -1,22 +1,24 @@
-import 'package:dio/dio.dart';
 import 'package:kkulkkulk/common/network/dio_client.dart';
+import 'package:kkulkkulk/features/statistics/data/models/statistics_model.dart';
 
 class StatisticsRepository {
-  final Dio _dio = DioClient().dio;
+  final DioClient _dioClient;
 
-  Future<Map<String, dynamic>> fetchWeeklyStatistics(
-      int userId, String date) async {
+  StatisticsRepository(this._dioClient);
+
+  Future<StatisticsModel> fetchWeeklyStatistics() async {
     try {
-      final response = await _dio.get(
+      final response = await _dioClient.dio.get(
         '/api/user-climbground/weekly',
         queryParameters: {
-          'userId': userId,
-          'date': date,
+          'userId': 1,
+          'date': '2025-02-01',
         },
       );
-      return response.data; // JSON 데이터를 그대로 반환
+
+      return StatisticsModel.fromJson(response.data);
     } catch (e) {
-      throw Exception('Failed to fetch statistics: $e');
+      throw Exception('Failed to load weekly statistics: $e');
     }
   }
 }
