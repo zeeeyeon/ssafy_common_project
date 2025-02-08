@@ -1,22 +1,34 @@
 package com.project.backend.video.service;
 
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.project.backend.common.advice.exception.CustomException;
 import com.project.backend.common.response.ResponseCode;
 import com.project.backend.record.entity.ClimbingRecord;
 import com.project.backend.video.dto.responseDTO.VideoSaveResponseDTO;
 import com.project.backend.video.entity.Video;
 import com.project.backend.video.repository.VideoRepository;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.apache.commons.io.FilenameUtils;
+import org.jcodec.api.FrameGrab;
+import org.jcodec.api.JCodecException;
+import org.jcodec.common.io.FileChannelWrapper;
+import org.jcodec.common.io.NIOUtils;
+import org.jcodec.common.model.Picture;
+import org.jcodec.scale.AWTUtil;
+import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
+import javax.imageio.ImageIO;
+import java.awt.*;
+import java.awt.geom.AffineTransform;
+import java.awt.image.BufferedImage;
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 @Service
 @RequiredArgsConstructor
@@ -36,19 +48,27 @@ public class S3UploadService {
 
         String originalFilename = multipartFile.getOriginalFilename();
 
+        String videoUrl = "video" +originalFilename + DateTime.now();
         ObjectMetadata objectMetadata = new ObjectMetadata();
         objectMetadata.setContentLength(multipartFile.getSize());
         objectMetadata.setContentType(multipartFile.getContentType());
 
-        amazonS3.putObject(bucket, originalFilename, multipartFile.getInputStream(), objectMetadata);
-        String url = amazonS3.getUrl(bucket, originalFilename).toString();
+        amazonS3.putObject(bucket, videoUrl, multipartFile.getInputStream(), objectMetadata);
+        String url = amazonS3.getUrl(bucket, videoUrl).toString();
+
+        // 썸네일 사진 추가
+        String thumbnailName = "Thumb_" + DateTime.now() + FilenameUtils.getBaseName(originalFilename) + ".JPEG";
+        String thumbnailURL = uploadThumbnail(multipartFile, thumbnailName);
 
         //비디오 테이블에 영상 url 저장
         Video newVideo = new Video();
         newVideo.setClimbingRecord(climbingRecord);
         newVideo.setUrl(url);
+
+        newVideo.setThumbnail(thumbnailURL);
+
         VideoSaveResponseDTO videoSaveResponseDTO = new VideoSaveResponseDTO(
-                newVideo.getId(), url, climbingRecord.getId()
+                newVideo.getId(), url, thumbnailURL,climbingRecord.getId()
         );
         videoRepository.save(newVideo);
 
@@ -74,4 +94,70 @@ public class S3UploadService {
             throw new CustomException(ResponseCode.FILE_SIZE_EXCEEDED);
         }
     }
+
+    public String uploadThumbnail(MultipartFile multipartFile , String thumbnailName) throws IOException {
+
+        File file = convertMultipartFileToFile(multipartFile);
+        String thumbnailURL = getThumbnailURL(thumbnailName, file);
+        try {
+            Files.delete(Path.of(file.getPath()));
+        } catch (IOException e) {
+            System.out.print("파일이 삭제되지 않았습니다.");
+            throw new RuntimeException(e);
+        }
+        return thumbnailURL;
+    }
+
+    private String getThumbnailURL(String thumbnailName, File file) {
+
+        // Get image from video
+        try (FileChannelWrapper fileChannelWrapper = NIOUtils.readableChannel(file);
+             ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+            FrameGrab grab = FrameGrab.createFrameGrab(fileChannelWrapper);
+            Picture picture = grab.seekToSecondPrecise(1.0).getNativeFrame();
+            BufferedImage bufferedImage = AWTUtil.toBufferedImage(picture);
+            // Convert the image to a JPEG and write it to a ByteArrayOutputStream
+
+            int width = bufferedImage.getWidth();
+            int height = bufferedImage.getHeight();
+            BufferedImage outputImage = new BufferedImage(height, width, bufferedImage.getType());
+
+            Graphics2D g2d = outputImage.createGraphics();
+            AffineTransform at = new AffineTransform();
+            at.translate(height, 0);
+            at.rotate(Math.PI / 2);
+            g2d.setTransform(at);
+            g2d.drawImage(bufferedImage, 0, 0, null);
+            g2d.dispose();
+
+            // 이미지 메타 데이터 설정해야 url 접근시 다운안됨
+            ObjectMetadata metadata = new ObjectMetadata();
+            metadata.setContentType("image/jpeg");
+
+
+            ImageIO.write(outputImage, "JPEG", baos);
+            baos.flush();
+            InputStream is = new ByteArrayInputStream(baos.toByteArray());
+            // Upload the object to S3
+            amazonS3.putObject(new PutObjectRequest(bucket, thumbnailName, is, metadata));
+            String url = amazonS3.getUrl(bucket, thumbnailName).toString();
+            return url;
+        } catch (JCodecException | IOException e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+
+
+    private File convertMultipartFileToFile(MultipartFile multipartFile) throws IOException {
+        File convFile = new File(multipartFile.getOriginalFilename());
+        convFile.createNewFile();
+        FileOutputStream fos = new FileOutputStream(convFile);
+        fos.write(multipartFile.getBytes());
+        fos.close();
+        return convFile;
+
+    }
+
+
 }
