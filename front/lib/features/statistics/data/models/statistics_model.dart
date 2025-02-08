@@ -1,7 +1,7 @@
 class ClimbGround {
-  final int climbGround; // 장소 ID
-  final int visited; // 방문한 장소 수
-  final List<int> list; // 방문한 장소 ID 리스트
+  final int climbGround;
+  final int visited;
+  final List<int> list;
 
   ClimbGround({
     required this.climbGround,
@@ -11,17 +11,16 @@ class ClimbGround {
 
   factory ClimbGround.fromJson(Map<String, dynamic> json) {
     return ClimbGround(
-      climbGround: json['climbGround'] as int,
-      visited: json['visited'] as int,
-      list: List<int>.from(json['list']),
-    );
+        climbGround: json['climbGround'],
+        visited: json['visited'],
+        list: List<int>.from(json['list']));
   }
 }
 
 class Hold {
-  final String color; // 홀드 색상
-  final int tryCount; // 시도 횟수
-  final int success; // 성공 횟수
+  final String color;
+  final int tryCount;
+  final int success;
 
   Hold({
     required this.color,
@@ -31,21 +30,21 @@ class Hold {
 
   factory Hold.fromJson(Map<String, dynamic> json) {
     return Hold(
-      color: json['color'] as String,
-      tryCount: json['tryCount'] as int,
-      success: json['success'] as int,
+      color: json['color'],
+      tryCount: json['tryCount'],
+      success: json['success'],
     );
   }
 }
 
-class StatisticsContent {
+class StatisticsModel {
   final ClimbGround climbGround;
-  final int success; // 성공 횟수
-  final double successRate; // 성공률
-  final int tryCount; // 시도 횟수
-  final List<Hold> holds; // 홀드별 데이터
+  final int success;
+  final double successRate;
+  final int tryCount;
+  final List<Hold> holds;
 
-  StatisticsContent({
+  StatisticsModel({
     required this.climbGround,
     required this.success,
     required this.successRate,
@@ -53,35 +52,15 @@ class StatisticsContent {
     required this.holds,
   });
 
-  factory StatisticsContent.fromJson(Map<String, dynamic> json) {
-    return StatisticsContent(
-      climbGround: ClimbGround.fromJson(json['climbground']),
-      success: json['success'] as int,
-      successRate: (json['success_rate'] as num).toDouble(),
-      tryCount: json['tryCount'] as int,
-      holds: (json['holds'] as List)
-          .map((holdJson) => Hold.fromJson(holdJson))
-          .toList(),
-    );
-  }
-}
-
-class StatisticsModel {
-  final int code; // 상태 코드
-  final String message; // 상태 메시지
-  final StatisticsContent content; // 실제 데이터
-
-  StatisticsModel({
-    required this.code,
-    required this.message,
-    required this.content,
-  });
-
   factory StatisticsModel.fromJson(Map<String, dynamic> json) {
     return StatisticsModel(
-      code: json['status']['code'] as int,
-      message: json['status']['message'] as String,
-      content: StatisticsContent.fromJson(json['content']),
+      climbGround: ClimbGround.fromJson(json['content']['climbground']),
+      success: json['content']['success'] as int,
+      successRate: (json['content']['success_rate'] as num).toDouble(),
+      tryCount: json['content']['tryCount'] as int,
+      holds: (json['content']['holds'] as List)
+          .map((hold) => Hold.fromJson(hold))
+          .toList(),
     );
   }
 }
