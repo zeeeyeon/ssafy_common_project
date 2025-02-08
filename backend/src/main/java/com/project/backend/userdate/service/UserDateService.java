@@ -1,5 +1,7 @@
 package com.project.backend.userdate.service;
 
+import com.project.backend.climbground.entity.ClimbGround;
+import com.project.backend.climbground.repository.ClimbGroundRepository;
 import com.project.backend.common.advice.exception.CustomException;
 import com.project.backend.hold.dto.HoldColorLevelDto;
 import com.project.backend.hold.dto.responseDTO.HoldResponseDTO;
@@ -10,7 +12,9 @@ import com.project.backend.record.entity.ClimbingRecord;
 import com.project.backend.userclimbground.entity.UserClimbGround;
 import com.project.backend.userclimbground.repository.UserClimbGroundRepository;
 import com.project.backend.userdate.dto.MonthlyRecordDto;
+import com.project.backend.userdate.dto.request.UserDateCheckAndAddLocationRequestDTO;
 import com.project.backend.userdate.dto.request.UserDateCheckAndAddRequestDTO;
+import com.project.backend.userdate.dto.response.ClimbIdAndNameStatus;
 import com.project.backend.userdate.dto.response.DailyClimbingRecordResponse;
 import com.project.backend.userdate.dto.response.MonthlyClimbingRecordResponse;
 import com.project.backend.userdate.dto.response.UserDateCheckAndAddResponseDTO;
@@ -36,6 +40,8 @@ public class UserDateService {
     private final UserDateRepository userDateRepository;
     private final HoldRepository holdRepository;
     private final UserClimbGroundRepository userClimbGroundRepository;
+    private final ClimbGroundRepository ClimbGroundRepository;
+    private final ClimbGroundRepository climbGroundRepository;
 
     public DailyClimbingRecordResponse getDailyRecord(LocalDate selectedDate, Long userId) {
 
@@ -176,5 +182,12 @@ public class UserDateService {
         }
 
         return responseDTO;
+    }
+
+    public ClimbIdAndNameStatus findClimbIdAndName(UserDateCheckAndAddLocationRequestDTO requestDTO) {
+        ClimbGround climbGround = climbGroundRepository.findClimbGroundByDistance(requestDTO.getLatitude(), requestDTO.getLongitude());
+
+        ClimbIdAndNameStatus climbStatus = new ClimbIdAndNameStatus(climbGround.getId(),climbGround.getName());
+        return climbStatus;
     }
 }
