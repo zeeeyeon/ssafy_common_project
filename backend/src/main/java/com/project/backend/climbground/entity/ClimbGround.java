@@ -35,11 +35,11 @@ public class ClimbGround extends BaseEntity {
     private String address;
 
 //    이건 일일이 찾아넣기 귀찮은데..
-    @Column(precision=13, scale=9,nullable = true)
-    private BigDecimal longitude;
+//    @Column(precision=13, scale=9,nullable = true)
+    private double longitude;
 
-    @Column(precision=12, scale=9, nullable = true)
-    private BigDecimal latitude;
+//    @Column(precision=12, scale=9, nullable = true)
+    private double latitude;
 
     private String open;
 

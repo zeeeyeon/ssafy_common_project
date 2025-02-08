@@ -1,5 +1,7 @@
 package com.project.backend.record.service;
 
+import com.project.backend.common.advice.exception.CustomException;
+import com.project.backend.common.response.ResponseCode;
 import com.project.backend.hold.entity.Hold;
 import com.project.backend.hold.repository.HoldRepository;
 import com.project.backend.record.dto.requestDTO.RecordSaveRequestDTO;
@@ -11,15 +13,19 @@ import com.project.backend.userdate.entity.UserDate;
 import com.project.backend.userdate.repository.UserDateRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
+@Service
+@RequiredArgsConstructor
 public class ClimbingRecordServiceImpl implements ClimbingRecordService {
 
-    HoldRepository holdRepository;
-    UserRepository userRepository;
-    UserDateRepository userDateRepository;
-    ClimbingRecordRepository climbingRecordRepository;
+    private final HoldRepository holdRepository;
+    private final UserRepository userRepository;
+    private final UserDateRepository userDateRepository;
+    private final ClimbingRecordRepository climbingRecordRepository;
 
     @Override
     @Transactional
@@ -27,7 +33,7 @@ public class ClimbingRecordServiceImpl implements ClimbingRecordService {
         ClimbingRecord newClimbingRecord = new ClimbingRecord();
         // Hold, User, UserDate 객체를 데이터베이스에서 찾고, 존재하지 않을 경우 예외 발생
         Hold hold = holdRepository.findById(requestDTO.getHoldId())
-                .orElseThrow(() -> new EntityNotFoundException("Hold not found with id: " + requestDTO.getHoldId()));
+                .orElseThrow(() -> new CustomException(ResponseCode.BAD_REQUEST));
         User user = userRepository.findById(requestDTO.getUserId())
                 .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + requestDTO.getUserId()));
         UserDate userDate = userDateRepository.findById(requestDTO.getUserDateId())
@@ -36,7 +42,7 @@ public class ClimbingRecordServiceImpl implements ClimbingRecordService {
         newClimbingRecord.setHold(hold);
         newClimbingRecord.setUser(user);
         newClimbingRecord.setUserDate(userDate);
-//        recordRepository.save( (com.project.backend.record.entity.Record) newRecord);
+        climbingRecordRepository.save(newClimbingRecord);
 
         return Optional.of(newClimbingRecord);
 

@@ -5,7 +5,6 @@ import com.project.backend.info.dto.responseDTO.InfoResponseDTO;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 @Getter
@@ -17,8 +16,8 @@ public class ClimbGroundDetailResponseDTO {
     private String address;
     private String image;
     private String number;
-    private BigDecimal latitude;
-    private BigDecimal longitude;
+    private double latitude;
+    private double longitude;
     private String open;
     private String sns_url;
     private List<HoldResponseDTO> holds;
@@ -27,7 +26,7 @@ public class ClimbGroundDetailResponseDTO {
     public ClimbGroundDetailResponseDTO(){
     }
 
-    public ClimbGroundDetailResponseDTO(Long id, String name, String address, String image, String number, BigDecimal latitude, BigDecimal longitude, String open, String sns_url, List<HoldResponseDTO> holds, List<InfoResponseDTO> infos) {
+    public ClimbGroundDetailResponseDTO(Long id, String name, String address, String image, String number, double latitude, double longitude, String open, String sns_url, List<HoldResponseDTO> holds, List<InfoResponseDTO> infos) {
 
         this.Id = id;
         this.name = name;
