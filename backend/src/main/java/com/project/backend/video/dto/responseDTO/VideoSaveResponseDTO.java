@@ -11,5 +11,6 @@ public class VideoSaveResponseDTO {
 
     private Long videoId;
     private String url;
+    private String thumbnailUrl;
     private Long climbRecordId;
 }
