@@ -4,13 +4,16 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Getter
 @Setter
 @AllArgsConstructor
 public class UserDateCheckAndAddRequestDTO {
-    Long userId;
-    Long climbGroundId;
-    LocalDate date;
+    private Long userId;
+    private Long climbGroundId;
+    private BigDecimal latitude;
+    private BigDecimal longitude;
+    private LocalDate date;
 }

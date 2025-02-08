@@ -122,5 +122,7 @@ public interface UserClimbGroundRepository extends JpaRepository<UserClimbGround
 
 
     Optional<UserClimbGround> findByUserAndClimbGround(User user, ClimbGround climbGround);
+
+    Optional<UserClimbGround> findByUserIdAndClimbGroundId(Long userId, Long climbGroundId);
 }
 
