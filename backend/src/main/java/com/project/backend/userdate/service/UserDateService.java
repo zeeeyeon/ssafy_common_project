@@ -25,6 +25,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.YearMonth;
 import java.util.*;
+import java.util.concurrent.ConcurrentMap;
 import java.util.stream.Collectors;
 
 import static com.project.backend.common.response.ResponseCode.NOT_FOUND_CLIMB_GROUND_OR_USER;
@@ -107,41 +108,76 @@ public class UserDateService {
     }
 
 
-    public MonthlyClimbingRecordResponse getMonthlyRecords(YearMonth selectedMonth, Long userId) {
-        int year = selectedMonth.getYear();
-        int month = selectedMonth.getMonthValue();
+//    public MonthlyClimbingRecordResponse getMonthlyRecords(YearMonth selectedMonth, Long userId) {
+//        int year = selectedMonth.getYear();
+//        int month = selectedMonth.getMonthValue();
+//
+//        List<MonthlyRecordDto> monthlyRecords = userDateRepository
+//                .findMonthlyRecords(year, month, userId);
+//
+//        // <일자, 각 날짜별 시도 횟수>
+//        Map<Integer, MonthlyRecordDto> recordMap = monthlyRecords.stream()
+//                .collect(Collectors.toMap(
+//                        MonthlyRecordDto::getDay,
+//                        record -> record
+//                ));
+//
+//        // 마지막 날 계산
+//        YearMonth yearMonth = YearMonth.of(year, month);
+//        int lastDay = yearMonth.lengthOfMonth();
+//
+//        // DayRecord 생성
+//        List<MonthlyClimbingRecordResponse.DayRecord> dayRecords = new ArrayList<>();
+//        for (int day = 1; day <= lastDay; day++) {
+//            MonthlyRecordDto record = recordMap.get(day);
+//            dayRecords.add(new MonthlyClimbingRecordResponse.DayRecord(
+//                    day,
+//                    record != null,
+//                    record != null ? record.getTotalCount() : 0
+//            ));
+//        }
+//
+//        return MonthlyClimbingRecordResponse.builder()
+//                .year(year)
+//                .month(month)
+//                .records(dayRecords)
+//                .build();
+//    }
 
-        List<MonthlyRecordDto> monthlyRecords = userDateRepository
-                .findMonthlyRecords(year, month, userId);
-
-        // <일자, 각 날짜별 시도 횟수>
-        Map<Integer, MonthlyRecordDto> recordMap = monthlyRecords.stream()
-                .collect(Collectors.toMap(
-                        MonthlyRecordDto::getDay,
-                        record -> record
-                ));
-
-        // 마지막 날 계산
-        YearMonth yearMonth = YearMonth.of(year, month);
-        int lastDay = yearMonth.lengthOfMonth();
-
-        // DayRecord 생성
-        List<MonthlyClimbingRecordResponse.DayRecord> dayRecords = new ArrayList<>();
-        for (int day = 1; day <= lastDay; day++) {
-            MonthlyRecordDto record = recordMap.get(day);
-            dayRecords.add(new MonthlyClimbingRecordResponse.DayRecord(
-                    day,
-                    record != null,
-                    record != null ? record.getTotalCount() : 0
-            ));
-        }
-
-        return MonthlyClimbingRecordResponse.builder()
-                .year(year)
-                .month(month)
-                .records(dayRecords)
-                .build();
-    }
+//    public MonthlyClimbingRecordResponse getMonthlyRecords(YearMonth selectedMonth, Long userId) {
+//        int year = selectedMonth.getYear();
+//        int month = selectedMonth.getMonthValue();
+//
+//        List<MonthlyRecordDto> monthlyRecords = userDateRepository
+//                .findMonthlyRecords(year, month, userId);
+//
+//        // 데이터베이스에서 조회하기
+//        // 해당하는 달은 미리 redis 담아놓기
+//
+//        // <일자, 각 날짜별 시도 횟수>
+//
+//
+//        // 마지막 날 계산
+//        YearMonth yearMonth = YearMonth.of(year, month);
+//        int lastDay = yearMonth.lengthOfMonth();
+//
+//        // DayRecord 생성
+//        List<MonthlyClimbingRecordResponse.DayRecord> dayRecords = new ArrayList<>();
+//        for (int day = 1; day <= lastDay; day++) {
+//            MonthlyRecordDto record = recordMap.get(day);
+//            dayRecords.add(new MonthlyClimbingRecordResponse.DayRecord(
+//                    day,
+//                    record != null,
+//                    record != null ? record.getTotalCount() : 0
+//            ));
+//        }
+//
+//        return MonthlyClimbingRecordResponse.builder()
+//                .year(year)
+//                .month(month)
+//                .records(dayRecords)
+//                .build();
+//    }
 
     public UserDateCheckAndAddResponseDTO UserDateCheckAndAdd(UserDateCheckAndAddRequestDTO requestDTO) {
         LocalDateTime startOfDay = requestDTO.getDate().atStartOfDay();
