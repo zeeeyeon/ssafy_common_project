@@ -113,7 +113,6 @@ public class UserDateService {
                 .build();
     }
 
-
     @Cacheable(value = "monthlyRecords", key = "#userId + '_' + 'monthly_' + #selectedMonth")
     public MonthlyClimbingRecordResponse getMonthlyRecords(YearMonth selectedMonth, Long userId) {
         int year = selectedMonth.getYear();
@@ -152,43 +151,6 @@ public class UserDateService {
         }
         return dayRecords;
     }
-
-//    public MonthlyClimbingRecordResponse getMonthlyRecords(YearMonth selectedMonth, Long userId) {
-//        int year = selectedMonth.getYear();
-//        int month = selectedMonth.getMonthValue();
-//
-//        List<MonthlyRecordDto> monthlyRecords = userDateRepository
-//                .findMonthlyRecords(year, month, userId);
-//
-//        // <일자, 각 날짜별 시도 횟수>
-//        Map<Integer, MonthlyRecordDto> recordMap = monthlyRecords.stream()
-//                .collect(Collectors.toMap(
-//                        MonthlyRecordDto::getDay,
-//                        record -> record
-//                ));
-//
-//        // 마지막 날 계산
-//        YearMonth yearMonth = YearMonth.of(year, month);
-//        int lastDay = yearMonth.lengthOfMonth();
-//
-//        // DayRecord 생성
-//        List<MonthlyClimbingRecordResponse.DayRecord> dayRecords = new ArrayList<>();
-//
-//        for (int day = 1; day <= lastDay; day++) {
-//            MonthlyRecordDto record = recordMap.get(day);
-//            dayRecords.add(new MonthlyClimbingRecordResponse.DayRecord(
-//                    day,
-//                    record != null,
-//                    record != null ? record.getTotalCount() : 0
-//            ));
-//        }
-//
-//        return MonthlyClimbingRecordResponse.builder()
-//                .year(year)
-//                .month(month)
-//                .records(dayRecords)
-//                .build();
-//    }
 
     public UserDateCheckAndAddResponseDTO UserDateCheckAndAdd(UserDateCheckAndAddRequestDTO requestDTO) {
         LocalDateTime startOfDay = requestDTO.getDate().atStartOfDay();
