@@ -1,6 +1,8 @@
 package com.project.backend.user.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import lombok.Data;
 
 @Data
@@ -11,8 +13,4 @@ public class KakaoTokenResponseDto {
   private String refreshToken;
   @JsonProperty("expires_in")
   private Long expiresIn;
-  @JsonProperty("account_email")
-  private String accountEmail;
-  @JsonProperty("profile_nickname")
-  private String accountNickname;
 }

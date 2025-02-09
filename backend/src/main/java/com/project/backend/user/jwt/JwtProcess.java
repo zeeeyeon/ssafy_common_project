@@ -91,12 +91,11 @@ public class JwtProcess {
 
             Long id = decodedJWT.getClaim("id").asLong();
             String username = decodedJWT.getClaim("username").asString();
-            String role = decodedJWT.getClaim("role").asString();
 
-            log.debug("토큰에서 추출된 정보 - id: {}, username: {}, role: {}",
-                    id, username, role);
+            log.debug("토큰에서 추출된 정보 - id: {}, username: {}",
+                    id, username);
 
-            if (id == null || username == null || role == null) {
+            if (id == null || username == null) {
                 throw new CustomException(MISSING_MANDATORY_CLAIMS);
             }
 

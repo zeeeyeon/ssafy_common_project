@@ -70,6 +70,7 @@ public class KakaoOauthService {
     HttpHeaders headers = new HttpHeaders();
     headers.add("Authorization", "Bearer " + accessToken);
     HttpEntity<?> request = new HttpEntity<>(headers);
+    //
     ResponseEntity<KakaoUserInfoDto> response = restTemplate.exchange(USER_INFO_URL, HttpMethod.GET, request, KakaoUserInfoDto.class);
     return response.getBody();
   }

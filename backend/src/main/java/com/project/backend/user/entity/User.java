@@ -40,17 +40,17 @@ public class User {
     private String password;
 
     @Column(length = 100)
-//    @NotNull
+    @NotNull
     @Size(max = 100)
     private String username;
 
     // 소셜 로그인 회원용 (카카오의 고유 ID 등)
     private Long socialId;
 
-//    @NotNull
+    @NotNull
     private String phone;
 
-    //    @NotNull
+    @NotNull
     @Column(unique = true)
     private String nickname;
 
