@@ -75,31 +75,46 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
                               color: Colors.grey
                             ),
                           ),
-                          SizedBox(height: 16),
+                          SizedBox(height: 8),
                           Row(
                             children: [
                               Icon(Icons.call),
-                              SizedBox(width: 16.0),
-                              Text(
-                                '${place.number}',
+                              SizedBox(width: 8.0),
+                              TextButton(
+                                onPressed: () async {
+                                  final tel = Uri.parse('tel:${place.number.replaceAll('-', '')}');
+                                  await launchUrl(tel);
+                                },
+                                child: Text('${place.number}',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                ),),
+                                style: TextButton.styleFrom(
+                                  foregroundColor: Colors.black, // 글자 색상 설정
+                                ),
                               )
                             ],
-
                           ),
-                          SizedBox(height: 8),
+                          // SizedBox(height: 8),
                           Row(
                             children: [
                               FaIcon(
                                 FontAwesomeIcons.instagram,
                                 color: Colors.pinkAccent,
                               ),
-                              SizedBox(width: 16.0),
-                              // Text(
-                              //   '${place.snsUrl}'
-                              // ),
+                              SizedBox(width: 8.0),
                               TextButton(
-                                onPressed: () {},
-                                child: Text('인스타그램'),
+                                onPressed: () async {
+                                  final snsUrl = Uri.parse(place.snsUrl);
+                                  await launchUrl(snsUrl);
+                                },
+                                child: Text('인스타그램',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold, // 글자 두께를 굵게 설정
+                                ),),
+                                style: TextButton.styleFrom(
+                                  foregroundColor: Colors.black, // 글자 색상 설정
+                                ),
                               ),
                             ],
                           ),
@@ -109,10 +124,24 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
                             '편의시절 및 서비스',
                             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                           ),
-                          ...place.infos.map((info) => Text(
-                          info.info,
-                          style: TextStyle(fontSize: 16),
-                          )),
+                          // ...place.infos.map((info) => Text(
+                          // info.info,
+                          // style: TextStyle(fontSize: 16),
+                          // )),
+                          ...place.infos.map((info) {
+                          IconData icon = _getIconForInfo(info.info); // 아이콘 결정
+                            return Row(
+                              children: [
+                                Icon(icon, size: 24), // 아이콘 표시
+                                SizedBox(width: 16), // 아이콘과 텍스트 사이에 간격 추가
+                                Text(
+                                  info.info,
+                                  style: TextStyle(fontSize: 16),
+                                ),
+                                SizedBox(height: 32,)
+                              ],
+                            );
+                          }).toList(),
                           SizedBox(height: 16,),
                           Text(
                             '난이도',
@@ -231,6 +260,39 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
         return const Color(0xFFC0C0C0);
       default:
         return Colors.grey;
+    }
+  }
+
+  IconData _getIconForInfo(String info) {
+    switch (info) {
+      case '예약':
+        return Icons.calendar_today;
+      case '무선 인터넷':
+        return Icons.wifi;
+      case '남/녀 화장실 구분':
+        return Icons.male; // 남성 화장실 아이콘
+      case '주차':
+        return Icons.local_parking;
+      case '단체 이용 가능':
+        return Icons.group;
+      case '대기공간':
+        return Icons.access_time;
+      case '간편결제':
+        return Icons.payment;
+      case '반려동물 동반':
+        return Icons.pets;
+      case '유아시설 (놀이방)':
+        return Icons.child_care;
+      case '방문접수/출장':
+        return Icons.business;
+      case '노키즈존':
+        return Icons.no_accounts;
+      case '장애인 편의시설':
+        return Icons.accessible;
+      case '발렛파킹':
+        return Icons.car_repair;
+      default:
+        return Icons.help; // 기본 아이콘
     }
   }
 }
