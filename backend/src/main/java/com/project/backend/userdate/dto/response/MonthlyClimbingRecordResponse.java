@@ -27,8 +27,16 @@ public class MonthlyClimbingRecordResponse {
     @Getter
     @AllArgsConstructor
     public static class DayRecord {
+        @JsonProperty("day")
         private int day;
+
+        @JsonProperty("hasRecord")
         private boolean hasRecord;
+
+        @JsonProperty("totalCount")
         private long totalCount;
+
+        public DayRecord() {
+        }
     }
 }
