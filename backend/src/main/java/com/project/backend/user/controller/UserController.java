@@ -8,10 +8,7 @@ import com.project.backend.user.dto.UserTierRequestDto;
 import com.project.backend.user.dto.request.ConvertRequestDto;
 import com.project.backend.user.dto.request.SignUpRequestDto;
 import com.project.backend.user.dto.request.UserInfoRequestDto;
-import com.project.backend.user.dto.response.ConvertResponseDto;
-import com.project.backend.user.dto.response.UserInfoResponseDto;
-import com.project.backend.user.dto.response.UserMedalPerClimbGroundResponseDto;
-import com.project.backend.user.dto.response.UserTierResponseDto;
+import com.project.backend.user.dto.response.*;
 import com.project.backend.user.entity.User;
 import com.project.backend.user.service.UserService;
 import com.project.backend.userclimbground.entity.UserClimbGroundMedalEnum;
@@ -73,7 +70,7 @@ public class UserController {
   public ResponseEntity<?> findUserProfile(@AuthenticationPrincipal CustomUserDetails userDetails) {
     Long userId = userDetails.getUser().getId();
     User user = userService.userProfileFindById(userId);
-    UserTierResponseDto responseDto = new UserTierResponseDto(user);
+    UserProfileResponseDto responseDto = new UserProfileResponseDto(user);
     return new ResponseEntity<>(Response.create(ResponseCode.GET_USER_PROFILE, responseDto), GET_USER_PROFILE.getHttpStatus());
   }
 
