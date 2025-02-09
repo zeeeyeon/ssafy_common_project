@@ -30,7 +30,6 @@ public interface ClimbGroundRepository extends JpaRepository<ClimbGround, Long> 
             "LEFT JOIN UserClimbGround uc ON c.Id = uc.climbGround.Id AND uc.user.id = :userId")
     List<MiddleLockClimbGroundResponseDTO> findAllWithUnlockStatus(Long userId);
 
-    //이거 만들어줄수 있어??
     @Query(value = "SELECT * FROM climbground ORDER BY ST_Distance_Sphere(point(longitude, latitude), point(:longitude, :latitude)) ASC LIMIT 1", nativeQuery = true)
     ClimbGround findClimbGroundByDistance(BigDecimal latitude, BigDecimal longitude);
 }
