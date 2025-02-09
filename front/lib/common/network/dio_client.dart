@@ -11,9 +11,10 @@ class DioClient {
   DioClient._internal() {
     dio = Dio(
       BaseOptions(
-        baseUrl: 'https://api.kkulkkulk.com', // API 서버 URL
-        connectTimeout: const Duration(seconds: 5),
-        receiveTimeout: const Duration(seconds: 3),
+        // baseUrl: 'https://api.kkulkkulk.com', // API 서버 URL
+        baseUrl: 'https://i12e206.p.ssafy.io',
+        connectTimeout: const Duration(seconds: 10),
+        receiveTimeout: const Duration(seconds: 10),
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',

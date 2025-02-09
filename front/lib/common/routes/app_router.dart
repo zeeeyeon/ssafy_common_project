@@ -4,6 +4,7 @@ import 'package:kkulkkulk/common/widgets/layout/main_layout.dart';
 import 'package:kkulkkulk/features/calendar/screens/calendar_screen.dart';
 import 'package:kkulkkulk/features/calendar/screens/calendar_detail_screen.dart';
 import 'package:kkulkkulk/features/camera/screens/camera_screen.dart';
+import 'package:kkulkkulk/features/challenge/screens/challenge_detail_screen.dart';
 import 'package:kkulkkulk/features/challenge/screens/challenge_screen.dart';
 import 'package:kkulkkulk/features/place/screens/place_screen.dart';
 import 'package:kkulkkulk/features/profile/screens/profile_screen.dart';
@@ -78,5 +79,9 @@ final router = GoRouter(
         date: state.pathParameters['date']!,
       ),
     ),
+    GoRoute(
+      path: '/challenge/detail',
+      builder: (context, state) => ChallengeDetailScreen(),
+    )
   ],
 );

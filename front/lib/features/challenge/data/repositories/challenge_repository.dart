@@ -1,35 +1,65 @@
 // import 'package:kkulkkulk/common/exceptions/exceptions.dart';
-import 'package:kkulkkulk/features/challenge/data/models/challenge_model.dart';
+import 'package:dio/dio.dart';
+import 'package:kkulkkulk/common/network/dio_client.dart';
+import 'package:kkulkkulk/features/challenge/data/models/challenge_all_model.dart';
+import 'package:kkulkkulk/features/challenge/data/models/challenge_response_model.dart';
+import 'package:kkulkkulk/features/challenge/data/models/detail_challenge_model.dart';
+import 'package:kkulkkulk/features/challenge/data/models/detail_challenge_response_model.dart';
+import 'package:kkulkkulk/features/challenge/data/models/search_challenge_all_model.dart';
 
 class ChallengeRepository {
-  Future<List<ChallengeModel>> getChallenges() async {
-    // 테스트를 위한 임시 코드
-    await Future.delayed(const Duration(seconds: 2)); // 로딩 상태 확인용 딜레이
+  final Dio _dio = DioClient().dio;
 
-    // 네트워크 에러 테스트
-    // throw NetworkException();
+  // 챌린지 장소 전체 조회(GPS 거리순)
+  Future<List<ChallengeResponseModel>> getAllChallenges(ChallengeAllModel challengeAllModel) async {
+    try {
+      final response = await _dio.get(
+        '/api/climbground/lock-climbground/list',
+        queryParameters: {
+          "userId": challengeAllModel.userId,
+          "latitude": challengeAllModel.latitude,
+          "longitude": challengeAllModel.longitude,
+        }
+      );
+      List<dynamic> data = response.data['content'];
+      return data.map<ChallengeResponseModel>((json) => ChallengeResponseModel.fromJson(json)).toList();
+    } catch (e) {
+      rethrow;
+    }
+  }
 
-    // // 1. 빈 데이터 테스트
-    // return [];
+  // 챌린지 장소 검색 조회
+  Future<List<ChallengeResponseModel>> searchGetAllChallenges(SearchChallengeAllModel searchhallengeAllModel) async {
+    try {
+      final response = await _dio.get(
+        'api/climbground/lock-glimbground/',
+        queryParameters: {
+          "userId": searchhallengeAllModel.userId,
+          "latitude": searchhallengeAllModel.latitude,
+          "longitude": searchhallengeAllModel.longitude,
+        }
+      );
+      List<dynamic> data = response.data['content'];
+      return data.map<ChallengeResponseModel>((json) => ChallengeResponseModel.fromJson(json)).toList();
+    } catch (e) {
+      rethrow;
+    }
+  }
 
-    // 2. 네트워크 에러 테스트
-    // throw NetworkException();
-
-    // 3. 서버 에러 테스트
-    // throw ServerException();
-
-    // 4. 알 수 없는 에러 테스트
-    // throw Exception('Unknown error');
-
-    // 5. 정상 데이터 테스트
-    return [
-      ChallengeModel(
-        id: '1',
-        title: '30일 운동 챌린지',
-        description: '매일 30분 운동하기',
-        startDate: DateTime.now(),
-        endDate: DateTime.now().add(const Duration(days: 30)),
-      ),
-    ];
+  // 챌린지 장소 상세 조회
+  Future<DetailChallengeResponseModel> detailChallenge(DetailChallengeModel detailChallengeModel) async {
+      try {
+        final response = await _dio.get(
+          '/api/climbground/lock-climbground/detail',
+          queryParameters: {
+            "userId": detailChallengeModel.userId,
+            "latitude": detailChallengeModel.latitude,
+            "longitude": detailChallengeModel.longitude,
+          }
+        );
+        return DetailChallengeResponseModel.fromJson(response.data['content']);
+      } catch (e) {
+        rethrow;
+      }
   }
 }
