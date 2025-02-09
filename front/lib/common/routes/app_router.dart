@@ -80,8 +80,11 @@ final router = GoRouter(
       ),
     ),
     GoRoute(
-      path: '/challenge/detail',
-      builder: (context, state) => ChallengeDetailScreen(),
+      path: '/challenge/detail/:climbGroundId',
+      builder: (context, state) {
+        final climbGroundId = int.parse(state.pathParameters['climbGroundId']!);
+        return ChallengeDetailScreen(climbGroundId: climbGroundId,);
+      },
     )
   ],
 );

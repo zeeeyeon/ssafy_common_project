@@ -3,7 +3,6 @@ import 'package:dio/dio.dart';
 import 'package:kkulkkulk/common/network/dio_client.dart';
 import 'package:kkulkkulk/features/challenge/data/models/challenge_all_model.dart';
 import 'package:kkulkkulk/features/challenge/data/models/challenge_response_model.dart';
-import 'package:kkulkkulk/features/challenge/data/models/detail_challenge_model.dart';
 import 'package:kkulkkulk/features/challenge/data/models/detail_challenge_response_model.dart';
 import 'package:kkulkkulk/features/challenge/data/models/search_challenge_all_model.dart';
 
@@ -47,14 +46,12 @@ class ChallengeRepository {
   }
 
   // 챌린지 장소 상세 조회
-  Future<DetailChallengeResponseModel> detailChallenge(DetailChallengeModel detailChallengeModel) async {
+  Future<DetailChallengeResponseModel> detailChallenge(int climbGroundId) async {
       try {
         final response = await _dio.get(
           '/api/climbground/lock-climbground/detail',
           queryParameters: {
-            "userId": detailChallengeModel.userId,
-            "latitude": detailChallengeModel.latitude,
-            "longitude": detailChallengeModel.longitude,
+            "climbGroundId": climbGroundId,
           }
         );
         return DetailChallengeResponseModel.fromJson(response.data['content']);

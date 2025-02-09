@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:go_router/go_router.dart';
 import 'package:kkulkkulk/common/gps/gps.dart';
 import 'package:kkulkkulk/features/challenge/data/models/challenge_all_model.dart';
 import 'package:kkulkkulk/features/challenge/data/models/challenge_response_model.dart';
@@ -151,9 +152,10 @@ class _ChallengeFormState extends State<ChallengeForm> {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: GestureDetector(
-                  onTap: () {
+                  onTap: () async {
+                    Position position = await determinePosition();
                     // 상세 페이지로 이동
-                    // context.go('/place/${place.id}');
+                    context.go('/challenge/detail/${place.climbGroundId}');
                   },
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
