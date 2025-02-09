@@ -121,7 +121,7 @@ public class UserDateService {
         List<MonthlyRecordDto> monthlyRecords = userDateRepository
                 .findMonthlyRecords(year, month, userId);
 
-        Map<Integer, MonthlyRecordDto> recordMap = dayTotalCountRecord(monthlyRecords);
+        Map<Integer, MonthlyRecordDto> recordMap = totalCountRecordPerDay(monthlyRecords);
 
         int lastDay = YearMonth.of(year, month).lengthOfMonth();
         List<MonthlyClimbingRecordResponse.DayRecord> dayRecords = dayRecords(recordMap, lastDay);
@@ -130,7 +130,7 @@ public class UserDateService {
     }
 
     // 날짜별 레코드 매핑
-    private Map<Integer, MonthlyRecordDto> dayTotalCountRecord(List<MonthlyRecordDto> monthlyRecords) {
+    private Map<Integer, MonthlyRecordDto> totalCountRecordPerDay(List<MonthlyRecordDto> monthlyRecords) {
         return monthlyRecords.stream()
                 .collect(Collectors.toMap(
                         MonthlyRecordDto::getDay,

@@ -16,7 +16,7 @@ import java.util.List;
 @Getter
 @NoArgsConstructor
 @AttributeOverride(name="Id", column=@Column(name="climbground_id")) //baseEntity에서 공통으로 관리해서 다른 이름 쓸려면 override 해야함
-@Table(name = "climbground")
+@Table(name = "\"climbground\"")
 public class ClimbGround extends BaseEntity {
 //    @Id
 //    @GeneratedValue(strategy = GenerationType.IDENTITY)
