@@ -102,4 +102,16 @@ public class ClimbGroundController {
         return new ResponseEntity<>(Response.create(GET_CLIMB_GROUND_DETAIL, responseDTO), GET_CLIMB_GROUND_DETAIL.getHttpStatus());
     }
 
+    @GetMapping("/lock-climbground/list/page")
+    public ResponseEntity<?> getLockCimbGroundList(@RequestParam(name = "userId") Long userId, @RequestParam(name = "latitude") double latitude, @RequestParam(name = "longitude") double longitude, @RequestParam(name = "page") int page) {
+        List<LockClimbGroundAllResponseDTO> lockClimbGrounds = ClimbGroundService.findAllLockClimbGroundPagination(userId, latitude, longitude,page);
+
+        if (!lockClimbGrounds.isEmpty()) {
+            return  new ResponseEntity<>(Response.create(GET_CLIMB_GROUND_List, lockClimbGrounds), GET_CLIMB_GROUND_List.getHttpStatus());
+        }
+        throw new CustomException(ResponseCode.NOT_FOUND_CLIMB_GROUND);
+    }
+
+
+
 }
