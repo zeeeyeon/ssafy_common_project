@@ -2,7 +2,6 @@ package com.project.backend.user.service;
 
 import com.project.backend.user.dto.KakaoUserInfoDto;
 import com.project.backend.user.entity.User;
-import com.project.backend.user.entity.UserRoleEnum;
 import com.project.backend.user.repository.jpa.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -41,7 +40,6 @@ public class SocialUserService {
       User newUser = User.builder()
               .socialId(kakaoUserInfo.getId())
               .email(email)
-              .roleType(UserRoleEnum.GUEST)
               .build();
       return userRepository.save(newUser);
     }
