@@ -80,6 +80,74 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen>
     );
   }
 
+  void _showLocationList(List<int> locationList) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true, // ✅ 스크롤 가능하도록 설정
+      shape: const RoundedRectangleBorder(
+        borderRadius:
+            BorderRadius.vertical(top: Radius.circular(16)), // ✅ 둥근 모서리
+      ),
+      builder: (context) {
+        return DraggableScrollableSheet(
+          expand: false,
+          initialChildSize: 0.5, // ✅ 기본 크기
+          maxChildSize: 0.9, // ✅ 최대 크기
+          minChildSize: 0.3, // ✅ 최소 크기
+          builder: (context, scrollController) {
+            return Container(
+              padding: const EdgeInsets.all(16),
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // ✅ 헤더
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        '방문한 장소 목록',
+                        style: TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: () => Navigator.pop(context),
+                      ),
+                    ],
+                  ),
+
+                  const Divider(), // ✅ 구분선 추가
+
+                  // ✅ 장소 리스트
+                  Expanded(
+                    child: ListView.builder(
+                      controller: scrollController,
+                      itemCount: locationList.length,
+                      itemBuilder: (context, index) {
+                        return ListTile(
+                          leading: const Icon(Icons.location_on,
+                              color: Colors.blueAccent), // ✅ 장소 아이콘
+                          title: Text(
+                            '장소 ${locationList[index]}', // ✅ 장소 정보 표시
+                            style: const TextStyle(fontSize: 16),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
   Widget _buildScrollableStatisticsView(String period) {
     final statisticsState = ref.watch(statisticsProvider(period));
 
@@ -100,14 +168,22 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen>
                 Row(
                   children: [
                     Expanded(
+                      child: GestureDetector(
+                        onTap: () => _showLocationList(
+                            stats.climbGround.list), // ✅ 클릭 시 모달 표시
                         child: StatisticsCard(
-                            title: '장소',
-                            value: '${stats.climbGround.climbGround}곳')),
+                          title: '장소',
+                          value: '${stats.climbGround.climbGround}곳',
+                        ),
+                      ),
+                    ),
                     const SizedBox(width: 8),
                     Expanded(
-                        child: StatisticsCard(
-                            title: '방문 횟수',
-                            value: '${stats.climbGround.visited}회')),
+                      child: StatisticsCard(
+                        title: '방문 횟수',
+                        value: '${stats.climbGround.visited}회',
+                      ),
+                    ),
                   ],
                 ),
                 const SizedBox(height: 8),
