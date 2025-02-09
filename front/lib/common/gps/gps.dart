@@ -5,9 +5,9 @@ import 'package:geolocator/geolocator.dart';
 /// When the location services are not enabled or permissions
 /// are denied the `Future` will return an error.
 Future determinePosition() async {
+  print('시작시작');
   bool serviceEnabled;
   LocationPermission permission;
-  print("tlwkrsajkdhasjdhsakjdhsakjdhaskjdsh");
   // Test if location services are enabled.
   serviceEnabled = await Geolocator.isLocationServiceEnabled();
   if (!serviceEnabled) {
@@ -31,7 +31,7 @@ Future determinePosition() async {
     print('위치 권한이 거부되었습니다.'); 
     return;
   } 
-
+  print('시작시작시작');
   //현재 위치 구하기
   Position position = await Geolocator.getCurrentPosition(
   );

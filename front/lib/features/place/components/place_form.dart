@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:go_router/go_router.dart';
+import 'package:kkulkkulk/common/gps/gps.dart';
 import 'package:kkulkkulk/features/place/data/models/place_all_model.dart';
 import 'package:kkulkkulk/features/place/data/models/place_response_model.dart';
 import 'package:kkulkkulk/features/place/data/models/search_place_all_model.dart';
@@ -31,10 +33,12 @@ class _PlaceFormState extends State<PlaceForm> {
     setState(() {
       isLoading = true;
     });
-
+    print('시작');
     try {
+      Position position = await determinePosition();
+
       List<PlaceResponseModel> places = await _placeRepository.getAllDisCLimbs(
-        PlaceAllModel(latitude: 0, longitude: 0),
+        PlaceAllModel(latitude: position.latitude, longitude: position.longitude),
       );
       setState(() {
         allPlaces = places;
@@ -155,7 +159,7 @@ class _PlaceFormState extends State<PlaceForm> {
                                 place.image!,
                                 width: double.infinity,
                                 height: 200,
-                                fit: BoxFit.fill,
+                                fit: BoxFit.cover,
                               ),
                             )
                           : Container(
@@ -171,13 +175,13 @@ class _PlaceFormState extends State<PlaceForm> {
                         ),
                       ),
                       // 장소 ID 표시
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                        child: Text(
-                          "장소 ID: ${place.id}",
-                          style: TextStyle(fontSize: 14, color: Colors.grey),
-                        ),
-                      ),
+                      // Padding(
+                      //   padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                      //   child: Text(
+                      //     "장소 ID: ${place.id}",
+                      //     style: TextStyle(fontSize: 14, color: Colors.grey),
+                      //   ),
+                      // ),
                       // 주소 표시
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 8.0),
@@ -190,7 +194,7 @@ class _PlaceFormState extends State<PlaceForm> {
                       Padding(
                         padding: const EdgeInsets.only(bottom: 8.0, left: 8.0),
                         child: Text(
-                          "거리: ${place.distance ?? '정보 없음'} km",
+                          "거리: ${place.distance ?? '정보 없음'} km 근처",
                           style: TextStyle(fontSize: 14, color: Colors.grey),
                         ),
                       ),
