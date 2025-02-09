@@ -12,7 +12,6 @@ import com.project.backend.common.advice.exception.CustomException;
 import com.project.backend.common.response.ResponseCode;
 import com.project.backend.user.auth.CustomUserDetails;
 import com.project.backend.user.entity.User;
-import com.project.backend.user.entity.UserRoleEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,7 +33,6 @@ public class JwtProcess {
                     .withExpiresAt(new Date(System.currentTimeMillis() + JwtVO.EXPIRATION_TIME))
                     .withClaim("id", loginUser.getUser().getId())
                     .withClaim("username", loginUser.getUser().getUsername())
-                    .withClaim("role", loginUser.getUser().getRoleType().name())
                     .sign(Algorithm.HMAC512(JwtVO.SECRET));
 
             log.debug("디버그 : 생성된 토큰 = {}", jwtToken);
@@ -105,7 +103,6 @@ public class JwtProcess {
             User user = User.builder()
                     .id(id)
                     .username(username)
-                    .roleType(UserRoleEnum.valueOf(role))
                     .build();
 
             return new CustomUserDetails(user);

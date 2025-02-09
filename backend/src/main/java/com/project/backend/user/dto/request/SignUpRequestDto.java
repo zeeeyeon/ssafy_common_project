@@ -1,7 +1,6 @@
 package com.project.backend.user.dto.request;
 
 import com.project.backend.user.entity.User;
-import com.project.backend.user.entity.UserRoleEnum;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
@@ -33,7 +32,6 @@ public class SignUpRequestDto {
                 .username(username)
                 .phone(phone)
                 .nickname(nickname)
-                .roleType(UserRoleEnum.USER)
                 .createDate(LocalDateTime.now())
                 .updateDate(LocalDateTime.now())
                 .build();
