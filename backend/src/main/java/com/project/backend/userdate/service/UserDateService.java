@@ -12,13 +12,16 @@ import com.project.backend.hold.repository.HoldRepository;
 import com.project.backend.record.entity.ClimbingRecord;
 import com.project.backend.user.entity.User;
 import com.project.backend.user.repository.jpa.UserRepository;
+import com.project.backend.userclimbground.dto.responseDTO.UnLockClimbGroundDetailResponseDTO;
 import com.project.backend.userclimbground.entity.UserClimbGround;
 import com.project.backend.userclimbground.entity.UserClimbGroundMedalEnum;
 import com.project.backend.userclimbground.repository.UserClimbGroundRepository;
+import com.project.backend.userclimbground.service.UserClimbGroundServiceImp;
 import com.project.backend.userdate.dto.ClimbGroundWithDistance;
 import com.project.backend.userdate.dto.MonthlyRecordDto;
 import com.project.backend.userdate.dto.request.UserDateCheckAndAddLocationRequestDTO;
 import com.project.backend.userdate.dto.request.UserDateCheckAndAddRequestDTO;
+import com.project.backend.userdate.dto.response.ChallUnlockResponseDTO;
 import com.project.backend.userdate.dto.response.DailyClimbingRecordResponse;
 import com.project.backend.userdate.dto.response.MonthlyClimbingRecordResponse;
 import com.project.backend.userdate.dto.response.UserDateCheckAndAddResponseDTO;
@@ -43,6 +46,7 @@ public class UserDateService {
     private final UserClimbGroundRepository userClimbGroundRepository;
     private final ClimbGroundRepository climbGroundRepository;
     private final UserRepository userRepository;
+    private final UserClimbGroundServiceImp userClimbGroundServiceImp;
 
     public DailyClimbingRecordResponse getDailyRecord(LocalDate selectedDate, Long userId) {
 
@@ -151,16 +155,23 @@ public class UserDateService {
                 .build();
     }
 
-    public UserDateCheckAndAddResponseDTO ChallUserDateCheckAndAdd(UserDateCheckAndAddRequestDTO requestDTO) {
+    public ChallUnlockResponseDTO ChallUserDateCheckAndAdd(UserDateCheckAndAddRequestDTO requestDTO) {
         ClimbGroundWithDistance climbGround = climbGroundRepository.findClimbGroundByIDAndDistance(requestDTO.getClimbGroundId(),requestDTO.getLatitude(), requestDTO.getLongitude());
         if (climbGround.getDistance() > 0.5){ // 500 미터 이상이면
             throw new CustomException(ResponseCode.NOT_FOUND_NEAR_CLIMB);
         }
         //  클라이밍장이 해금 되어 있는지 부터 체크
-        UserClimbGround userClimbGround = CheckUserClombGround(requestDTO.getUserId(), requestDTO.getClimbGroundId());
+        UserClimbGround userClimbGround = CheckUserClimbGround(requestDTO.getUserId(), requestDTO.getClimbGroundId());
 
         // userDate가 있는지 체크
-        UserDateCheckAndAddResponseDTO responseDTO= CheckAndAdd(requestDTO.getUserId(),userClimbGround);
+        UserDateCheckAndAddResponseDTO userDateDTO= CheckAndAdd(requestDTO.getUserId(),userClimbGround);
+
+        // detail
+        UnLockClimbGroundDetailResponseDTO detailResponseDTO = userClimbGroundServiceImp.getUnlockClimbGroundDetail(requestDTO.getUserId(), requestDTO.getClimbGroundId());
+
+        ChallUnlockResponseDTO responseDTO = new ChallUnlockResponseDTO(
+                userDateDTO, detailResponseDTO
+        );
 
         return responseDTO;
     }
@@ -171,7 +182,7 @@ public class UserDateService {
             throw new CustomException(ResponseCode.NOT_FOUND_NEAR_CLIMB);
         }
         //  클라이밍장이 해금 되어 있는지 부터 체크
-        UserClimbGround userClimbGround = CheckUserClombGround(requestDTO.getUserId(), nearClimbGround.getClimbGroundId());
+        UserClimbGround userClimbGround = CheckUserClimbGround(requestDTO.getUserId(), nearClimbGround.getClimbGroundId());
 
         // userDate가 있는지 체크
         UserDateCheckAndAddResponseDTO responseDTO= CheckAndAdd(requestDTO.getUserId(),userClimbGround);
@@ -180,7 +191,7 @@ public class UserDateService {
     }
 
     // 클라이밍장 체크 해금여부 체크하는 코드
-    private UserClimbGround CheckUserClombGround(Long userId , Long climbGroundId) {
+    private UserClimbGround CheckUserClimbGround(Long userId , Long climbGroundId) {
         Optional<UserClimbGround> userClimbGround = userClimbGroundRepository.findByUserIdAndClimbGroundId(userId, climbGroundId);
         if (userClimbGround.isPresent()) {
             return userClimbGround.get();
@@ -190,7 +201,7 @@ public class UserDateService {
         User user = userRepository.findById(userId).orElseThrow(() ->new EntityNotFoundException("일치하는 유저를 찾을 수 없습니다"));
         newUserClimbGround.setUser(user);
         newUserClimbGround.setClimbGround(climbGround);
-        newUserClimbGround.setMedal(UserClimbGroundMedalEnum.BRONZE);
+        newUserClimbGround.setMedal(UserClimbGroundMedalEnum.NONE);
         userClimbGroundRepository.save(newUserClimbGround);
 
         return newUserClimbGround;

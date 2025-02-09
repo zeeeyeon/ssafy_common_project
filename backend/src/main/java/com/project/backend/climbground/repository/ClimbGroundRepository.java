@@ -26,7 +26,7 @@ public interface ClimbGroundRepository extends JpaRepository<ClimbGround, Long> 
 
     @Query("SELECT new com.project.backend.climbground.dto.responseDTO.MiddleLockClimbGroundResponseDTO(" +
             "c.Id, c.name, c.image, c.address, c.latitude, c.longitude, " +
-            "CASE WHEN uc.Id IS NOT NULL THEN true ELSE false END) " +
+            "CASE WHEN uc.Id IS NOT NULL THEN false ELSE true END) " +
             "FROM ClimbGround c " +
             "LEFT JOIN UserClimbGround uc ON c.Id = uc.climbGround.Id AND uc.user.id = :userId")
     List<MiddleLockClimbGroundResponseDTO> findAllWithUnlockStatus(Long userId);

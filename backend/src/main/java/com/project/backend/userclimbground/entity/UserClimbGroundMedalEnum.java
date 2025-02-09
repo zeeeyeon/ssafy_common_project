@@ -6,7 +6,8 @@ import lombok.Getter;
 public enum UserClimbGroundMedalEnum {
     GOLD(5),
     SILVER(3),
-    BRONZE(1);
+    BRONZE(1),
+    NONE(0);
 
     private final int score;
 

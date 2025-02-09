@@ -6,6 +6,7 @@ import com.project.backend.common.response.ResponseCode;
 import com.project.backend.userdate.dto.ClimbGroundWithDistance;
 import com.project.backend.userdate.dto.request.UserDateCheckAndAddLocationRequestDTO;
 import com.project.backend.userdate.dto.request.UserDateCheckAndAddRequestDTO;
+import com.project.backend.userdate.dto.response.ChallUnlockResponseDTO;
 import com.project.backend.userdate.dto.response.DailyClimbingRecordResponse;
 import com.project.backend.userdate.dto.response.MonthlyClimbingRecordResponse;
 import com.project.backend.userdate.dto.response.UserDateCheckAndAddResponseDTO;
@@ -47,12 +48,12 @@ public class UserDateController {
         return new ResponseEntity<>(Response.create(GET_MONTHLY_RECORD, monthlyRecords), GET_MONTHLY_RECORD.getHttpStatus());
     }
 
-    // user_date 생성
-    @PostMapping("/start")
+
+    @PostMapping("/unlock")
     public ResponseEntity<?> startRecord (@RequestBody UserDateCheckAndAddRequestDTO requestDTO) {
-        UserDateCheckAndAddResponseDTO responseDTO = userDateService.ChallUserDateCheckAndAdd(requestDTO);
+        ChallUnlockResponseDTO responseDTO = userDateService.ChallUserDateCheckAndAdd(requestDTO);
         if (responseDTO != null) {
-            if (responseDTO.isNewlyCreated()){ //새로 생성 한것 이면
+            if (responseDTO.getUserDate().isNewlyCreated()){ //새로 생성 한것 이면
                 return new ResponseEntity<>(Response.create(POST_USER_DATE, responseDTO), POST_USER_DATE.getHttpStatus());
             }
             // 이미 전에 생성된적 있으면
