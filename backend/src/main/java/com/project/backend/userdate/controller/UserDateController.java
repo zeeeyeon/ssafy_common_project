@@ -11,6 +11,8 @@ import com.project.backend.userdate.dto.response.MonthlyClimbingRecordResponse;
 import com.project.backend.userdate.dto.response.UserDateCheckAndAddResponseDTO;
 import com.project.backend.userdate.service.UserDateService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -39,6 +41,7 @@ public class UserDateController {
     }
 
     @GetMapping("/monthly/{userId}")
+    @Cacheable(value = "monthlyRecords", key = "#userId + '_' + 'monthly_' + #selectedMonth")
     public ResponseEntity<?> getMonthlyRecords(
             @RequestParam("date") @DateTimeFormat(pattern = "yyyy-MM") YearMonth selectedMonth,
             @PathVariable Long userId) {
@@ -49,6 +52,7 @@ public class UserDateController {
 
     // user_date 생성
     @PostMapping("/start")
+    @CacheEvict(value = "monthlyRecords", key = "#RequestDTO.userId + '_' + 'monthly_' + #RequestDTO.date")
     public ResponseEntity<?> startRecord (@RequestBody UserDateCheckAndAddRequestDTO RequestDTO) {
         UserDateCheckAndAddResponseDTO responseDTO = userDateService.UserDateCheckAndAdd(RequestDTO);
         if (responseDTO != null) {
