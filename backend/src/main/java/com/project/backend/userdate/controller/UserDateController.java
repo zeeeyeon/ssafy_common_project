@@ -41,13 +41,12 @@ public class UserDateController {
     }
 
     @GetMapping("/monthly/{userId}")
-    @Cacheable(value = "monthlyRecords", key = "#userId + '_' + 'monthly_' + #selectedMonth")
     public ResponseEntity<?> getMonthlyRecords(
             @RequestParam("date") @DateTimeFormat(pattern = "yyyy-MM") YearMonth selectedMonth,
             @PathVariable Long userId) {
 
         MonthlyClimbingRecordResponse monthlyRecords = userDateService.getMonthlyRecords(selectedMonth, userId);
-        return new ResponseEntity<>(Response.create(GET_MONTHLY_RECORD, monthlyRecords), GET_MONTHLY_RECORD.getHttpStatus());
+        return ResponseEntity.ok(Response.create(GET_MONTHLY_RECORD, monthlyRecords));
     }
 
     // user_date 생성
