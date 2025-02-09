@@ -7,7 +7,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @AllArgsConstructor
-public class UnlockClimbGroundRequsetDTO {
+public class UnlockClimbGroundRequestDTO {
 
     Long userId;
     Long climbGroundId;

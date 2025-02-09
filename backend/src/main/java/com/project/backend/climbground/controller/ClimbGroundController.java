@@ -12,6 +12,8 @@ import com.project.backend.climbground.service.ClimbGroundServiceImpl;
 import com.project.backend.common.advice.exception.CustomException;
 import com.project.backend.common.response.Response;
 import com.project.backend.common.response.ResponseCode;
+import com.project.backend.userclimbground.dto.responseDTO.UnLockClimbGroundDetailResponseDTO;
+import com.project.backend.userclimbground.service.UserClimbGroundServiceImp;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -30,6 +32,7 @@ public class ClimbGroundController {
 
 
     private final ClimbGroundServiceImpl ClimbGroundService;
+    private final UserClimbGroundServiceImp userClimbGroundServiceImp;
 
     // 클라이밍장 상세 조회
     @GetMapping("/detail/{climbground_id}")
@@ -91,6 +94,12 @@ public class ClimbGroundController {
             return  new ResponseEntity<>(Response.create(GET_CLIMB_GROUND_List, lockClimbGrounds), GET_CLIMB_GROUND_List.getHttpStatus());
         }
         throw new CustomException(ResponseCode.NOT_FOUND_CLIMB_GROUND);
+    }
+    @GetMapping("/lock-climbground/detail")
+    public ResponseEntity<?> getUnlockClimbGroundDetail(@RequestParam(name= "userId") Long userId, @RequestParam(name="climbGroundId") Long climbGroundId) {
+        UnLockClimbGroundDetailResponseDTO responseDTO = userClimbGroundServiceImp.getUnlockClimbGroundDetail(userId, climbGroundId);
+
+        return new ResponseEntity<>(Response.create(GET_CLIMB_GROUND_DETAIL, responseDTO), GET_CLIMB_GROUND_DETAIL.getHttpStatus());
     }
 
 }
