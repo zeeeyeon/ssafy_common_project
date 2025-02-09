@@ -50,4 +50,13 @@ public interface ClimbGroundRepository extends JpaRepository<ClimbGround, Long> 
             "ORDER BY distance ASC " +
             "LIMIT 1", nativeQuery = true)
     ClimbGroundWithDistance findClimbGroundByDistance(BigDecimal latitude, BigDecimal longitude);
+
+    @Query("SELECT new com.project.backend.climbground.dto.responseDTO.MiddleLockClimbGroundResponseDTO(" +
+            "c.Id, c.name, c.image, c.address, c.latitude, c.longitude, " +
+            "CASE WHEN uc.Id IS NOT NULL THEN false ELSE true END) " +
+            "FROM ClimbGround c " +
+            "LEFT JOIN UserClimbGround uc ON c.Id = uc.climbGround.Id AND uc.user.id = :userId " +
+            "WHERE LOWER(c.address) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
+            "OR LOWER(c.name) LIKE LOWER(CONCAT('%', :keyword, '%'))")
+    List<ClimbGround> searchLockClimbGround(Long userId,String keyword);
 }
