@@ -163,7 +163,10 @@ public class ClimbGroundServiceImpl implements ClimbGroundService {
                               distance,
                               middleLockClimbGround.isLocked()
                               );
-                  }).sorted(Comparator.comparing(LockClimbGroundAllResponseDTO::getDistance)).collect(Collectors.toList());
+                  })
+                  .sorted(Comparator.comparing(LockClimbGroundAllResponseDTO::isLocked)
+                  .thenComparing(LockClimbGroundAllResponseDTO::getDistance))
+                  .collect(Collectors.toList());
 
           return responseList;
 
@@ -219,7 +222,10 @@ public class ClimbGroundServiceImpl implements ClimbGroundService {
                                 distance,
                                 middleLockClimbGround.isLocked()
                         );
-                    }).sorted(Comparator.comparing(LockClimbGroundAllResponseDTO::getDistance)).collect(Collectors.toList());
+                    })
+                    .sorted(Comparator.comparing(LockClimbGroundAllResponseDTO::isLocked)
+                            .thenComparing(LockClimbGroundAllResponseDTO::getDistance))
+                    .collect(Collectors.toList());
 
             redisTemplate.opsForValue().set("lock-" + "userId:" + userId, responseList, Duration.ofMinutes(1));
             cachedList = (List<LockClimbGroundAllResponseDTO>) redisTemplate.opsForValue().get(redisKey);
@@ -233,23 +239,46 @@ public class ClimbGroundServiceImpl implements ClimbGroundService {
 
 
     @Override
-    public List<LockClimbGroundAllResponseDTO> findAllLockClimbGroundLimitFive(Long userId, double latitude, double longitude) {
+    public LockClimbGroundAllResponseDTO findAllLockClimbGroundFirst(Long userId, double latitude, double longitude) {
         List<MiddleLockClimbGroundResponseDTO> middleLockClimbGrounds = climbGroundRepository.findAllWithUnlockStatus(userId);
 
-        List<LockClimbGroundAllResponseDTO> responseList = middleLockClimbGrounds.stream().map(
-                middleLockClimbGround -> {
-                    double distance = calculateDistance(latitude, longitude, middleLockClimbGround.getLatitude(), middleLockClimbGround.getLongitude());
-
-                    return new LockClimbGroundAllResponseDTO(
-                            middleLockClimbGround.getClimbGroundId(),
-                            middleLockClimbGround.getName(),
-                            middleLockClimbGround.getImage(),
-                            middleLockClimbGround.getAddress(),
-                            distance,
-                            middleLockClimbGround.isLocked()
-                    );
-                }).sorted(Comparator.comparing(LockClimbGroundAllResponseDTO::getDistance)).limit(5).collect(Collectors.toList());
-        return responseList;
+        return middleLockClimbGrounds.stream()
+                .map(middleLockClimbGround -> new LockClimbGroundAllResponseDTO(
+                        middleLockClimbGround.getClimbGroundId(),
+                        middleLockClimbGround.getName(),
+                        middleLockClimbGround.getImage(),
+                        middleLockClimbGround.getAddress(),
+                        calculateDistance(latitude, longitude, middleLockClimbGround.getLatitude(), middleLockClimbGround.getLongitude()),
+                        middleLockClimbGround.isLocked()
+                ))
+                .min(Comparator.comparing(LockClimbGroundAllResponseDTO::getDistance))
+                .orElse(null); // 리스트가 비어있을 경우 null 반환
     };
+
+    public List<ClimbGroundAllResponseDTO> searchLockClimbGroundByKeyword(Long userId, String keyword, double latitude, double longitude) {
+        //검색결과가 나올수도 안나올수도 여러 개일수도 한개 일수도 있음
+        List<ClimbGround> climbGrounds = climbGroundRepository.searchLockClimbGround(userId, keyword);
+
+        // 검색 결과 없으면 빈리스트 주기
+        if (climbGrounds.isEmpty()) {
+            return List.of();
+        }
+        List<ClimbGroundAllResponseDTO> responseList = climbGrounds.stream().map(climb -> {
+
+            double distance = calculateDistance(latitude,longitude,climb.getLatitude(),climb.getLongitude());
+
+            return new ClimbGroundAllResponseDTO(
+                    climb.getId(),
+                    climb.getName(),
+                    climb.getImage(),
+                    climb.getAddress(),
+                    distance
+            );
+        }).sorted(Comparator.comparing(ClimbGroundAllResponseDTO::getDistance)).collect(Collectors.toList());
+
+
+        return responseList;
+
+    }
 
 }

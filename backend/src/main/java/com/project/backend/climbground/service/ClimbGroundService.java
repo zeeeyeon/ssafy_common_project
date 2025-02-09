@@ -25,5 +25,5 @@ public interface ClimbGroundService {
 
     List<LockClimbGroundAllResponseDTO> findAllLockClimbGround(Long userId ,double latitude, double longitude);
 
-    List<LockClimbGroundAllResponseDTO> findAllLockClimbGroundLimitFive(Long userId ,double latitude, double longitude);
+    LockClimbGroundAllResponseDTO findAllLockClimbGroundFirst(Long userId ,double latitude, double longitude);
 }
