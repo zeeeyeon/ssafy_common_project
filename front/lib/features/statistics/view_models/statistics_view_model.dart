@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:kkulkkulk/features/statistics/data/models/statistics_model.dart';
 import 'package:kkulkkulk/features/statistics/data/repositories/statistics_repository.dart';
@@ -6,15 +7,25 @@ import 'package:kkulkkulk/common/network/dio_client.dart';
 class StatisticsViewModel extends StateNotifier<AsyncValue<StatisticsModel>> {
   final StatisticsRepository _repository;
 
-  StatisticsViewModel(this._repository) : super(const AsyncValue.loading()) {
-    loadWeeklyStatistics();
-  } // ✅ 화면 처음 로드 시 API 실행
+  StatisticsViewModel(this._repository) : super(const AsyncValue.loading());
 
-  Future<void> loadWeeklyStatistics() async {
+  Future<void> loadStatistics({
+    required int userId,
+    required String date,
+    required String period, // 'weekly', 'monthly', 'year'
+  }) async {
     try {
-      final data = await _repository.fetchWeeklyStatistics();
+      debugPrint(
+          '📡 ViewModel: $period 통계 데이터 요청 (userId=$userId, date=$date)');
+      final data = await _repository.fetchStatistics(
+        userId: userId,
+        date: date,
+        period: period,
+      );
+      debugPrint('✅ ViewModel: $period 통계 데이터 성공적으로 로드됨');
       state = AsyncValue.data(data);
     } catch (e) {
+      debugPrint('❌ ViewModel: $period 통계 데이터 로드 실패 - $e');
       state = AsyncValue.error(e, StackTrace.current);
     }
   }
@@ -27,9 +38,15 @@ final statisticsRepositoryProvider = Provider<StatisticsRepository>(
   },
 );
 
-final statisticsProvider =
-    StateNotifierProvider<StatisticsViewModel, AsyncValue<StatisticsModel>>(
-  (ref) {
-    return StatisticsViewModel(ref.watch(statisticsRepositoryProvider));
+final statisticsProvider = StateNotifierProvider.family<StatisticsViewModel,
+    AsyncValue<StatisticsModel>, String>(
+  (ref, period) {
+    final repository = ref.watch(statisticsRepositoryProvider);
+    final viewModel = StatisticsViewModel(repository);
+
+    // ✅ 화면에서 period를 전달받으면 자동으로 해당 데이터를 로드!
+    viewModel.loadStatistics(userId: 1, date: '2025-02-01', period: period);
+
+    return viewModel;
   },
 );

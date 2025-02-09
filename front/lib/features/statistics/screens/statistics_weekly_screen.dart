@@ -7,7 +7,7 @@ class StatisticsWeeklyScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final statisticsState = ref.watch(statisticsProvider);
+    final statisticsState = ref.watch(statisticsProvider('weekly'));
 
     return Scaffold(
       appBar: AppBar(title: const Text('Weekly Statistics')),
@@ -23,8 +23,8 @@ class StatisticsWeeklyScreen extends ConsumerWidget {
                 Text('달성율: ${stats.successRate}%'),
                 Text('시도횟수: ${stats.tryCount}'),
                 Text('홀더: ${stats.holds[0].color}'),
-                Text('홀더: ${stats.holds[0].tryCount}'),
-                Text('홀더: ${stats.holds[0].success}'),
+                Text('홀더 시도횟수: ${stats.holds[0].tryCount}'),
+                Text('홀더 성공횟수: ${stats.holds[0].success}'),
               ],
             ),
           );
@@ -38,7 +38,11 @@ class StatisticsWeeklyScreen extends ConsumerWidget {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          ref.read(statisticsProvider.notifier).loadWeeklyStatistics();
+          ref.read(statisticsProvider('weekly').notifier).loadStatistics(
+                userId: 1,
+                date: '2025-02-01',
+                period: 'weekly',
+              );
         },
         child: const Icon(Icons.refresh),
       ),
