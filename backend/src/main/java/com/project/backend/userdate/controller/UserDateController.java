@@ -78,4 +78,15 @@ public class UserDateController {
         }
         throw new CustomException(ResponseCode.BAD_REQUEST);
     }
+
+    @GetMapping("/test/get")
+    public String test01() {
+        return "get";
+    }
+
+
+    @PostMapping("/test/post")
+    public String test02(@RequestBody int userId ) {
+        return "post";
+    }
 }
