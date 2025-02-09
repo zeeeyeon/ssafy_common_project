@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../view_models/statistics_view_model.dart';
+import 'package:intl/intl.dart'; // ✅ 날짜 포맷 라이브러리 추가
 
 class StatisticsScreen extends ConsumerStatefulWidget {
   const StatisticsScreen({super.key});
@@ -18,6 +19,9 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen>
     'year'
   ]; // API 요청용 period 값
 
+  // ✅ 현재 선택된 날짜 (주간, 월간, 연간에 따라 다름)
+  DateTime selectedDate = DateTime.now();
+
   @override
   void initState() {
     super.initState();
@@ -25,13 +29,42 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen>
     _loadData(periods[0]); // 초기 로딩: 주간 데이터
   }
 
-  /// ✅ 선택된 탭에 따라 데이터 로드
+  /// ✅ 선택된 탭에 따라 데이터 로드 (항상 YYYY-MM-DD로 요청)
   void _loadData(String period) {
+    String requestDate =
+        DateFormat('yyyy-MM-dd').format(selectedDate); // API 요청용 날짜
     ref.read(statisticsProvider(period).notifier).loadStatistics(
           userId: 1,
-          date: '2025-02-01', // 기본 날짜 (선택 가능하도록 나중에 수정)
+          date: requestDate, // ✅ API 요청은 YYYY-MM-DD 형식
           period: period,
         );
+  }
+
+  /// ✅ 날짜 포맷 변환 함수 (UI 표시용)
+  String _getFormattedDateForUI(String period, DateTime date) {
+    if (period == 'weekly') {
+      return DateFormat('yyyy.MM.dd').format(date); // ✅ 주간: YYYY.MM.DD
+    } else if (period == 'monthly') {
+      return DateFormat('yyyy.MM').format(date); // ✅ 월간: YYYY.MM
+    } else {
+      return DateFormat('yyyy').format(date); // ✅ 연간: YYYY
+    }
+  }
+
+  /// ✅ 날짜 변경 함수 (좌우 버튼)
+  void _changeDate(String period, int amount) {
+    setState(() {
+      if (period == 'weekly') {
+        selectedDate = selectedDate.add(Duration(days: amount)); // 하루씩 변경
+      } else if (period == 'monthly') {
+        selectedDate = DateTime(
+            selectedDate.year, selectedDate.month + amount, selectedDate.day);
+      } else {
+        selectedDate = DateTime(
+            selectedDate.year + amount, selectedDate.month, selectedDate.day);
+      }
+    });
+    _loadData(period);
   }
 
   @override
@@ -81,6 +114,29 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen>
             child: Column(
               children: [
                 const SizedBox(height: 10),
+
+                // ✅ 날짜 선택 UI (좌우 버튼 포함)
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.chevron_left),
+                      onPressed: () => _changeDate(period, -1),
+                    ),
+                    // ✅ 날짜 UI (주간, 월간, 연간에 따라 다르게 표시)
+                    Text(
+                      _getFormattedDateForUI(
+                          periods[_tabController.index], selectedDate),
+                      style: const TextStyle(
+                          fontSize: 16, fontWeight: FontWeight.bold),
+                    ),
+
+                    IconButton(
+                      icon: const Icon(Icons.chevron_right),
+                      onPressed: () => _changeDate(period, 1),
+                    ),
+                  ],
+                ),
 
                 // ✅ 반응형 통계 카드
                 Row(

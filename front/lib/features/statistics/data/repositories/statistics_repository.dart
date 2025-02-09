@@ -31,20 +31,4 @@ class StatisticsRepository {
       throw Exception('Failed to load $period statistics: $e');
     }
   }
-
-  // Future<StatisticsModel> fetchWeeklyStatistics() async {
-  //   try {
-  //     final response = await _dioClient.dio.get(
-  //       '/api/user-climbground/weekly',
-  //       queryParameters: {
-  //         'userId': 1,
-  //         'date': '2025-02-01',
-  //       },
-  //     );
-
-  //     return StatisticsModel.fromJson(response.data);
-  //   } catch (e) {
-  //     throw Exception('Failed to load weekly statistics: $e');
-  //   }
-  // }
 }
