@@ -103,7 +103,7 @@ public class ClimbGroundController {
     }
 
     @GetMapping("/lock-climbground/list/page")
-    public ResponseEntity<?> getLockCimbGroundList(@RequestParam(name = "userId") Long userId, @RequestParam(name = "latitude") double latitude, @RequestParam(name = "longitude") double longitude, @RequestParam(name = "page") int page) {
+    public ResponseEntity<?> getLockClimbGroundList(@RequestParam(name = "userId") Long userId, @RequestParam(name = "latitude") double latitude, @RequestParam(name = "longitude") double longitude, @RequestParam(name = "page") int page) {
         List<LockClimbGroundAllResponseDTO> lockClimbGrounds = ClimbGroundService.findAllLockClimbGroundPagination(userId, latitude, longitude,page);
 
         if (!lockClimbGrounds.isEmpty()) {
