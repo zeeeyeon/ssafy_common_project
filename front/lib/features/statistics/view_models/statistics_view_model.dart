@@ -44,9 +44,6 @@ final statisticsProvider = StateNotifierProvider.family<StatisticsViewModel,
     final repository = ref.watch(statisticsRepositoryProvider);
     final viewModel = StatisticsViewModel(repository);
 
-    // ✅ 화면에서 period를 전달받으면 자동으로 해당 데이터를 로드!
-    viewModel.loadStatistics(userId: 1, date: '2025-02-01', period: period);
-
     return viewModel;
   },
 );
