@@ -5,11 +5,10 @@ import com.project.backend.common.response.Response;
 import com.project.backend.common.response.ResponseCode;
 import com.project.backend.user.auth.CustomUserDetails;
 import com.project.backend.user.dto.UserTierRequestDto;
+import com.project.backend.user.dto.request.ConvertRequestDto;
 import com.project.backend.user.dto.request.SignUpRequestDto;
 import com.project.backend.user.dto.request.UserInfoRequestDto;
-import com.project.backend.user.dto.response.UserInfoResponseDto;
-import com.project.backend.user.dto.response.UserMedalPerClimbGroundResponseDto;
-import com.project.backend.user.dto.response.UserTierResponseDto;
+import com.project.backend.user.dto.response.*;
 import com.project.backend.user.entity.User;
 import com.project.backend.user.service.UserService;
 import com.project.backend.userclimbground.entity.UserClimbGroundMedalEnum;
@@ -22,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Optional;
 
 import static com.project.backend.common.response.ResponseCode.*;
+import static com.project.backend.common.response.ResponseCode.SUCCESS_CONVERT;
 
 @RestController
 @RequestMapping("/api/user")
@@ -35,6 +35,14 @@ public class UserController {
   public ResponseEntity<?> signUp(@RequestBody @Valid SignUpRequestDto signUpRequestDto) {
     userService.signUp(signUpRequestDto);
     return new ResponseEntity<>(Response.create(SUCCESS_SIGNUP, null), SUCCESS_SIGNUP.getHttpStatus());
+  }
+
+  // 소셜 사용자 전환
+  @PostMapping("/social-update")
+  public ResponseEntity<?> updateSocialUser(@AuthenticationPrincipal CustomUserDetails userDetails, @RequestBody ConvertRequestDto convertRequestDto) {
+    User user = userService.updateSocialUser(userDetails.getUser(), convertRequestDto);
+    ConvertResponseDto responseDto = new ConvertResponseDto(user);
+    return new ResponseEntity<>(Response.create(SUCCESS_CONVERT, responseDto), SUCCESS_CONVERT.getHttpStatus());
   }
 
   // 이메일 중복 체크
@@ -62,7 +70,7 @@ public class UserController {
   public ResponseEntity<?> findUserProfile(@AuthenticationPrincipal CustomUserDetails userDetails) {
     Long userId = userDetails.getUser().getId();
     User user = userService.userProfileFindById(userId);
-    UserTierResponseDto responseDto = new UserTierResponseDto(user);
+    UserProfileResponseDto responseDto = new UserProfileResponseDto(user);
     return new ResponseEntity<>(Response.create(ResponseCode.GET_USER_PROFILE, responseDto), GET_USER_PROFILE.getHttpStatus());
   }
 

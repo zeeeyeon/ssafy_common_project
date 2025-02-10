@@ -3,8 +3,6 @@ package com.project.backend.userclimbground.entity;
 import com.project.backend.climbground.entity.ClimbGround;
 import com.project.backend.common.auditing.BaseEntity;
 import com.project.backend.user.entity.User;
-import com.project.backend.user.entity.UserProviderEnum;
-import com.project.backend.user.entity.UserRoleEnum;
 import com.project.backend.userdate.entity.UserDate;
 import jakarta.persistence.*;
 import lombok.Builder;

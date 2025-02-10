@@ -1,6 +1,7 @@
 package com.project.backend.user.service;
 
 import com.project.backend.user.dto.UserTierRequestDto;
+import com.project.backend.user.dto.request.ConvertRequestDto;
 import com.project.backend.user.dto.request.SignUpRequestDto;
 import com.project.backend.user.dto.request.UserInfoRequestDto;
 import com.project.backend.user.dto.response.UserTierResponseDto;
@@ -14,6 +15,7 @@ import java.util.Optional;
 public interface UserService {
   public User getUserByUserName(String userName);
   public void signUp(SignUpRequestDto signUpRequestDto);
+  public User updateSocialUser(User user, ConvertRequestDto convertRequestDto);
   public Optional<User> checkEmailDuplication(String email);
   public Optional<User> checkNicknameDuplication(String nickname);
   // 사용자 ID로 사용자 프로필 조회
