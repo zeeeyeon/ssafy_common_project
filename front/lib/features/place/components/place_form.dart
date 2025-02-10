@@ -33,7 +33,6 @@ class _PlaceFormState extends State<PlaceForm> {
     setState(() {
       isLoading = true;
     });
-    print('시작');
     try {
       Position position = await determinePosition();
 
@@ -65,8 +64,9 @@ class _PlaceFormState extends State<PlaceForm> {
       });
 
       try {
+        Position position = await determinePosition();
         List<PlaceResponseModel> places = await _placeRepository.searchClimbGround(
-          SearchPlaceAllModel(keyword: keyword, latitude: 0, longitude: 0),
+          SearchPlaceAllModel(keyword: keyword, latitude: position.latitude, longitude: position.longitude),
         );
         setState(() {
           filteredPlaces = places;
@@ -146,7 +146,7 @@ class _PlaceFormState extends State<PlaceForm> {
                 child: GestureDetector(
                   onTap: () {
                     // 상세 페이지로 이동
-                    context.go('/place/${place.id}');
+                    context.push('/place/${place.id}');
                   },
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,

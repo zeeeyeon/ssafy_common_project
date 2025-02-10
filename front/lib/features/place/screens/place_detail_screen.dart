@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:kkulkkulk/features/place/data/models/place_detail_model.dart';
 import 'package:kkulkkulk/features/place/data/repositories/place_repository.dart';
 import 'package:kkulkkulk/common/widgets/layout/custom_app_bar.dart'; // CustomAppBar 경로 수정
@@ -29,7 +30,10 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
     return Scaffold(
       appBar: CustomAppBar(
         title: '장소 상세 정보',
-        
+        showBackButton: true,
+        onBackPressed: () {
+          context.go('/place');
+        },
       ),
       body: Padding(
         padding: const EdgeInsets.all(0),
