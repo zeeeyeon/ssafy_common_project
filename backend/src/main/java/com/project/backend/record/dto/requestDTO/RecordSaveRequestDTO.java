@@ -14,5 +14,4 @@ public class RecordSaveRequestDTO {
     private Boolean isSuccess;
     private MultipartFile file;
     private Long holdId;
-
 }

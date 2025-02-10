@@ -20,6 +20,10 @@ public class Video extends BaseEntity {
     @Column(columnDefinition = "LONGTEXT")
     private String url;
 
+    @Lob
+    @Column(columnDefinition = "LONGTEXT")
+    private String thumbnail;
+
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "record_id")
     private ClimbingRecord climbingRecord;

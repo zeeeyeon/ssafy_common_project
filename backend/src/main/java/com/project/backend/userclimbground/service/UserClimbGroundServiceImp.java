@@ -2,18 +2,14 @@ package com.project.backend.userclimbground.service;
 
 import com.project.backend.climbground.entity.ClimbGround;
 import com.project.backend.climbground.repository.ClimbGroundRepository;
+import com.project.backend.common.advice.exception.CustomException;
 import com.project.backend.common.response.ResponseCode;
 import com.project.backend.user.entity.User;
 import com.project.backend.user.repository.jpa.UserRepository;
-import com.project.backend.userclimbground.dto.requestDTO.ClimbGroundRecordRequestDTO;
-import com.project.backend.userclimbground.dto.requestDTO.UnlockClimbGroundRequsetDTO;
+import com.project.backend.userclimbground.dto.requestDTO.UnlockClimbGroundRequestDTO;
 import com.project.backend.hold.entity.HoldColorEnum;
 import com.project.backend.record.entity.ClimbingRecord;
-import com.project.backend.userclimbground.dto.requestDTO.ClimbRecordRequestDTO;
-import com.project.backend.userclimbground.dto.responseDTO.ClimbGroundRecordResponseDTO;
-import com.project.backend.userclimbground.dto.responseDTO.ClimbGroundStatus;
-import com.project.backend.userclimbground.dto.responseDTO.ClimbRecordResponseDTO;
-import com.project.backend.userclimbground.dto.responseDTO.HoldStats;
+import com.project.backend.userclimbground.dto.responseDTO.*;
 import com.project.backend.userclimbground.entity.UserClimbGround;
 import com.project.backend.userclimbground.entity.UserClimbGroundMedalEnum;
 import com.project.backend.userclimbground.repository.UserClimbGroundRepository;
@@ -110,7 +106,7 @@ public class UserClimbGroundServiceImp implements UserClimbGroundService{
     }
 
     @Override
-    public ResponseCode saveUnlockClimbGround(UnlockClimbGroundRequsetDTO requestDTO) {
+    public ResponseCode saveUnlockClimbGround(UnlockClimbGroundRequestDTO requestDTO) {
         Boolean is_unlock = userClimbGroundRepository.existsUserCLimbGroundByUserIdAndClimbGroundId(requestDTO.getUserId(),requestDTO.getClimbGroundId());
 
         // 이미 해금되어 있으면
@@ -127,7 +123,7 @@ public class UserClimbGroundServiceImp implements UserClimbGroundService{
         UserClimbGround newUserClimbGround = new UserClimbGround();
         newUserClimbGround.setUser(user);
         newUserClimbGround.setClimbGround(climbGround);
-        newUserClimbGround.setMedal(UserClimbGroundMedalEnum.BRONZE);
+        newUserClimbGround.setMedal(UserClimbGroundMedalEnum.NONE);
         userClimbGroundRepository.save(newUserClimbGround);
         return ResponseCode.POST_UNLUCK_CLIMB_GROUND;
     };
@@ -199,5 +195,42 @@ public class UserClimbGroundServiceImp implements UserClimbGroundService{
         holdStatsList.sort(Comparator.comparing(HoldStats::getColor));
 
         return new ClimbGroundRecordResponseDTO(name,totalVisited,totalSuccess,successRate,totalTries,holdStatsList);
+    }
+
+    @Override
+    public UnLockClimbGroundDetailResponseDTO getUnlockClimbGroundDetail(Long userId , Long climbGroundId){
+        Optional<UserClimbGround> userClimbGround = userClimbGroundRepository.findByUserIdAndClimbGroundId(userId, climbGroundId);
+
+        UnLockClimbGroundDetailResponseDTO detailResponseDTO = new UnLockClimbGroundDetailResponseDTO();
+        if (userClimbGround.isPresent()){
+            detailResponseDTO.setClimbGroundDetail(
+                    userClimbGround.get().getClimbGround().getId(),
+                    userClimbGround.get().getClimbGround().getName(),
+                    userClimbGround.get().getClimbGround().getAddress(),
+                    userClimbGround.get().getClimbGround().getImage()
+            );
+            // 총시도 횟수, 성공횟수 ,성공률
+            int totalSuccess =0;
+            int totalTries =0;
+
+            for (UserDate ud : userClimbGround.get().getUserDateList()) {
+                for (ClimbingRecord r : ud.getClimbingRecordList()){
+                    totalTries++;
+                    if (r.isSuccess()) totalSuccess++;
+
+                }
+            }
+            double successRate = ((double) totalSuccess / totalTries) * 100;
+            successRate = Math.round(successRate * 100) / 100.0;
+
+            detailResponseDTO.setRecordDetail(
+                    userClimbGround.get().getMedal(),
+                    totalSuccess,
+                    successRate,
+                    totalTries
+            );
+            return detailResponseDTO;
+        }
+        throw new CustomException(ResponseCode.NOT_UNLOCK_CLIMB);
     }
 }

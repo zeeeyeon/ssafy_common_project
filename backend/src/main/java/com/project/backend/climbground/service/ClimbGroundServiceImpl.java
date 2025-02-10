@@ -14,8 +14,11 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.time.Duration;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -26,6 +29,7 @@ public class ClimbGroundServiceImpl implements ClimbGroundService {
     private final ClimbGroundRepository climbGroundRepository;
 
     private final ClimbGroundInfoRepository climbGroundInfoRepository;
+    private final RedisTemplate<String, Object> redisTemplate;
 
     //클라이밍장 상세 페이지
     @Override
@@ -159,28 +163,122 @@ public class ClimbGroundServiceImpl implements ClimbGroundService {
                               distance,
                               middleLockClimbGround.isLocked()
                               );
-                  }).sorted(Comparator.comparing(LockClimbGroundAllResponseDTO::getDistance)).collect(Collectors.toList());
+                  })
+                  .sorted(Comparator.comparing(LockClimbGroundAllResponseDTO::isLocked)
+                  .thenComparing(LockClimbGroundAllResponseDTO::getDistance))
+                  .collect(Collectors.toList());
+
           return responseList;
 
     };
 
+    // 클라이밍장 전체 리스트 조회 페이지네이션
+    public List<ClimbGroundAllResponseDTO> findAllClimbGroundPagination(Long userId, double latitude, double longitude, int page) {
+        String redisKey = "findAll-" +"userId:" + userId;
+        List<ClimbGroundAllResponseDTO> cachedList = (List<ClimbGroundAllResponseDTO>) redisTemplate.opsForValue().get(redisKey);
+
+        if (cachedList == null) {
+            // 레디스에 정렬한 값 캐싱하는 메서드
+            List<ClimbGround> climbGrounds = climbGroundRepository.findAll();
+            List<ClimbGroundAllResponseDTO> responseList = climbGrounds.stream().map(climb -> {
+
+                double distance = calculateDistance(latitude,longitude,climb.getLatitude(),climb.getLongitude());
+
+                return new ClimbGroundAllResponseDTO(
+                        climb.getId(),
+                        climb.getName(),
+                        climb.getImage(),
+                        climb.getAddress(),
+                        distance
+                );
+            }).sorted(Comparator.comparing(ClimbGroundAllResponseDTO::getDistance)).collect(Collectors.toList());
+            redisTemplate.opsForValue().set("findAll-" + "userId:" + userId, responseList, Duration.ofMinutes(1));
+            cachedList = (List<ClimbGroundAllResponseDTO>) redisTemplate.opsForValue().get(redisKey);
+        }
+        int size = 10;
+        int start = (page-1) * size;
+        int end = Math.min(start + size, cachedList.size());
+
+        return cachedList.subList(start, end);
+    };
+
+    // 해금된 클라이밍장 전체 리스트 조회 페이지네이션
+    public List<LockClimbGroundAllResponseDTO> findAllLockClimbGroundPagination(Long userId, double latitude, double longitude, int page) {
+        String redisKey = "lock-" +"userId:" + userId;
+        List<LockClimbGroundAllResponseDTO> cachedList = (List<LockClimbGroundAllResponseDTO>) redisTemplate.opsForValue().get(redisKey);
+
+        if (cachedList == null) {
+            // 레디스에 정렬한 값 캐싱하는 메서드
+            List<MiddleLockClimbGroundResponseDTO> middleLockClimbGrounds = climbGroundRepository.findAllWithUnlockStatus(userId);
+            List<LockClimbGroundAllResponseDTO> responseList = middleLockClimbGrounds.stream().map(
+                    middleLockClimbGround -> {
+                        double distance = calculateDistance(latitude,longitude, middleLockClimbGround.getLatitude(),middleLockClimbGround.getLongitude());
+
+                        return new LockClimbGroundAllResponseDTO(
+                                middleLockClimbGround.getClimbGroundId(),
+                                middleLockClimbGround.getName(),
+                                middleLockClimbGround.getImage(),
+                                middleLockClimbGround.getAddress(),
+                                distance,
+                                middleLockClimbGround.isLocked()
+                        );
+                    })
+                    .sorted(Comparator.comparing(LockClimbGroundAllResponseDTO::isLocked)
+                            .thenComparing(LockClimbGroundAllResponseDTO::getDistance))
+                    .collect(Collectors.toList());
+
+            redisTemplate.opsForValue().set("lock-" + "userId:" + userId, responseList, Duration.ofMinutes(1));
+            cachedList = (List<LockClimbGroundAllResponseDTO>) redisTemplate.opsForValue().get(redisKey);
+        }
+        int size = 10;
+        int start = (page-1) * size;
+        int end = Math.min(start + size, cachedList.size());
+
+        return cachedList.subList(start, end);
+    };
+
+
     @Override
-    public List<LockClimbGroundAllResponseDTO> findAllLockClimbGroundLimitFive(Long userId, double latitude, double longitude) {
+    public LockClimbGroundAllResponseDTO findAllLockClimbGroundFirst(Long userId, double latitude, double longitude) {
         List<MiddleLockClimbGroundResponseDTO> middleLockClimbGrounds = climbGroundRepository.findAllWithUnlockStatus(userId);
 
-        List<LockClimbGroundAllResponseDTO> responseList = middleLockClimbGrounds.stream().map(
-                middleLockClimbGround -> {
-                    double distance = calculateDistance(latitude, longitude, middleLockClimbGround.getLatitude(), middleLockClimbGround.getLongitude());
-
-                    return new LockClimbGroundAllResponseDTO(
-                            middleLockClimbGround.getClimbGroundId(),
-                            middleLockClimbGround.getName(),
-                            middleLockClimbGround.getImage(),
-                            middleLockClimbGround.getAddress(),
-                            distance,
-                            middleLockClimbGround.isLocked()
-                    );
-                }).sorted(Comparator.comparing(LockClimbGroundAllResponseDTO::getDistance)).limit(5).collect(Collectors.toList());
-        return responseList;
+        return middleLockClimbGrounds.stream()
+                .map(middleLockClimbGround -> new LockClimbGroundAllResponseDTO(
+                        middleLockClimbGround.getClimbGroundId(),
+                        middleLockClimbGround.getName(),
+                        middleLockClimbGround.getImage(),
+                        middleLockClimbGround.getAddress(),
+                        calculateDistance(latitude, longitude, middleLockClimbGround.getLatitude(), middleLockClimbGround.getLongitude()),
+                        middleLockClimbGround.isLocked()
+                ))
+                .min(Comparator.comparing(LockClimbGroundAllResponseDTO::getDistance))
+                .orElse(null); // 리스트가 비어있을 경우 null 반환
     };
+
+    public List<ClimbGroundAllResponseDTO> searchLockClimbGroundByKeyword(Long userId, String keyword, double latitude, double longitude) {
+        //검색결과가 나올수도 안나올수도 여러 개일수도 한개 일수도 있음
+        List<ClimbGround> climbGrounds = climbGroundRepository.searchLockClimbGround(userId, keyword);
+
+        // 검색 결과 없으면 빈리스트 주기
+        if (climbGrounds.isEmpty()) {
+            return List.of();
+        }
+        List<ClimbGroundAllResponseDTO> responseList = climbGrounds.stream().map(climb -> {
+
+            double distance = calculateDistance(latitude,longitude,climb.getLatitude(),climb.getLongitude());
+
+            return new ClimbGroundAllResponseDTO(
+                    climb.getId(),
+                    climb.getName(),
+                    climb.getImage(),
+                    climb.getAddress(),
+                    distance
+            );
+        }).sorted(Comparator.comparing(ClimbGroundAllResponseDTO::getDistance)).collect(Collectors.toList());
+
+
+        return responseList;
+
+    }
+
 }
