@@ -8,10 +8,13 @@ class PlaceScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CustomAppBar(title: '장소'),
+      appBar: CustomAppBar(
+        title: '장소'
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: PlaceForm(),
+        
       ),
     );
   }
