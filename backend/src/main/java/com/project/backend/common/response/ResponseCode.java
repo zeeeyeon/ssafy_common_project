@@ -72,8 +72,9 @@ public enum ResponseCode {
     NOT_FOUND_CLIMB_RECORD(404, HttpStatus.BAD_REQUEST, "영상저장을 위한 기록을 찾을 수 없습니다."),
     SUCCESS_RECORD_UPLOAD(201, HttpStatus.CREATED, "클라이밍 기록을 성공적으로 로드했습니다."),
     GET_ALBUM(successCode(), HttpStatus.OK, "사용자의 클라이밍 영상이 조회되었습니다."),
-    NO_CONTENT_ALBUM(204, HttpStatus.OK, "해당 날짜에 클라이밍 영상을 찾을 수 없습니다.");
-
+    NO_CONTENT_ALBUM(204, HttpStatus.OK, "해당 날짜에 클라이밍 영상을 찾을 수 없습니다."),
+    NOT_FOUND_NEAR_CLIMB(404,HttpStatus.NOT_FOUND, "현재 위치에서 오차범위 안에 있는 클라이밍장을 찾을 수 없습니다."),
+    NOT_UNLOCK_CLIMB(400,HttpStatus.BAD_REQUEST,"해금되지 않은 클라이밍장 입니다.");
 
     private int code;
     private HttpStatus httpStatus;

@@ -3,10 +3,11 @@ package com.project.backend.userclimbground.service;
 import com.project.backend.common.ResponseType;
 import com.project.backend.common.response.ResponseCode;
 import com.project.backend.userclimbground.dto.requestDTO.ClimbGroundRecordRequestDTO;
-import com.project.backend.userclimbground.dto.requestDTO.UnlockClimbGroundRequsetDTO;
+import com.project.backend.userclimbground.dto.requestDTO.UnlockClimbGroundRequestDTO;
 import com.project.backend.userclimbground.dto.requestDTO.ClimbRecordRequestDTO;
 import com.project.backend.userclimbground.dto.responseDTO.ClimbGroundRecordResponseDTO;
 import com.project.backend.userclimbground.dto.responseDTO.ClimbRecordResponseDTO;
+import com.project.backend.userclimbground.dto.responseDTO.UnLockClimbGroundDetailResponseDTO;
 
 import java.time.LocalDate;
 
@@ -21,7 +22,7 @@ public interface UserClimbGroundService {
     ClimbRecordResponseDTO getUserClimbRecordDay(Long userId , LocalDate date);
 
     // 클라이밍장 해금 요청
-    ResponseCode saveUnlockClimbGround(UnlockClimbGroundRequsetDTO requestDTO);
+    ResponseCode saveUnlockClimbGround(UnlockClimbGroundRequestDTO requestDTO);
 
     // 클라이밍장별 통계(년별)
     ClimbGroundRecordResponseDTO getUserClimbGroundRecordYear(Long userId , Long climbGroundId,LocalDate date);
@@ -35,4 +36,6 @@ public interface UserClimbGroundService {
     // 클라이밍장별 통계(일별)
     ClimbGroundRecordResponseDTO getUserClimbGroundRecordDay(Long userId , Long climbGroundId,LocalDate date);
 
+    // 해금된 클라이밍장 상세 페이지
+    UnLockClimbGroundDetailResponseDTO getUnlockClimbGroundDetail(Long userId , Long climbGroundId);
 }
