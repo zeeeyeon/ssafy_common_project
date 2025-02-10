@@ -10,8 +10,9 @@ import java.time.temporal.ChronoUnit;
 
 @Data
 public class UserProfileResponseDto {
+  private String username;
   private float height;
-  private String armSpan;
+  private float armSpan;
   private int Dday;  // Changed to Long to allow null
   private UserTierEnum userTier;
 
@@ -19,9 +20,9 @@ public class UserProfileResponseDto {
     if (user == null) {
       throw new IllegalArgumentException("User cannot be null");
     }
-
-    // Username/armSpan handling
-    this.armSpan = user.getUsername() != null ? user.getUsername() : "";
+    this.username = user.getUsername() != null ? user.getUsername() : "";
+    // armSpan handling
+    this.armSpan = user.getReach();
 
     // Height handling
     this.height = user.getHeight();
@@ -44,8 +45,6 @@ public class UserProfileResponseDto {
       LocalDate currentDate = LocalDate.now();
       this.Dday = (int) ChronoUnit.DAYS.between(startDate, currentDate);
     } catch (DateTimeParseException e) {
-      // Log the error if you have a logging system
-      // logger.error("Failed to parse start date: " + startDateStr, e);
       this.Dday = 0;
     }
   }

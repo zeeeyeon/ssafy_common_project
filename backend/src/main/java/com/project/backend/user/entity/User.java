@@ -64,17 +64,10 @@ public class User {
     private LocalDateTime createDate;
     private LocalDateTime updateDate;
 
-    @Column(length = 1)
-//    @NotNull
-    @Size(min = 1, max = 1)
-    private String emailVerifiedYn;
-
     @Column(length = 512)
-//    @NotNull
     @Size(max = 512)
     private String profileImageUrl;
 
-//    @NotNull
     private int score;
 
     // tier

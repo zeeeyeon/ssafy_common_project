@@ -32,7 +32,6 @@ public class KakaoSocialLoginController {
 
   private final KakaoOauthService kakaoOauthService;
   private final SocialUserService socialUserService;
-  private final RefreshTokenService refreshTokenService;
   private final Logger log = LoggerFactory.getLogger(getClass());
 
   // 1. 카카오 로그인 페이지로 리다이렉트
