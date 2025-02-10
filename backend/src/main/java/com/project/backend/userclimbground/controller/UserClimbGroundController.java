@@ -65,7 +65,7 @@ public class UserClimbGroundController {
 
     }
 
-    @PostMapping("/unlock")
+    @PostMapping("/unlock/{climbground_id}")
     public ResponseEntity<?> postUnlockClimbGround(@AuthenticationPrincipal CustomUserDetails userDetails,
                                                    @PathVariable Long climbground_id) {
         Long userId = userDetails.getUser().getId();
