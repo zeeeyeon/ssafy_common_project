@@ -126,7 +126,7 @@ public class ClimbGroundController {
     // 클라이밍장 검색
     @GetMapping("/lock-climbground/search")
     public ResponseEntity<?> searchLockClimbGround(@RequestParam(name= "userId") Long userId,@RequestParam(name = "keyword") String keyword, @RequestParam(name = "latitude") double latitude, @RequestParam(name = "longitude") double longitude) {
-        List<ClimbGroundAllResponseDTO> climbGrounds = ClimbGroundService.searchLockClimbGroundByKeyword(userId,keyword,latitude,longitude);
+        List<LockClimbGroundAllResponseDTO> climbGrounds = ClimbGroundService.searchLockClimbGroundByKeyword(userId,keyword,latitude,longitude);
 
         if (!climbGrounds.isEmpty()) {
             return new ResponseEntity<>(Response.create(GET_CLIMB_GROUND_List, climbGrounds), GET_CLIMB_GROUND_List.getHttpStatus());
