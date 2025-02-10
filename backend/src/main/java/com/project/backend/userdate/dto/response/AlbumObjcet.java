@@ -15,5 +15,6 @@ public class AlbumObjcet {
     private HoldColorEnum color;
     private HoldLevelEnum level;
     private String url;
+    private String thumbnailUrl;
 
 }
