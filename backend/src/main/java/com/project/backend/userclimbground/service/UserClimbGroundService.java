@@ -22,7 +22,7 @@ public interface UserClimbGroundService {
     ClimbRecordResponseDTO getUserClimbRecordDay(Long userId , LocalDate date);
 
     // 클라이밍장 해금 요청
-    ResponseCode saveUnlockClimbGround(UnlockClimbGroundRequestDTO requestDTO);
+    ResponseCode saveUnlockClimbGround(Long userId, Long climbGroundId);
 
     // 클라이밍장별 통계(년별)
     ClimbGroundRecordResponseDTO getUserClimbGroundRecordYear(Long userId , Long climbGroundId,LocalDate date);

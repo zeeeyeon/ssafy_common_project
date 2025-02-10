@@ -175,16 +175,16 @@ public class UserDateService {
         return responseDTO;
     }
 
-    public UserDateCheckAndAddResponseDTO UserDateCheckAndAdd(UserDateCheckAndAddLocationRequestDTO requestDTO) {
+    public UserDateCheckAndAddResponseDTO UserDateCheckAndAdd(Long userId,UserDateCheckAndAddLocationRequestDTO requestDTO) {
         ClimbGroundWithDistance nearClimbGround = climbGroundRepository.findClimbGroundByDistance(requestDTO.getLatitude(), requestDTO.getLongitude());
         if (nearClimbGround.getDistance() > 0.5){ // 500 미터 이상이면
             throw new CustomException(ResponseCode.NOT_FOUND_NEAR_CLIMB);
         }
         //  클라이밍장이 해금 되어 있는지 부터 체크
-        UserClimbGround userClimbGround = CheckUserClimbGround(requestDTO.getUserId(), nearClimbGround.getClimbGroundId());
+        UserClimbGround userClimbGround = CheckUserClimbGround(userId, nearClimbGround.getClimbGroundId());
 
         // userDate가 있는지 체크
-        UserDateCheckAndAddResponseDTO responseDTO= CheckAndAdd(requestDTO.getUserId(),userClimbGround);
+        UserDateCheckAndAddResponseDTO responseDTO= CheckAndAdd(userId,userClimbGround);
 
         return responseDTO;
     }
