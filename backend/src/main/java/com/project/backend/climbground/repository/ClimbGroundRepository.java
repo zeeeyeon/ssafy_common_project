@@ -58,5 +58,5 @@ public interface ClimbGroundRepository extends JpaRepository<ClimbGround, Long> 
             "LEFT JOIN UserClimbGround uc ON c.Id = uc.climbGround.Id AND uc.user.id = :userId " +
             "WHERE LOWER(c.address) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
             "OR LOWER(c.name) LIKE LOWER(CONCAT('%', :keyword, '%'))")
-    List<ClimbGround> searchLockClimbGround(Long userId,String keyword);
+    List<MiddleLockClimbGroundResponseDTO> searchLockClimbGround(Long userId,String keyword);
 }
