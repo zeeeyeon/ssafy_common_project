@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'components/statistics_header.dart';
 import 'components/statistics_card.dart';
 import 'components/statistics_bar_chart.dart';
+import 'components/climbing_gym_statistics_screen.dart';
 
 class StatisticsScreen extends ConsumerStatefulWidget {
   const StatisticsScreen({super.key});
@@ -145,11 +146,45 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen>
                               itemBuilder: (context, index) {
                                 final gym = climbingGyms[index];
                                 return ListTile(
-                                  leading: Image.network(gym.image,
-                                      width: 40, height: 40, fit: BoxFit.cover),
-                                  title: Text(gym.name,
-                                      style: const TextStyle(fontSize: 16)),
-                                  subtitle: Text(gym.address),
+                                  leading: ClipRRect(
+                                    borderRadius:
+                                        BorderRadius.circular(10), // 더 부드러운 모서리
+                                    child: Image.network(
+                                      gym.image,
+                                      width: 52, // ✅ 기존보다 1.3배 증가 (40 → 52)
+                                      height: 52, // ✅ 기존보다 1.3배 증가 (40 → 52)
+                                      fit: BoxFit.cover,
+                                    ),
+                                  ),
+                                  title: Text(
+                                    gym.name,
+                                    style: const TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                      letterSpacing: 0.5, // 가독성 향상
+                                    ),
+                                  ),
+                                  subtitle: Text(
+                                    gym.address,
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      color: Colors.grey[600], // 부드러운 회색으로 조정
+                                    ),
+                                    overflow: TextOverflow
+                                        .ellipsis, // 너무 긴 텍스트는 말줄임표 처리
+                                  ),
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            ClimbingGymStatisticsScreen(
+                                          climbGroundId: gym.id,
+                                          gymName: gym.name,
+                                        ),
+                                      ),
+                                    );
+                                  },
                                 );
                               },
                             );
