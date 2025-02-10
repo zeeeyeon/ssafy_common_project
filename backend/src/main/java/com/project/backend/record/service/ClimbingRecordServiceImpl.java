@@ -14,8 +14,10 @@ import com.project.backend.userdate.repository.UserDateRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.CacheManager;
 import org.springframework.stereotype.Service;
 
+import java.time.YearMonth;
 import java.util.Optional;
 
 @Service
@@ -26,6 +28,7 @@ public class ClimbingRecordServiceImpl implements ClimbingRecordService {
     private final UserRepository userRepository;
     private final UserDateRepository userDateRepository;
     private final ClimbingRecordRepository climbingRecordRepository;
+    private final CacheManager redisCacheManager;
 
     @Override
     @Transactional
@@ -43,6 +46,10 @@ public class ClimbingRecordServiceImpl implements ClimbingRecordService {
         newClimbingRecord.setUser(user);
         newClimbingRecord.setUserDate(userDate);
         climbingRecordRepository.save(newClimbingRecord);
+
+        String cacheKey = requestDTO.getUserId() + "_monthly_" + YearMonth.from(userDate.getCreatedAt());
+        Optional.ofNullable(redisCacheManager.getCache("monthlyRecords"))
+                .ifPresent(cache -> cache.evictIfPresent(cacheKey));
 
         return Optional.of(newClimbingRecord);
 
