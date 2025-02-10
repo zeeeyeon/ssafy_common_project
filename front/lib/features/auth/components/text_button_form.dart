@@ -18,6 +18,7 @@ class TextButtonForm extends StatelessWidget {
             fontWeight: FontWeight.bold,
             color: Colors.white,
             fontSize: 16,
+            overflow: TextOverflow.ellipsis,
           ),
         ),
         style: TextButton.styleFrom(
@@ -25,7 +26,7 @@ class TextButtonForm extends StatelessWidget {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),  
           ),
-          padding: EdgeInsets.symmetric(vertical: 16), 
+          padding: EdgeInsets.symmetric(vertical: 8), 
         ),
         
       ),

@@ -1,8 +1,8 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:kkulkkulk/common/jwt/jwt_token_provider.dart';
+import 'package:kkulkkulk/common/storage/storage.dart';
 import 'package:kkulkkulk/features/auth/data/models/user_login_model.dart';
 import 'package:kkulkkulk/features/auth/data/repositories/auth_repository.dart';
 
@@ -32,16 +32,20 @@ class LogInViewModel extends ChangeNotifier {
     try {
       isLoading = true;
       notifyListeners();
-
+      print('email: $email password: $password');
       final Response response = await _authRepository.login(userLoginModel);
-
+      print('response: $response');
       if (response.statusCode == 200) {
         final String? token = response.headers.value('authorization');
 
         if (token != null) {
           // Bearer 접두어 제거
           final String actualToken = token.replaceFirst('Bearer ', '');
+          print('actualToken: $actualToken');
 
+          await Storage.saveToken(token);
+          final String? checkToken = await Storage.getToken();
+          print(checkToken);
           // 토큰을 업데이트
           ref.read(jwtTokenProvider.notifier).state = actualToken;
 
@@ -52,6 +56,7 @@ class LogInViewModel extends ChangeNotifier {
       }
     } catch (e) {
       errorMessage = '로그인 실패';
+      print(e);
       return flag;
     }
     return flag;

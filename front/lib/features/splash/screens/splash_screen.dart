@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:jwt_decoder/jwt_decoder.dart';
+import 'package:kkulkkulk/common/storage/storage.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -51,11 +53,20 @@ class _SplashScreenState extends State<SplashScreen>
   }
 
   Future<void> _startAnimationAndNavigation() async {
+    final token = await Storage.getToken();
     try {
       await _controller.forward();
       await Future.delayed(const Duration(milliseconds: 500));
       if (mounted) {
-        context.go('/login');
+        if(token == null) {
+          context.push('/login');
+        }else {
+          final decodedToken = JwtDecoder.decode(token.replaceAll("Bearer", ''));
+          context.push('/calendar');
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('환영합니다 ${decodedToken['username']} 님')),
+          );
+        }
       }
     } catch (e) {
       debugPrint('Animation or navigation error: $e');
