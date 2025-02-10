@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:go_router/go_router.dart';
@@ -5,6 +6,7 @@ import 'package:kkulkkulk/common/gps/gps.dart';
 import 'package:kkulkkulk/features/challenge/data/models/challenge_all_model.dart';
 import 'package:kkulkkulk/features/challenge/data/models/challenge_response_model.dart';
 import 'package:kkulkkulk/features/challenge/data/models/search_challenge_all_model.dart';
+import 'package:kkulkkulk/features/challenge/data/models/unlock_challenge_model.dart';
 import 'package:kkulkkulk/features/challenge/data/repositories/challenge_repository.dart';
 
 class ChallengeForm extends StatefulWidget {
@@ -69,15 +71,23 @@ class _ChallengeFormState extends State<ChallengeForm> {
 
       try {
         Position position = await determinePosition();
-        List<ChallengeResponseModel> place = await _challengeRepository.searchGetAllChallenges(
+        // print('keyword : ${keyword}');
+
+        List<ChallengeResponseModel> places = await _challengeRepository.searchGetAllChallenges(
           SearchChallengeAllModel(
             userId: 1, // 나중에 토큰으로 사용자 userId 추출 수정
             latitude: position.latitude, 
             longitude: position.longitude,
+            keyword: keyword,
           )
+
+        
         );
+        print(places);
         setState(() {
-          filteredPlaces = allPlaces;
+          allPlaces = places;
+          filteredPlaces = places;
+          // filteredPlaces = allPlaces;
           isLoading = false;
         });
       } catch (e) {
@@ -90,12 +100,94 @@ class _ChallengeFormState extends State<ChallengeForm> {
     }
   }
 
+  // 해금 함수
+  Future<void> _unlockChallenge(int userId, int climbGroundId) async {
+    try {
+      Position position = await determinePosition();
+      final response = await _challengeRepository.unlockChallenge(UnlockChallengeModel(
+          userId: userId, 
+          climbGroundId: climbGroundId, 
+          // latitude: 37.650919453,
+          // longitude: 126.778892137,
+          latitude: position.latitude, 
+          longitude: position.longitude
+        ));
+
+      if(response.statusCode == 201) {
+        // context.push('/challenge/detail/${unlockChallengeModel.climbGroundId}');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('해당 클라이밍장이 성공적으로 해금되었습니다'))
+        );
+      }
+    } catch (e) {
+      // Navigator.of(context).pop();
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('해당 클라이밍장을 해금할 수 없는 거리에 있습니다'))
+      );
+      rethrow;
+    }
+  }
+
   // 검색어를 비우는 함수
   void _clearKeyword() {
     setState(() {
       keywordController.clear();
       filteredPlaces = allPlaces; // 검색어를 비우면 전체 장소 리스트로 복원
     });
+  }
+
+  // 해금 확인 모달
+  void _showUnlockDialog(ChallengeResponseModel place) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(
+            "해금하시겠습니까?",
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          content: Text(
+            "${place.name}",
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                _unlockChallenge(1, place.climbGroundId);
+                // 해금 작업 진행 (API 호출 등)
+                
+                // print("해금 완료: ${place.climbGroundId}");
+                // 예: _unlockChallenge(place.climbGroundId);
+                Navigator.of(context).pop();
+              },
+              child: Text(
+                "확인",
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF8A9EA6)
+                ),
+              ),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text(
+                "취소",
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF8A9EA6)
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -152,10 +244,14 @@ class _ChallengeFormState extends State<ChallengeForm> {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: GestureDetector(
-                  onTap: () async {
-                    Position position = await determinePosition();
+                  onTap: () {
+                    // Position position = await determinePosition();
                     // 상세 페이지로 이동
-                    context.go('/challenge/detail/${place.climbGroundId}');
+                    if(!place.locked) {
+                      context.push('/challenge/detail/${place.climbGroundId}');
+                    } else {
+                      _showUnlockDialog(place);
+                    }
                   },
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -179,14 +275,14 @@ class _ChallengeFormState extends State<ChallengeForm> {
                                   color: Colors.grey[200],
                                 ),
                           // place.locked가 false일 때만 어두운 배경 오버레이 추가
-                          if (!place.locked)
+                          if (place.locked)
                             Container(
                               height: 200,
                               color: Colors.black.withOpacity(0.5), // 어두운 배경 오버레이
                             ),
                           // 자물쇠 아이콘
                           Icon(
-                            place.locked ? Icons.lock_open : Icons.lock,
+                            !place.locked ? Icons.lock_open : Icons.lock,
                             color: Color(0xFF8A9EA6),
                             size: 50,
                           ),
@@ -212,7 +308,7 @@ class _ChallengeFormState extends State<ChallengeForm> {
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 8.0),
                         child: Text(
-                          "장소 상태: ${place.locked ? '열림' : '잠김'}",
+                          "장소 상태: ${place.locked ? '잠김' : '열림'} ${place.locked}",
                           style: TextStyle(fontSize: 14, color: Colors.grey),
                         ),
                       ),
