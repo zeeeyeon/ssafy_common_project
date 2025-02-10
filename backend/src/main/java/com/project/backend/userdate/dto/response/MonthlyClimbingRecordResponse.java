@@ -1,5 +1,7 @@
 package com.project.backend.userdate.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -7,17 +9,34 @@ import lombok.Getter;
 import java.util.List;
 
 @Getter
-@Builder
 public class MonthlyClimbingRecordResponse {
     private int year;
     private int month;
     private List<DayRecord> records;
 
+    @JsonCreator
+    public MonthlyClimbingRecordResponse(
+            @JsonProperty("year") int year,
+            @JsonProperty("month") int month,
+            @JsonProperty("records") List<DayRecord> records) {
+        this.year = year;
+        this.month = month;
+        this.records = records;
+    }
+
     @Getter
     @AllArgsConstructor
     public static class DayRecord {
+        @JsonProperty("day")
         private int day;
+
+        @JsonProperty("hasRecord")
         private boolean hasRecord;
+
+        @JsonProperty("totalCount")
         private long totalCount;
+
+        public DayRecord() {
+        }
     }
 }
