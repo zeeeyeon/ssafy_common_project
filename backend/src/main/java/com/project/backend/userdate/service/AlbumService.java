@@ -34,7 +34,8 @@ public class AlbumService {
                                         userDate.getUserClimbGround().getClimbGround().getName(),
                                         climbingRecord.getHold().getColor(),
                                         climbingRecord.getHold().getLevel(),
-                                        climbingRecord.getVideo().getUrl()
+                                        climbingRecord.getVideo().getUrl(),
+                                        climbingRecord.getVideo().getThumbnail()
                                 ))).collect(Collectors.toList());
 
         List<AlbumObjcet> sortedAlbumObjcetList = albumObjcetList.stream()
