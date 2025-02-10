@@ -12,7 +12,6 @@ import com.project.backend.common.advice.exception.CustomException;
 import com.project.backend.common.response.ResponseCode;
 import com.project.backend.user.auth.CustomUserDetails;
 import com.project.backend.user.entity.User;
-import com.project.backend.user.entity.UserRoleEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,7 +33,6 @@ public class JwtProcess {
                     .withExpiresAt(new Date(System.currentTimeMillis() + JwtVO.EXPIRATION_TIME))
                     .withClaim("id", loginUser.getUser().getId())
                     .withClaim("username", loginUser.getUser().getUsername())
-                    .withClaim("role", loginUser.getUser().getRoleType().name())
                     .sign(Algorithm.HMAC512(JwtVO.SECRET));
 
             log.debug("디버그 : 생성된 토큰 = {}", jwtToken);
@@ -42,7 +40,22 @@ public class JwtProcess {
 
         } catch (Exception e) {
             log.error("JWT 토큰 생성 실패: ", e);
-            throw new RuntimeException("JWT 토큰 생성에 실패했습니다.");
+            throw new RuntimeException("JWT Access Token 생성 실패");
+        }
+    }
+
+    // Refresh Token 생성
+    public static String createRefreshToken(CustomUserDetails user) {
+        try {
+            String refreshToken = JWT.create()
+                    .withSubject(user.getUser().getId() + "")
+                    .withIssuedAt(new Date())
+                    .withExpiresAt(new Date(System.currentTimeMillis() + JwtVO.REFRESH_EXPIRATION_TIME))
+                    .sign(Algorithm.HMAC512(JwtVO.SECRET));
+            return JwtVO.TOKEN_PREFIX + refreshToken;
+        } catch (Exception e) {
+            log.error("JWT Refresh Token 생성 실패", e);
+            throw new RuntimeException("JWT Refresh Token 생성 실패");
         }
     }
 
@@ -78,19 +91,17 @@ public class JwtProcess {
 
             Long id = decodedJWT.getClaim("id").asLong();
             String username = decodedJWT.getClaim("username").asString();
-            String role = decodedJWT.getClaim("role").asString();
 
-            log.debug("토큰에서 추출된 정보 - id: {}, username: {}, role: {}",
-                    id, username, role);
+            log.debug("토큰에서 추출된 정보 - id: {}, username: {}",
+                    id, username);
 
-            if (id == null || username == null || role == null) {
+            if (id == null || username == null) {
                 throw new CustomException(MISSING_MANDATORY_CLAIMS);
             }
 
             User user = User.builder()
                     .id(id)
                     .username(username)
-                    .roleType(UserRoleEnum.valueOf(role))
                     .build();
 
             return new CustomUserDetails(user);
