@@ -52,19 +52,21 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: TabBar(
+          controller: _tabController,
+          onTap: (index) {
+            _loadData(periods[index]);
+          },
+          tabs: const [
+            Tab(text: '주간'),
+            Tab(text: '월간'),
+            Tab(text: '연간'),
+          ],
+        ),
+      ),
       body: Column(
         children: [
-          TabBar(
-            controller: _tabController,
-            onTap: (index) {
-              _loadData(periods[index]);
-            },
-            tabs: const [
-              Tab(text: '주간'),
-              Tab(text: '월간'),
-              Tab(text: '연간'),
-            ],
-          ),
           Expanded(
             child: TabBarView(
               controller: _tabController,
@@ -80,67 +82,87 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen>
     );
   }
 
-  void _showLocationList(List<int> locationList) {
+  void _showLocationList(List<int> climbGroundIds) {
+    final climbingGymListNotifier = ref.read(climbingGymListProvider.notifier);
+
+    // ✅ 기존 데이터 초기화 후 API 요청
+    climbingGymListNotifier.loadClimbingGymList(
+      userId: 1,
+      climbGroundIds: climbGroundIds,
+    );
+
     showModalBottomSheet(
       context: context,
-      isScrollControlled: true, // ✅ 스크롤 가능하도록 설정
+      isScrollControlled: true,
       shape: const RoundedRectangleBorder(
-        borderRadius:
-            BorderRadius.vertical(top: Radius.circular(16)), // ✅ 둥근 모서리
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
       builder: (context) {
-        return DraggableScrollableSheet(
-          expand: false,
-          initialChildSize: 0.5, // ✅ 기본 크기
-          maxChildSize: 0.9, // ✅ 최대 크기
-          minChildSize: 0.3, // ✅ 최소 크기
-          builder: (context, scrollController) {
-            return Container(
-              padding: const EdgeInsets.all(16),
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // ✅ 헤더
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        return Consumer(
+          builder: (context, ref, child) {
+            final climbingGymListState = ref.watch(climbingGymListProvider);
+
+            return DraggableScrollableSheet(
+              expand: false,
+              initialChildSize: 0.5,
+              maxChildSize: 0.9,
+              minChildSize: 0.3,
+              builder: (context, scrollController) {
+                return Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    borderRadius:
+                        BorderRadius.vertical(top: Radius.circular(16)),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        '방문한 장소 목록',
-                        style: TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.bold),
+                      // ✅ 헤더
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text(
+                            '방문한 장소 목록',
+                            style: TextStyle(
+                                fontSize: 18, fontWeight: FontWeight.bold),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.close),
+                            onPressed: () => Navigator.pop(context),
+                          ),
+                        ],
                       ),
-                      IconButton(
-                        icon: const Icon(Icons.close),
-                        onPressed: () => Navigator.pop(context),
+                      const Divider(),
+
+                      // ✅ 장소 리스트 상태 확인
+                      Expanded(
+                        child: climbingGymListState.when(
+                          data: (climbingGyms) {
+                            return ListView.builder(
+                              controller: scrollController,
+                              itemCount: climbingGyms.length,
+                              itemBuilder: (context, index) {
+                                final gym = climbingGyms[index];
+                                return ListTile(
+                                  leading: Image.network(gym.image,
+                                      width: 40, height: 40, fit: BoxFit.cover),
+                                  title: Text(gym.name,
+                                      style: const TextStyle(fontSize: 16)),
+                                  subtitle: Text(gym.address),
+                                );
+                              },
+                            );
+                          },
+                          loading: () =>
+                              const Center(child: CircularProgressIndicator()),
+                          error: (e, _) => Center(child: Text('데이터 로드 실패: $e')),
+                        ),
                       ),
                     ],
                   ),
-
-                  const Divider(), // ✅ 구분선 추가
-
-                  // ✅ 장소 리스트
-                  Expanded(
-                    child: ListView.builder(
-                      controller: scrollController,
-                      itemCount: locationList.length,
-                      itemBuilder: (context, index) {
-                        return ListTile(
-                          leading: const Icon(Icons.location_on,
-                              color: Colors.blueAccent), // ✅ 장소 아이콘
-                          title: Text(
-                            '장소 ${locationList[index]}', // ✅ 장소 정보 표시
-                            style: const TextStyle(fontSize: 16),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                ],
-              ),
+                );
+              },
             );
           },
         );
@@ -173,7 +195,7 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen>
                             stats.climbGround.list), // ✅ 클릭 시 모달 표시
                         child: StatisticsCard(
                           title: '장소',
-                          value: '${stats.climbGround.climbGround}곳',
+                          value: '${stats.climbGround.climbGround}곳 🔎',
                         ),
                       ),
                     ),
