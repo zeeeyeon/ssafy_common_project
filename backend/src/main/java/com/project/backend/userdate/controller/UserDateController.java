@@ -6,12 +6,11 @@ import com.project.backend.common.response.ResponseCode;
 import com.project.backend.userdate.dto.ClimbGroundWithDistance;
 import com.project.backend.userdate.dto.request.UserDateCheckAndAddLocationRequestDTO;
 import com.project.backend.userdate.dto.request.UserDateCheckAndAddRequestDTO;
-import com.project.backend.userdate.dto.response.ChallUnlockResponseDTO;
-import com.project.backend.userdate.dto.response.DailyClimbingRecordResponse;
-import com.project.backend.userdate.dto.response.MonthlyClimbingRecordResponse;
-import com.project.backend.userdate.dto.response.UserDateCheckAndAddResponseDTO;
+import com.project.backend.userdate.dto.response.*;
 import com.project.backend.userdate.service.UserDateService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -74,12 +73,4 @@ public class UserDateController {
         }
         throw new CustomException(ResponseCode.BAD_REQUEST);
     }
-
-
-//    @GetMapping("/test")
-//    public void test(@AuthenticationPrincipal UserPrincipal userPrincipal) throws JsonProcessingException {
-//        ObjectMapper objectMapper = new ObjectMapper();
-//        System.out.println(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(userPrincipal));
-//    }
-
 }

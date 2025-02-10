@@ -26,25 +26,3 @@ public class DailyClimbingRecordResponse {
     private Map<HoldColorEnum, Long> colorSuccesses;
 
 }
-
-//{
-//        "climbGroundName": "클라이밍장 이름",
-//        "visitCount": 5,
-//        "successCount": 12,
-//        "completionRate": 65.5,
-//        "holdColorLevel": {
-//        "RED": "SEVEN",
-//        "BLUE": "FIVE",
-//        "YELLOW": "THREE"
-//        },
-//        "colorAttempts": {
-//        "RED": 10,
-//        "BLUE": 8,
-//        "YELLOW": 5
-//        },
-//        "colorSuccesses": {
-//        "RED": 7,
-//        "BLUE": 4,
-//        "YELLOW": 2
-//        },
-//}
