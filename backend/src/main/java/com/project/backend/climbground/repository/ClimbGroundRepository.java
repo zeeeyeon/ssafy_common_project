@@ -46,7 +46,7 @@ public interface ClimbGroundRepository extends JpaRepository<ClimbGround, Long> 
     // 카메라 촬영시 자동으로 해금
     @Query(value = "SELECT c.climbground_id AS climbGroundId, c.name AS name, " +
             "ST_Distance_Sphere(point(c.longitude, c.latitude), point(:longitude, :latitude)) AS distance " +
-            "FROM ClimbGround c " +
+            "FROM climbground c " +
             "ORDER BY distance ASC " +
             "LIMIT 1", nativeQuery = true)
     ClimbGroundWithDistance findClimbGroundByDistance(BigDecimal latitude, BigDecimal longitude);
