@@ -74,8 +74,14 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> {
                     auth
                             .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
-                            .requestMatchers("/api/user/signup", "/api/user/social/**").permitAll()
-                            .requestMatchers("/api/user/**").authenticated()
+                            .requestMatchers(
+                                    "/api/user/signup",
+                                    "/api/user/login",
+                                    "/api/user/nickname-check",
+                                    "/api/user/email-check",
+                                    "/api/user/social/kakao/login",
+                                    "/api/user/social/kakao/complete-signup")
+                            .permitAll()
                             .anyRequest().permitAll();
                 })
                 .exceptionHandling(exception -> {
