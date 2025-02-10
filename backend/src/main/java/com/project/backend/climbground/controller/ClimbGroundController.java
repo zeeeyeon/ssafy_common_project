@@ -12,11 +12,12 @@ import com.project.backend.climbground.service.ClimbGroundServiceImpl;
 import com.project.backend.common.advice.exception.CustomException;
 import com.project.backend.common.response.Response;
 import com.project.backend.common.response.ResponseCode;
+import com.project.backend.userclimbground.dto.responseDTO.UnLockClimbGroundDetailResponseDTO;
+import com.project.backend.userclimbground.service.UserClimbGroundServiceImp;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -31,6 +32,7 @@ public class ClimbGroundController {
 
 
     private final ClimbGroundServiceImpl ClimbGroundService;
+    private final UserClimbGroundServiceImp userClimbGroundServiceImp;
 
     // 클라이밍장 상세 조회
     @GetMapping("/detail/{climbground_id}")
@@ -46,7 +48,7 @@ public class ClimbGroundController {
 
     // 클라이밍장 검색
     @GetMapping("/search")
-    public ResponseEntity<?> searchClimbGround(@RequestParam("keyword") String keyword, @RequestParam(name = "latitude") BigDecimal latitude, @RequestParam(name = "longitude") BigDecimal longitude) {
+    public ResponseEntity<?> searchClimbGround(@RequestParam("keyword") String keyword, @RequestParam(name = "latitude") double latitude, @RequestParam(name = "longitude") double longitude) {
         List<ClimbGroundAllResponseDTO> climbGrounds = ClimbGroundService.searchClimbGroundByKeyword(keyword,latitude,longitude);
 
         if (!climbGrounds.isEmpty()) {
@@ -57,7 +59,7 @@ public class ClimbGroundController {
     }
     // 클라이밍장 리스트 조회 (거리별 정렬)
     @GetMapping("/all/user-location")
-    public ResponseEntity<?> getAllDisCLimbs(@RequestParam(name = "latitude") BigDecimal latitude, @RequestParam(name = "longitude") BigDecimal longitude) {
+    public ResponseEntity<?> getAllDisCLimbs(@RequestParam(name = "latitude") double latitude, @RequestParam(name = "longitude") double longitude) {
         List<ClimbGroundAllResponseDTO> climbGrounds = ClimbGroundService.findAllClimbGround(latitude,longitude);
         if (!climbGrounds.isEmpty()) {
             return new ResponseEntity<>(Response.create(GET_CLIMB_GROUND_List, climbGrounds), GET_CLIMB_GROUND_List.getHttpStatus());
@@ -75,7 +77,7 @@ public class ClimbGroundController {
     }
 
     @GetMapping("/lock-climbground/list")
-    public ResponseEntity<?> getLockCimbGroundList(@RequestParam(name = "userId") Long userId, @RequestParam(name = "latitude") BigDecimal latitude, @RequestParam(name = "longitude") BigDecimal longitude) {
+    public ResponseEntity<?> getLockClimbGroundList(@RequestParam(name = "userId") Long userId, @RequestParam(name = "latitude") double latitude, @RequestParam(name = "longitude") double longitude) {
         List<LockClimbGroundAllResponseDTO> lockClimbGrounds = ClimbGroundService.findAllLockClimbGround(userId, latitude, longitude);
 
         if (!lockClimbGrounds.isEmpty()) {
@@ -84,14 +86,53 @@ public class ClimbGroundController {
         throw new CustomException(ResponseCode.NOT_FOUND_CLIMB_GROUND);
     }
 
-    @GetMapping("/lock-climbground/limit-five")
-    public ResponseEntity<?> getLockCimbGroundLimitFive(@RequestParam(name = "userId") Long userId, @RequestParam(name = "latitude") BigDecimal latitude, @RequestParam(name = "longitude") BigDecimal longitude) {
-        List<LockClimbGroundAllResponseDTO> lockClimbGrounds = ClimbGroundService.findAllLockClimbGroundLimitFive(userId, latitude, longitude);
+    @GetMapping("/lock-climbground/first")
+    public ResponseEntity<?> getLockClimbGround(@RequestParam(name = "userId") Long userId, @RequestParam(name = "latitude") double latitude, @RequestParam(name = "longitude") double longitude) {
+        LockClimbGroundAllResponseDTO lockClimbGround = ClimbGroundService.findAllLockClimbGroundFirst(userId, latitude, longitude);
+
+        if (lockClimbGround != null) {
+            return  new ResponseEntity<>(Response.create(GET_CLIMB_GROUND_List, lockClimbGround), GET_CLIMB_GROUND_List.getHttpStatus());
+        }
+        throw new CustomException(ResponseCode.NOT_FOUND_CLIMB_GROUND);
+    }
+    @GetMapping("/lock-climbground/detail")
+    public ResponseEntity<?> getUnlockClimbGroundDetail(@RequestParam(name= "userId") Long userId, @RequestParam(name="climbGroundId") Long climbGroundId) {
+        UnLockClimbGroundDetailResponseDTO responseDTO = userClimbGroundServiceImp.getUnlockClimbGroundDetail(userId, climbGroundId);
+
+        return new ResponseEntity<>(Response.create(GET_CLIMB_GROUND_DETAIL, responseDTO), GET_CLIMB_GROUND_DETAIL.getHttpStatus());
+    }
+
+    // 클라이밍장 전체조회(해금 여부 포함) -paginateion
+    @GetMapping("/lock-climbground/list/page")
+    public ResponseEntity<?> getLockClimbGroundListPage(@RequestParam(name = "userId") Long userId, @RequestParam(name = "latitude") double latitude, @RequestParam(name = "longitude") double longitude, @RequestParam(name = "page") int page) {
+        List<LockClimbGroundAllResponseDTO> lockClimbGrounds = ClimbGroundService.findAllLockClimbGroundPagination(userId, latitude, longitude,page);
 
         if (!lockClimbGrounds.isEmpty()) {
             return  new ResponseEntity<>(Response.create(GET_CLIMB_GROUND_List, lockClimbGrounds), GET_CLIMB_GROUND_List.getHttpStatus());
         }
         throw new CustomException(ResponseCode.NOT_FOUND_CLIMB_GROUND);
+    }
+
+    // 클라이밍장 리스트 조회 (거리별 정렬) - 페이지네이션
+    @GetMapping("/all/user-location/page")
+    public ResponseEntity<?> getAllDisCLimbsPage(@RequestParam(name = "userId") Long userId,@RequestParam(name = "latitude") double latitude, @RequestParam(name = "longitude") double longitude ,@RequestParam(name="page") int page) {
+        List<ClimbGroundAllResponseDTO> climbGrounds = ClimbGroundService.findAllClimbGroundPagination(userId, latitude,longitude,page);
+        if (!climbGrounds.isEmpty()) {
+            return new ResponseEntity<>(Response.create(GET_CLIMB_GROUND_List, climbGrounds), GET_CLIMB_GROUND_List.getHttpStatus());
+        }
+        throw new CustomException(ResponseCode.NOT_FOUND_CLIMB_GROUND);
+    }
+
+    // 클라이밍장 검색
+    @GetMapping("/lock-climbground/search")
+    public ResponseEntity<?> searchLockClimbGround(@RequestParam(name= "userId") Long userId,@RequestParam(name = "keyword") String keyword, @RequestParam(name = "latitude") double latitude, @RequestParam(name = "longitude") double longitude) {
+        List<LockClimbGroundAllResponseDTO> climbGrounds = ClimbGroundService.searchLockClimbGroundByKeyword(userId,keyword,latitude,longitude);
+
+        if (!climbGrounds.isEmpty()) {
+            return new ResponseEntity<>(Response.create(GET_CLIMB_GROUND_List, climbGrounds), GET_CLIMB_GROUND_List.getHttpStatus());
+        }
+
+        throw new CustomException(ResponseCode.NO_MATCHING_CLIMBING_GYM);
     }
 
 }

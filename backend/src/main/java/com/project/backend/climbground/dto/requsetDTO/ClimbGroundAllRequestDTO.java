@@ -3,16 +3,15 @@ package com.project.backend.climbground.dto.requsetDTO;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.math.BigDecimal;
 
 @Setter
 @Getter
 public class ClimbGroundAllRequestDTO {
 
-    private BigDecimal latitude;
-    private BigDecimal longitude;
+    private double latitude;
+    private double longitude;
 
-    public ClimbGroundAllRequestDTO(BigDecimal latitude, BigDecimal longitude) {
+    public ClimbGroundAllRequestDTO(double latitude, double longitude) {
         this.latitude = latitude;
         this.longitude = longitude;
     }

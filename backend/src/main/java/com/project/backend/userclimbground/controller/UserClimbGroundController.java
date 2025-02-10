@@ -2,7 +2,7 @@ package com.project.backend.userclimbground.controller;
 
 import com.project.backend.common.response.Response;
 import com.project.backend.common.response.ResponseCode;
-import com.project.backend.userclimbground.dto.requestDTO.UnlockClimbGroundRequsetDTO;
+import com.project.backend.userclimbground.dto.requestDTO.UnlockClimbGroundRequestDTO;
 import com.project.backend.userclimbground.dto.responseDTO.ClimbGroundRecordResponseDTO;
 import com.project.backend.userclimbground.dto.responseDTO.ClimbRecordResponseDTO;
 import com.project.backend.userclimbground.service.UserClimbGroundServiceImp;
@@ -56,7 +56,7 @@ public class UserClimbGroundController {
     }
 
     @PostMapping("/unlock")
-    public ResponseEntity<?> postUnlockClimbGround(@RequestBody UnlockClimbGroundRequsetDTO requestDTO) {
+    public ResponseEntity<?> postUnlockClimbGround(@RequestBody UnlockClimbGroundRequestDTO requestDTO) {
         ResponseCode responseCode = userClimbGroundService.saveUnlockClimbGround(requestDTO);
         return new ResponseEntity<>(Response.create(responseCode,null), responseCode.getHttpStatus());
     }
@@ -87,5 +87,6 @@ public class UserClimbGroundController {
         return new ResponseEntity<>(Response.create(GET_CLIMBGROUND_RECORD_DAILY, responseDTO), GET_CLIMBGROUND_RECORD_DAILY.getHttpStatus());
 
     }
+
     
 }

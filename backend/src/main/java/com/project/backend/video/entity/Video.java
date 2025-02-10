@@ -4,9 +4,11 @@ import com.project.backend.common.auditing.BaseEntity;
 import com.project.backend.record.entity.ClimbingRecord;
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.Setter;
 
 @Getter
 @Entity
+@Setter
 @AttributeOverride(name="Id", column=@Column(name="video_id"))
 public class Video extends BaseEntity {
 //    @Id
@@ -17,6 +19,10 @@ public class Video extends BaseEntity {
     @Lob
     @Column(columnDefinition = "LONGTEXT")
     private String url;
+
+    @Lob
+    @Column(columnDefinition = "LONGTEXT")
+    private String thumbnail;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "record_id")

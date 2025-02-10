@@ -15,7 +15,6 @@ import com.project.backend.user.service.UserService;
 import com.project.backend.userclimbground.entity.UserClimbGroundMedalEnum;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -58,21 +57,22 @@ public class UserController {
     return new ResponseEntity<>(Response.create(NO_EXISTED_USER_NICKNAME, null), NO_EXISTED_USER_NICKNAME.getHttpStatus());
   }
 
-  // 사용자 정보 조회 ( 이름, 클라이밍 시작일, 키, 팔길이)
-  @GetMapping("/info")
-  public ResponseEntity<?> findUserInfo(@AuthenticationPrincipal CustomUserDetails userDetails) {
+  // 사용자 프로필 조회 ( 이름, 클라이밍 시작일, 키, 팔길이)
+  @GetMapping("/profile")
+  public ResponseEntity<?> findUserProfile(@AuthenticationPrincipal CustomUserDetails userDetails) {
     Long userId = userDetails.getUser().getId();
-    User user = userService.userFindById(userId);
+    User user = userService.userProfileFindById(userId);
     UserTierResponseDto responseDto = new UserTierResponseDto(user);
-    return new ResponseEntity<>(Response.create(ResponseCode.GET_USER_INFO, responseDto), GET_USER_INFO.getHttpStatus());
+    return new ResponseEntity<>(Response.create(ResponseCode.GET_USER_PROFILE, responseDto), GET_USER_PROFILE.getHttpStatus());
   }
 
-  @PutMapping("/info")
-  public ResponseEntity<?> updateUserInfo(@AuthenticationPrincipal CustomUserDetails userDetails, @RequestBody UserInfoRequestDto requestDto) {
+  // 사용자 프로필 수정 ( 이름, 클라이밍 시작일, 키, 팔길이)
+  @PutMapping("/profile")
+  public ResponseEntity<?> updateUserProfile(@AuthenticationPrincipal CustomUserDetails userDetails, @RequestBody UserInfoRequestDto requestDto) {
     Long userId = userDetails.getUser().getId();
-    User findUser = userService.updateUserInfoById(userId, requestDto);
+    User findUser = userService.updateUserProfileById(userId, requestDto);
     UserInfoResponseDto responseDto = new UserInfoResponseDto(findUser);
-    return new ResponseEntity<>(Response.create(ResponseCode.GET_USER_INFO, responseDto), GET_USER_INFO.getHttpStatus());
+    return new ResponseEntity<>(Response.create(ResponseCode.UPDATE_USER_PROFILE, responseDto), UPDATE_USER_PROFILE.getHttpStatus());
   }
 
   // 사용자 티어 조회
@@ -80,16 +80,16 @@ public class UserController {
   public ResponseEntity<?> findUserTier(@AuthenticationPrincipal CustomUserDetails userDetails) {
     Long userId = userDetails.getUser().getId();
     UserTierResponseDto responseDto = userService.userTierFindById(userId);
-    return new ResponseEntity<>(Response.create(ResponseCode.GET_USER_INFO, responseDto), GET_USER_INFO.getHttpStatus());
+    return new ResponseEntity<>(Response.create(ResponseCode.GET_USER_TIER, responseDto), GET_USER_TIER.getHttpStatus());
   }
 
-  // 사용자 티어 수정
+  // 사용자 티어 갱신
   @PatchMapping("/tier")
-  public ResponseEntity<?> insertUserTier(@AuthenticationPrincipal CustomUserDetails userDetails, @RequestBody UserTierRequestDto requestDto) {
+  public ResponseEntity<?> updateUserTier(@AuthenticationPrincipal CustomUserDetails userDetails) {
     Long userId = userDetails.getUser().getId();
-    User findUser = userService.insertUserTier(userId, requestDto);
+    User findUser = userService.updateUserTier(userId);
     UserTierResponseDto responseDto = new UserTierResponseDto(findUser);
-    return new ResponseEntity<>(Response.create(ResponseCode.GET_USER_INFO, responseDto), GET_USER_INFO.getHttpStatus());
+    return new ResponseEntity<>(Response.create(ResponseCode.UPDATE_USER_TIER, responseDto), UPDATE_USER_TIER.getHttpStatus());
   }
 
   // 클라이밍장별 메달 조회
