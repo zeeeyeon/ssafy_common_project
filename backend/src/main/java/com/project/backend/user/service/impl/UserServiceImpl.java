@@ -5,7 +5,7 @@ import com.project.backend.climbground.repository.ClimbGroundRepository;
 import com.project.backend.common.advice.exception.CustomException;
 import com.project.backend.common.response.ResponseCode;
 import com.project.backend.record.entity.ClimbingRecord;
-import com.project.backend.user.dto.UserTierRequestDto;
+import com.project.backend.user.dto.request.ConvertRequestDto;
 import com.project.backend.user.dto.request.SignUpRequestDto;
 import com.project.backend.user.dto.request.UserInfoRequestDto;
 import com.project.backend.user.dto.response.UserTierResponseDto;
@@ -21,7 +21,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 @RequiredArgsConstructor
@@ -55,15 +55,38 @@ public class UserServiceImpl implements UserService {
     if(existedUserNickname.isPresent()) {
       throw new CustomException(ResponseCode.EXISTED_USER_NICKNAME);
     }
-    // 4) 비밀번호와 비밀번호 확인 정보가 일치하지 않는지 확인
-    if (!signUpRequestDto.getPassword().equals(signUpRequestDto.getPasswordConfirm())) {
-      throw new CustomException(ResponseCode.MISMATCH_PASSWORD);
-    }
 
-    // 1, 2, 3, 4 해당 사항이 없다면 정상적으로 회원가입 진행
+    // 1, 2, 3 해당 사항이 없다면 정상적으로 회원가입 진행
     userRepository.save(signUpRequestDto.toUserEntity(passwordEncoder));
 
   }
+
+  public User updateSocialUser(User user, ConvertRequestDto convertRequestDto) {
+    User findUser = userRepository.findById(user.getId())
+            .orElseThrow(() -> new CustomException(ResponseCode.NOT_FOUND_USER));
+
+    // 전화번호 중복 체크
+    Optional<User> existedUserPhone = userRepository.findByPhone(convertRequestDto.getPhone());
+    if(existedUserPhone.isPresent()) {
+      throw new CustomException(ResponseCode.EXISTED_USER_PHONE);
+    }
+
+    // 닉네임 중복 체크
+    Optional<User> existedUserNickname = userRepository.findByNickname(convertRequestDto.getNickname());
+    if(existedUserNickname.isPresent()) {
+      throw new CustomException(ResponseCode.EXISTED_USER_NICKNAME);
+    }
+
+    // 기존 사용자 정보 업데이트
+    findUser.setPassword(passwordEncoder.encode(convertRequestDto.getPassword()));
+    findUser.setUsername(convertRequestDto.getUsername());
+    findUser.setPhone(convertRequestDto.getPhone());
+    findUser.setNickname(convertRequestDto.getNickname());
+    findUser.setUpdateDate(LocalDateTime.now());
+
+    return userRepository.save(findUser);
+  }
+
 
   @Override
   public Optional<User> checkEmailDuplication(String email) {

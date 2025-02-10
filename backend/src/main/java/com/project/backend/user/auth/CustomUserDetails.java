@@ -24,7 +24,8 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority(user.getRoleType().getCode()));
+        // 기본적인 사용자 권한만 부여
+        return List.of(new SimpleGrantedAuthority("ROLE_USER"));
     }
 
     @Override
