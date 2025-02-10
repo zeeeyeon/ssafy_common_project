@@ -7,5 +7,5 @@ import java.util.Optional;
 
 public interface ClimbingRecordService {
 
-    Optional<ClimbingRecord> saveRecord(RecordSaveRequestDTO requestDTO);
+    Optional<ClimbingRecord> saveRecord(Long userId, RecordSaveRequestDTO requestDTO);
 }
