@@ -15,5 +15,4 @@ public class UserDateCheckAndAddRequestDTO {
     private Long climbGroundId;
     private BigDecimal latitude;
     private BigDecimal longitude;
-    private LocalDate date;
 }
