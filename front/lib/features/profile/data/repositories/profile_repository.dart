@@ -1,17 +1,17 @@
 import 'package:dio/dio.dart';
 import 'package:kkulkkulk/common/network/dio_client.dart';
 import 'package:kkulkkulk/features/profile/data/models/profile_model.dart';
+import 'package:flutter/foundation.dart'; // debugPrint 사용
 
 class ProfileRepository {
   final DioClient _dioClient;
 
   ProfileRepository(this._dioClient);
 
+  /// ✅ 사용자 프로필 데이터 가져오기
   Future<UserProfile> fetchUserProfile() async {
-    print('🔥 fetchUserProfile 실행됨');
+    debugPrint('📡 API 요청 시작: /api/user/profile');
     try {
-      print('📡 API 요청 시작: /api/user/profile'); // 요청이 시작되는지 확인
-
       final response = await _dioClient.dio.get(
         '/api/user/profile',
         options: Options(
@@ -22,11 +22,16 @@ class ProfileRepository {
         ),
       );
 
-      print('✅ API 응답 데이터: ${response.data}'); // API 응답 확인
-      return UserProfile.fromJson(response.data['content']);
+      debugPrint('✅ API 응답 받음: ${response.data}');
+
+      if (response.data['status']['code'] == 200) {
+        return UserProfile.fromJson(response.data);
+      } else {
+        throw Exception('API 응답 오류: ${response.data['status']['message']}');
+      }
     } catch (e) {
-      print('❌ API 요청 실패: $e');
-      throw Exception('Failed to load profile data: $e');
+      debugPrint('❌ API 요청 실패: $e');
+      throw Exception('Failed to fetch user profile: $e');
     }
   }
 }

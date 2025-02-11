@@ -13,17 +13,7 @@ class ProfileScreen extends ConsumerWidget {
     final profileState = ref.watch(profileProvider);
 
     return Scaffold(
-      appBar: CustomAppBar(
-        title: 'My Page',
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.settings),
-            onPressed: () {
-              // 설정 화면 이동
-            },
-          ),
-        ],
-      ),
+      appBar: const CustomAppBar(title: 'My Page'),
       body: profileState.when(
         data: (userProfile) => _buildProfileUI(userProfile),
         loading: () =>
@@ -45,20 +35,20 @@ class ProfileScreen extends ConsumerWidget {
             children: [
               CircleAvatar(
                 radius: 40,
-                backgroundImage: AssetImage(userProfile.effectiveProfileImage),
+                backgroundImage: NetworkImage(userProfile.profileImageUrl),
               ),
               const SizedBox(width: 16),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    userProfile.username,
+                    userProfile.nickname,
                     style: const TextStyle(
                         fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    "클라이밍 시작: ${userProfile.dDay.toString().split(" ")[0] ?? '미입력'}",
+                    "클라이밍 시작: ${userProfile.dDay}일",
                     style: TextStyle(color: Colors.grey[600]),
                   ),
                 ],
