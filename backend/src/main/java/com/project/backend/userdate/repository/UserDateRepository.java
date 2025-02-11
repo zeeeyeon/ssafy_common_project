@@ -49,22 +49,21 @@ public interface UserDateRepository extends JpaRepository<UserDate, Long> {
 
 
     //앨범 조회
-//    @Query("SELECT ud FROM UserDate ud " +
-//            "JOIN FETCH ud.userClimbGround uc " +
-//            "JOIN FETCH ud.climbingRecordList cr " +
-//            "JOIN FETCH cr.video v " +
-//            "WHERE uc.user.id = :userId " +
-//            "AND ud.createdAt >= :startOfDay AND ud.createdAt < :endOfDay " +
-//            "AND cr.isSuccess = :isSuccess ")
-//    List<UserDate> findUserDatesByUserAndClimbGroundAndIsSuccess(Long userId, LocalDateTime startOfDay, LocalDateTime endOfDay, Boolean isSuccess);
-
     @Query("SELECT ud FROM UserDate ud " +
-            "WHERE ud.userClimbGround.user.id = :userId " +
-            "AND ud.createdAt BETWEEN :startOfDay AND :endOfDay ")
-    List<UserDate> findUserDatesByUserAndClimbGroundAndIsSuccess(
-            @Param("userId") Long userId,
-            @Param("startOfDay") LocalDateTime startOfDay,
-            @Param("endOfDay") LocalDateTime endOfDay,
-            boolean isSuccess);
-    
+            "JOIN FETCH ud.userClimbGround uc " +
+            "JOIN FETCH ud.climbingRecordList cr " +
+            "JOIN FETCH cr.video v " +
+            "WHERE uc.user.id = :userId " +
+            "AND ud.createdAt >= :startOfDay AND ud.createdAt < :endOfDay " +
+            "AND cr.isSuccess = :isSuccess ")
+    List<UserDate> findUserDatesByUserAndClimbGroundAndIsSuccess(Long userId, LocalDateTime startOfDay, LocalDateTime endOfDay, Boolean isSuccess);
+
+//    @Query("SELECT ud FROM UserDate ud " +
+//            "WHERE ud.userClimbGround.user.id = :userId " +
+//            "AND ud.createdAt BETWEEN :startOfDay AND :endOfDay ")
+//    List<UserDate> findUserDatesByUserAndClimbGroundAndIsSuccess(
+//            @Param("userId") Long userId,
+//            @Param("startOfDay") LocalDateTime startOfDay,
+//            @Param("endOfDay") LocalDateTime endOfDay,
+//            boolean isSuccess);
 }
