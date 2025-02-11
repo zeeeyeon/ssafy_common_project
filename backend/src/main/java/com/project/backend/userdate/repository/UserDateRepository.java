@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -48,12 +49,20 @@ public interface UserDateRepository extends JpaRepository<UserDate, Long> {
 
 
     //앨범 조회
+//    @Query("SELECT ud FROM UserDate ud " +
+//            "JOIN FETCH ud.userClimbGround uc " +
+//            "JOIN FETCH ud.climbingRecordList cr " +
+//            "JOIN FETCH cr.video v " +
+//            "WHERE uc.user.id = :userId " +
+//            "AND ud.createdAt >= :startOfDay AND ud.createdAt < :endOfDay " +
+//            "AND cr.isSuccess = :isSuccess ")
+//    List<UserDate> findUserDatesByUserAndClimbGroundAndIsSuccess(Long userId, LocalDateTime startOfDay, LocalDateTime endOfDay, Boolean isSuccess);
+
     @Query("SELECT ud FROM UserDate ud " +
-            "JOIN FETCH ud.userClimbGround uc " +
-            "JOIN FETCH ud.climbingRecordList cr " +
-            "JOIN FETCH cr.video v " +
-            "WHERE uc.user.id = :userId " +
-            "AND ud.createdAt >= :startOfDay AND ud.createdAt < :endOfDay " +
-            "AND cr.isSuccess = :isSuccess ")
-    List<UserDate> findUserDatesByUserAndClimbGroundAndIsSuccess(Long userId, LocalDateTime startOfDay, LocalDateTime endOfDay, Boolean isSuccess);
+            "WHERE ud.userClimbGround.user.id = :userId " +
+            "AND DATE(ud.createdAt) = :date " +
+            "AND ud.isSuccess = :isSuccess")
+    List<UserDate> findUserDatesByUserAndClimbGroundAndIsSuccess(
+            Long userId, LocalDate date, boolean isSuccess);
+
 }
