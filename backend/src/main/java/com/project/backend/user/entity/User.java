@@ -1,6 +1,5 @@
 package com.project.backend.user.entity;
 import com.project.backend.record.entity.ClimbingRecord;
-import com.project.backend.user.dto.request.UserImageRequestDto;
 import com.project.backend.user.dto.request.UserInfoRequestDto;
 import com.project.backend.userclimbground.entity.UserClimbGround;
 import jakarta.persistence.*;
@@ -99,11 +98,6 @@ public class User {
         this.height = requestDto.getHeight() != null ? requestDto.getHeight() : this.height;
         this.reach = requestDto.getReach() != null ? requestDto.getReach() : this.reach;
         this.startDate = requestDto.getStartDate() != null ? requestDto.getStartDate() : this.startDate;
-        return this;
-    }
-
-    public User setUserImageRequestDto(UserImageRequestDto requestDto) {
-        this.profileImageUrl = requestDto.getProfileImageUrl() != null ? requestDto.getProfileImageUrl() : this.profileImageUrl;
         return this;
     }
 

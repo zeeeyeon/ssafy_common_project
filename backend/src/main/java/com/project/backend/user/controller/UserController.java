@@ -18,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Optional;
 
@@ -84,9 +85,9 @@ public class UserController {
   }
 
   @PutMapping("/image")
-  public ResponseEntity<?> updateUserImage(@AuthenticationPrincipal CustomUserDetails userDetails, @RequestBody UserImageRequestDto requestDto) {
+  public ResponseEntity<?> updateUserImage(@AuthenticationPrincipal CustomUserDetails userDetails, @RequestPart("file")MultipartFile image) {
     Long userId = userDetails.getUser().getId();
-    userService.updateUserImageById(userId, requestDto);
+    userService.updateUserImageById(userId, image);
     return new ResponseEntity<>(Response.create(ResponseCode.UPDATE_USER_PROFILE, null), UPDATE_USER_PROFILE.getHttpStatus());
   }
 
