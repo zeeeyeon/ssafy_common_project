@@ -56,9 +56,9 @@ public class User {
 
     private String profile;
 
-    private float height;
+    private Float height;
 
-    private float reach;
+    private Float reach;
 
     private LocalDateTime startDate;
     private LocalDateTime createDate;
@@ -84,21 +84,23 @@ public class User {
 
 
     @Builder
-    public User(Long id, String username, String email, String nickname, int score, UserTierEnum tier) {
+    public User(Long id, String username, String email, String nickname, int score, UserTierEnum tier, Float height, Float reach) {
         this.id = id;
         this.username = username;
         this.email = email;
         this.nickname = nickname;
         this.score = score;
         this.tier = tier;
+        this.height = height;
+        this.reach = reach;
     }
 
-    public User setUserInfoRquestDto(UserInfoRequestDto requestDto) {
-        this.username = requestDto.getUsername();
-        this.height = requestDto.getHeight();
-        this.reach = requestDto.getReach();
-        this.startDate = requestDto.getStartDate();
-
+    public User setUserInfoRequestDto(UserInfoRequestDto requestDto) {
+        this.nickname = requestDto.getNickname() != null ? requestDto.getNickname() : this.nickname;
+        this.height = requestDto.getHeight() != null ? requestDto.getHeight() : this.height;
+        this.reach = requestDto.getArmSpan() != null ? requestDto.getArmSpan() : this.reach;
+        this.startDate = requestDto.getStartDate() != null ? requestDto.getStartDate() : this.startDate;
         return this;
     }
+
 }

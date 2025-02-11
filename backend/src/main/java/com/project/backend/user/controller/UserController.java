@@ -7,6 +7,7 @@ import com.project.backend.user.auth.CustomUserDetails;
 import com.project.backend.user.dto.UserTierRequestDto;
 import com.project.backend.user.dto.request.ConvertRequestDto;
 import com.project.backend.user.dto.request.SignUpRequestDto;
+import com.project.backend.user.dto.request.UserImageRequestDto;
 import com.project.backend.user.dto.request.UserInfoRequestDto;
 import com.project.backend.user.dto.response.*;
 import com.project.backend.user.entity.User;
@@ -17,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Optional;
 
@@ -65,7 +67,7 @@ public class UserController {
     return new ResponseEntity<>(Response.create(NO_EXISTED_USER_NICKNAME, null), NO_EXISTED_USER_NICKNAME.getHttpStatus());
   }
 
-  // 사용자 프로필 조회 ( 이름, 클라이밍 시작일, 키, 팔길이)
+  // 사용자 프로필 조회 ( 닉네임, 클라이밍 시작일, 키, 팔길이)
   @GetMapping("/profile")
   public ResponseEntity<?> findUserProfile(@AuthenticationPrincipal CustomUserDetails userDetails) {
     Long userId = userDetails.getUser().getId();
@@ -74,13 +76,19 @@ public class UserController {
     return new ResponseEntity<>(Response.create(ResponseCode.GET_USER_PROFILE, responseDto), GET_USER_PROFILE.getHttpStatus());
   }
 
-  // 사용자 프로필 수정 ( 이름, 클라이밍 시작일, 키, 팔길이)
+  // 사용자 프로필 수정 ( 닉네임, 클라이밍 시작일, 키, 팔길이)
   @PutMapping("/profile")
   public ResponseEntity<?> updateUserProfile(@AuthenticationPrincipal CustomUserDetails userDetails, @RequestBody UserInfoRequestDto requestDto) {
     Long userId = userDetails.getUser().getId();
-    User findUser = userService.updateUserProfileById(userId, requestDto);
-    UserInfoResponseDto responseDto = new UserInfoResponseDto(findUser);
-    return new ResponseEntity<>(Response.create(ResponseCode.UPDATE_USER_PROFILE, responseDto), UPDATE_USER_PROFILE.getHttpStatus());
+    userService.updateUserProfileById(userId, requestDto);
+    return new ResponseEntity<>(Response.create(ResponseCode.UPDATE_USER_PROFILE, null), UPDATE_USER_PROFILE.getHttpStatus());
+  }
+
+  @PutMapping("/image")
+  public ResponseEntity<?> updateUserImage(@AuthenticationPrincipal CustomUserDetails userDetails, @RequestPart("file")MultipartFile image) {
+    Long userId = userDetails.getUser().getId();
+    userService.updateUserImageById(userId, image);
+    return new ResponseEntity<>(Response.create(ResponseCode.UPDATE_USER_PROFILE, null), UPDATE_USER_PROFILE.getHttpStatus());
   }
 
   // 사용자 티어 조회

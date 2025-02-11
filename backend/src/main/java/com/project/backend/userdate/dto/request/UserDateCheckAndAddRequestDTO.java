@@ -11,9 +11,8 @@ import java.time.LocalDate;
 @Setter
 @AllArgsConstructor
 public class UserDateCheckAndAddRequestDTO {
-    private Long userId;
+//    private Long userId;
     private Long climbGroundId;
     private BigDecimal latitude;
     private BigDecimal longitude;
-    private LocalDate date;
 }

@@ -8,11 +8,14 @@ import com.project.backend.userdate.repository.UserDateRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.time.*;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AlbumService {
@@ -20,16 +23,20 @@ public class AlbumService {
     private final UserDateRepository userDateRepository;
 
     public AlbumResponseDTO getAlbum(Long userId, LocalDate date, Boolean isSuccess) {
-        java.time.ZonedDateTime startOfDay = date.atStartOfDay(ZoneId.of("Asia/Seoul"));
-        java.time.ZonedDateTime endOfDay = date.atTime(LocalTime.MAX).atZone(ZoneId.of("Asia/Seoul"));
+        ZonedDateTime startOfDay = date.atStartOfDay(ZoneId.of("Asia/Seoul"));
+        ZonedDateTime endOfDay = date.atTime(LocalTime.MAX).atZone(ZoneId.of("Asia/Seoul"));
 
         LocalDateTime startOfDayLDT = startOfDay.toLocalDateTime();
         LocalDateTime endOfDayLDT = endOfDay.toLocalDateTime();
 
+        log.info("Start of day: " + startOfDay);
+        log.info("End of day: " + endOfDay);
+        log.info("Start of day: " + startOfDayLDT);
+        log.info("End of day: " + endOfDayLDT);
 
         AlbumResponseDTO albumResponseDTO = new AlbumResponseDTO(date,isSuccess);
         List<AlbumObjcet> albumObjcetList = userDateRepository.findUserDatesByUserAndClimbGroundAndIsSuccess(userId, startOfDayLDT, endOfDayLDT, isSuccess)
-        .stream()
+                .stream()
                 .flatMap(userDate ->  userDate.getClimbingRecordList().stream().map(
                             climbingRecord ->
                                 new AlbumObjcet(
@@ -45,8 +52,5 @@ public class AlbumService {
                 .collect(Collectors.toList());
         albumResponseDTO.setAlbumObject(sortedAlbumObjcetList);
         return albumResponseDTO;
-    }
-
-    private class ZonedDateTime {
     }
 }
