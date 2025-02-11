@@ -7,10 +7,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 final logger = Logger();
 
 class VisitLogRepository {
-  static const String _path = '/record/start/near-location';
+  static const String _path = '/api/record/start/near-location';
   final Dio _dio;
 
-  VisitLogRepository(this._dio);
+  VisitLogRepository() : _dio = DioClient().dio;
 
   Future<VisitLogResponse> createVisitLog({
     required int userId,
@@ -59,5 +59,5 @@ class VisitLogRepository {
 }
 
 final visitLogRepositoryProvider = Provider<VisitLogRepository>((ref) {
-  return VisitLogRepository(ref.read(dioClientProvider).dio);
+  return VisitLogRepository();
 });

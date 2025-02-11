@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:kkulkkulk/common/widgets/layout/main_layout.dart';
 import 'package:kkulkkulk/features/calendar/screens/calendar_screen.dart';
 import 'package:kkulkkulk/features/calendar/screens/calendar_detail_screen.dart';
@@ -13,19 +14,34 @@ import 'package:kkulkkulk/features/splash/screens/splash_screen.dart';
 import 'package:kkulkkulk/features/statistics/screens/statistics_screen.dart';
 import 'package:kkulkkulk/features/auth/screens/login_screen.dart';
 import 'package:kkulkkulk/features/auth/screens/register_screen.dart';
+import 'package:kkulkkulk/features/calendar/view_models/calendar_view_model.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _shellNavigatorKey = GlobalKey<NavigatorState>();
+
+// 현재 선택된 탭 인덱스를 관리하는 provider
+final selectedTabIndexProvider = StateProvider<int>((ref) => 0);
 
 final router = GoRouter(
   navigatorKey: _rootNavigatorKey,
   initialLocation: '/',
   redirect: (BuildContext context, GoRouterState state) {
-    if (state.uri.toString() != '/' &&
+    // 스플래시 화면 처리
+    if (state.uri.toString() == '/' &&
         !state.extra.toString().contains('restart')) {
-      return null;
+      return '/calendar';
     }
-    return '/';
+
+    // 새로고침 처리
+    if (state.extra is Map && (state.extra as Map)['isRefresh'] == true) {
+      final container = ProviderScope.containerOf(context);
+      final userId = container.read(userIdProvider);
+      container
+          .read(calendarProvider.notifier)
+          .fetchCalendarData(userId, DateTime.now());
+    }
+
+    return null;
   },
   routes: [
     // 스플래시 화면을 최상단에 배치

@@ -5,9 +5,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:kkulkkulk/features/camera/data/models/album_model.dart';
 import 'package:kkulkkulk/features/camera/view_models/album_view_model.dart';
 import 'package:kkulkkulk/features/camera/providers/camera_providers.dart';
+import 'package:kkulkkulk/features/calendar/view_models/calendar_view_model.dart';
 import 'package:logger/logger.dart';
 
 final logger = Logger();
+
+// 유저 id 가져오기 (임시)
+final userIdProvider = StateProvider<int>((ref) => 1);
 
 class AlbumScreen extends ConsumerStatefulWidget {
   const AlbumScreen({super.key});
@@ -75,60 +79,103 @@ class _AlbumScreenState extends ConsumerState<AlbumScreen>
     }
   }
 
+  // 캘린더로 이동하는 함수 수정
+  Future<void> _navigateToCalendar() async {
+    try {
+      // 캘린더 데이터 새로고침
+      final userId = ref.read(userIdProvider);
+      await ref
+          .read(calendarProvider.notifier)
+          .fetchCalendarData(userId, DateTime.now());
+
+      logger.d("캘린더 데이터 새로고침 완료");
+
+      if (!mounted) return;
+
+      // 현재 경로 확인
+      final location = GoRouterState.of(context).uri.toString();
+
+      // 앨범 화면이 스택에 쌓여있는 경우에만 pop
+      if (location.contains('/album/camera')) {
+        context.pop();
+      } else {
+        // 메인 화면에서 직접 앨범으로 온 경우는 go 사용
+        context.go('/calendar');
+      }
+    } catch (e) {
+      logger.e("캘린더 데이터 새로고침 실패: $e");
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('데이터 새로고침에 실패했습니다.')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: CustomAppBar(
-        title: '앨범',
-        showBackButton: true,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.camera_alt_rounded),
-            iconSize: 30,
-            onPressed: () {
-              context.push('/camera');
-            },
+    return WillPopScope(
+      onWillPop: () async {
+        await _navigateToCalendar();
+        return false;
+      },
+      child: Scaffold(
+        appBar: CustomAppBar(
+          title: '앨범',
+          showBackButton: true,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: _navigateToCalendar,
           ),
-        ],
-      ),
-      body: Column(
-        children: [
-          TabBar(
-            controller: _tabController,
-            tabs: const [
-              Tab(text: '성공'),
-              Tab(text: '실패'),
-            ],
-          ),
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: GestureDetector(
-              onTap: _selectDate,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    "${selectedDate.year}. ${selectedDate.month}. ${selectedDate.day}",
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.camera_alt_rounded),
+              iconSize: 30,
+              onPressed: () {
+                context.push('/camera');
+              },
+            ),
+          ],
+        ),
+        body: Column(
+          children: [
+            TabBar(
+              controller: _tabController,
+              tabs: const [
+                Tab(text: '성공'),
+                Tab(text: '실패'),
+              ],
+            ),
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: GestureDetector(
+                onTap: _selectDate,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      "${selectedDate.year}. ${selectedDate.month}. ${selectedDate.day}",
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                  ),
-                  const Icon(Icons.arrow_drop_down),
+                    const Icon(Icons.arrow_drop_down),
+                  ],
+                ),
+              ),
+            ),
+            Expanded(
+              child: TabBarView(
+                controller: _tabController,
+                children: [
+                  _buildVideoGrid(isSuccess: true),
+                  _buildVideoGrid(isSuccess: false),
                 ],
               ),
             ),
-          ),
-          Expanded(
-            child: TabBarView(
-              controller: _tabController,
-              children: [
-                _buildVideoGrid(isSuccess: true),
-                _buildVideoGrid(isSuccess: false),
-              ],
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

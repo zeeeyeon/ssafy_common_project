@@ -4,13 +4,11 @@ import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:kkulkkulk/features/calendar/data/models/calendar_model.dart';
 import 'package:kkulkkulk/features/calendar/view_models/calendar_view_model.dart';
+import 'package:kkulkkulk/common/providers/user_provider.dart';
 import 'package:logger/logger.dart';
 import 'package:intl/intl.dart';
 
 final logger = Logger();
-
-// 유저 id 가져오기 (임시)
-final userIdProvider = StateProvider<int>((ref) => 1);
 
 class CalendarScreen extends ConsumerStatefulWidget {
   const CalendarScreen({super.key});
@@ -43,6 +41,15 @@ class CalendarScreenState extends ConsumerState<CalendarScreen> {
   void _initializeDate() {
     final userId = ref.read(userIdProvider);
     ref.read(calendarProvider.notifier).fetchCalendarData(userId, currentMonth);
+  }
+
+  // 현재 화면이 캘린더 화면인지 확인하고 새로고침하는 함수
+  void _refreshIfCalendarScreen() {
+    final location = GoRouterState.of(context).uri.toString();
+    if (location == '/calendar') {
+      logger.d("캘린더 화면 새로고침");
+      _initializeDate();
+    }
   }
 
   // 📌 월 변경 시 API 요청 (setState 이후 호출)
@@ -82,7 +89,10 @@ class CalendarScreenState extends ConsumerState<CalendarScreen> {
         showBackButton: false,
         leading: IconButton(
           icon: const Icon(Icons.calendar_today),
-          onPressed: () => selectDate(context),
+          onPressed: () {
+            _refreshIfCalendarScreen(); // 캘린더 아이콘 클릭 시 새로고침
+            selectDate(context);
+          },
         ),
       ),
       body: SafeArea(

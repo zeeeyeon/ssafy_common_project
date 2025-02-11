@@ -16,7 +16,7 @@ class MainLayout extends StatelessWidget {
       body: child,
       bottomNavigationBar: NavigationBar(
         selectedIndex: _calculateSelectedIndex(context),
-        onDestinationSelected: (index) => _onItemTapped(index, context),
+        onDestinationSelected: (index) => _onTap(context, index),
         backgroundColor: Colors.white,
         elevation: 0,
         height: 60,
@@ -84,23 +84,34 @@ class MainLayout extends StatelessWidget {
     return 2; // 기본값은 홈(캘린더)
   }
 
-  void _onItemTapped(int index, BuildContext context) {
+  void _onTap(BuildContext context, int index) {
+    final currentLocation = GoRouterState.of(context).uri.toString();
+    final newLocation = _getLocationFromIndex(index);
+
+    // 홈 탭으로 이동하거나 같은 탭을 누른 경우 새로고침
+    if (newLocation == '/calendar' || currentLocation == newLocation) {
+      context.go(newLocation, extra: {'isRefresh': true});
+      return;
+    }
+
+    // 다른 탭으로 이동
+    context.go(newLocation);
+  }
+
+  String _getLocationFromIndex(int index) {
     switch (index) {
       case 0:
-        context.go('/challenge');
-        break;
+        return '/challenge';
       case 1:
-        context.go('/place');
-        break;
+        return '/place';
       case 2:
-        context.go('/calendar'); // 홈 버튼은 항상 캘린더로 이동
-        break;
+        return '/calendar';
       case 3:
-        context.go('/statistics');
-        break;
+        return '/statistics';
       case 4:
-        context.go('/profile');
-        break;
+        return '/profile';
+      default:
+        return '/calendar';
     }
   }
 }

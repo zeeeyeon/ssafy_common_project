@@ -6,10 +6,10 @@ import 'package:logger/logger.dart';
 final logger = Logger();
 
 class AlbumRepository {
-  static const String _path = '/album/daily';
+  static const String _path = '/api/album/daily';
   final Dio _dio;
 
-  AlbumRepository(this._dio);
+  AlbumRepository() : _dio = DioClient().dio;
 
   Future<Response> getAlbums({
     required int userId,
@@ -48,5 +48,5 @@ class AlbumRepository {
 }
 
 final albumRepositoryProvider = Provider<AlbumRepository>((ref) {
-  return AlbumRepository(ref.read(dioClientProvider).dio);
+  return AlbumRepository();
 });
