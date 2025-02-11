@@ -60,9 +60,11 @@ public interface UserDateRepository extends JpaRepository<UserDate, Long> {
 
     @Query("SELECT ud FROM UserDate ud " +
             "WHERE ud.userClimbGround.user.id = :userId " +
-            "AND DATE(ud.createdAt) = :date " +
-            "AND ud.isSuccess = :isSuccess")
+            "AND ud.createdAt BETWEEN :startOfDay AND :endOfDay ")
     List<UserDate> findUserDatesByUserAndClimbGroundAndIsSuccess(
-            Long userId, LocalDate date, boolean isSuccess);
-
+            @Param("userId") Long userId,
+            @Param("startOfDay") LocalDateTime startOfDay,
+            @Param("endOfDay") LocalDateTime endOfDay,
+            boolean isSuccess);
+    
 }

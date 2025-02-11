@@ -26,8 +26,8 @@ public class AlbumService {
         LocalDateTime endOfDay = date.atTime(LocalTime.MAX);
 
         AlbumResponseDTO albumResponseDTO = new AlbumResponseDTO(date,isSuccess);
-//        List<AlbumObjcet> albumObjcetList = userDateRepository.findUserDatesByUserAndClimbGroundAndIsSuccess(userId, startOfDay,endOfDay, isSuccess)
-        List<AlbumObjcet> albumObjcetList = userDateRepository.findUserDatesByUserAndClimbGroundAndIsSuccess(userId, date, isSuccess)
+        List<AlbumObjcet> albumObjcetList = userDateRepository.findUserDatesByUserAndClimbGroundAndIsSuccess(userId, startOfDay,endOfDay, isSuccess)
+//        List<AlbumObjcet> albumObjcetList = userDateRepository.findUserDatesByUserAndClimbGroundAndIsSuccess(userId, date, isSuccess)
         .stream()
                 .flatMap(userDate ->  userDate.getClimbingRecordList().stream().map(
                             climbingRecord ->
