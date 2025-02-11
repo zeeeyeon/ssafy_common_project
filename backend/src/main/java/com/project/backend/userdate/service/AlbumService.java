@@ -6,6 +6,7 @@ import com.project.backend.userdate.dto.response.AlbumResponseDTO;
 import com.project.backend.userdate.entity.UserDate;
 import com.project.backend.userdate.repository.UserDateRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -15,6 +16,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AlbumService {
@@ -24,6 +26,8 @@ public class AlbumService {
     public AlbumResponseDTO getAlbum(Long userId, LocalDate date, Boolean isSuccess) {
         LocalDateTime startOfDay = date.atStartOfDay();
         LocalDateTime endOfDay = date.atTime(LocalTime.MAX);
+        log.info("Start of day: " + startOfDay);
+        log.info("End of day: " + endOfDay);
 
         AlbumResponseDTO albumResponseDTO = new AlbumResponseDTO(date,isSuccess);
         List<AlbumObjcet> albumObjcetList = userDateRepository.findUserDatesByUserAndClimbGroundAndIsSuccess(userId, startOfDay,endOfDay, isSuccess)
