@@ -28,11 +28,6 @@ public class AlbumService {
         LocalDateTime startOfDayLDT = startOfDay.toLocalDateTime();
         LocalDateTime endOfDayLDT = endOfDay.toLocalDateTime();
 
-        log.info("Start of day: " + startOfDay);
-        log.info("End of day: " + endOfDay);
-        log.info("Start of day: " + startOfDayLDT);
-        log.info("End of day: " + endOfDayLDT);
-
         AlbumResponseDTO albumResponseDTO = new AlbumResponseDTO(date,isSuccess);
         List<AlbumObjcet> albumObjcetList = userDateRepository.findUserDatesByUserAndClimbGroundAndIsSuccess(userId, startOfDayLDT, endOfDayLDT, isSuccess)
                 .stream()
