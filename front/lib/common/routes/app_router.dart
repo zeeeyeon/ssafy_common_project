@@ -5,6 +5,7 @@ import 'package:kkulkkulk/features/auth/screens/oauth_register_screen.dart';
 import 'package:kkulkkulk/features/calendar/screens/calendar_screen.dart';
 import 'package:kkulkkulk/features/calendar/screens/calendar_detail_screen.dart';
 import 'package:kkulkkulk/features/camera/screens/camera_screen.dart';
+import 'package:kkulkkulk/features/challenge/screens/challenge_detail_screen.dart';
 import 'package:kkulkkulk/features/challenge/screens/challenge_screen.dart';
 import 'package:kkulkkulk/features/place/screens/place_detail_screen.dart';
 import 'package:kkulkkulk/features/place/screens/place_screen.dart';
@@ -91,5 +92,12 @@ final router = GoRouter(
         return PlaceDetailScreen(id: id);
       },
     ),
+    GoRoute(
+      path: '/challenge/detail/:climbGroundId',
+      builder: (context, state) {
+        final climbGroundId = int.parse(state.pathParameters['climbGroundId']!);
+        return ChallengeDetailScreen(climbGroundId: climbGroundId,);
+      },
+    )
   ],
 );
