@@ -16,10 +16,10 @@ class CalendarRepository {
     try {
       final formattedDate = DateFormat('yyyy-MM').format(date);
       logger.i(
-          "📡 API 요청: /record/monthly/$userId?date=$formattedDate"); // ✅ 요청 로그 추가
+          "📡 API 요청: api/record/monthly/$userId?date=$formattedDate"); // ✅ 요청 로그 추가
 
       final response = await _dio.get(
-        '/record/monthly/$userId',
+        '/api/record/monthly/$userId',
         queryParameters: {'date': formattedDate},
       );
 
@@ -48,7 +48,7 @@ class CalendarRepository {
       logger.i("📡 API 요청: /record/daily/$userId?date=$formattedDate");
 
       final response = await _dio.get(
-        '/record/daily/$userId',
+        '/api/record/daily/$userId',
         queryParameters: {'date': formattedDate},
       );
 

@@ -10,10 +10,10 @@ import 'package:kkulkkulk/features/camera/data/models/video_model.dart';
 final logger = Logger();
 
 class VideoRepository {
-  static const String _path = '/climbing/record/save';
+  static const String _path = '/api/climbing/record/save';
   final Dio _dio;
 
-  VideoRepository(this._dio);
+  VideoRepository() : _dio = DioClient().dio;
 
   Future<VideoResponse> uploadVideo({
     required File videoFile,
@@ -87,5 +87,5 @@ class VideoRepository {
 }
 
 final videoRepositoryProvider = Provider<VideoRepository>((ref) {
-  return VideoRepository(ref.read(dioClientProvider).dio);
+  return VideoRepository();
 });

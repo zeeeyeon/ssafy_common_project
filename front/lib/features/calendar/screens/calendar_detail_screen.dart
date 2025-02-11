@@ -7,9 +7,6 @@ import 'package:kkulkkulk/common/utils/color_converter.dart';
 
 final logger = Logger();
 
-// 유저 id 가져오기 (임시)
-final userIdProvider = StateProvider<int>((ref) => 1);
-
 // ✅ 통계 데이터 관리 (완등률 포함)
 final statisticsProvider =
     StateNotifierProvider<StatisticsNotifier, Map<String, String>>(

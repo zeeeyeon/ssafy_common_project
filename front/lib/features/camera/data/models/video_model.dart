@@ -1,35 +1,31 @@
 class VideoResponse {
-  final int id;
+  final int? videoId;
   final String url;
-  final bool isSuccess;
-  final String color;
-  final String createdAt;
+  final String thumbnailUrl;
+  final int climbRecordId;
 
   VideoResponse({
-    required this.id,
+    this.videoId,
     required this.url,
-    required this.isSuccess,
-    required this.color,
-    required this.createdAt,
+    required this.thumbnailUrl,
+    required this.climbRecordId,
   });
 
   factory VideoResponse.fromJson(Map<String, dynamic> json) {
     return VideoResponse(
-      id: json['id'] as int,
+      videoId: json['videoId'] as int?,
       url: json['url'] as String,
-      isSuccess: json['isSuccess'] as bool,
-      color: json['color'] as String,
-      createdAt: json['createdAt'] as String,
+      thumbnailUrl: json['thumbnailUrl'] as String,
+      climbRecordId: json['climbRecordId'] as int,
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
-      'id': id,
+      'videoId': videoId,
       'url': url,
-      'isSuccess': isSuccess,
-      'color': color,
-      'createdAt': createdAt,
+      'thumbnailUrl': thumbnailUrl,
+      'climbRecordId': climbRecordId,
     };
   }
 }
