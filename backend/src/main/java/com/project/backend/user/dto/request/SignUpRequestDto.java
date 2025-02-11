@@ -32,6 +32,7 @@ public class SignUpRequestDto {
                 .username(username)
                 .phone(phone)
                 .nickname(nickname)
+                .profileImageUrl("https://ssafy-ori-bucket.s3.ap-northeast-2.amazonaws.com/profile_default.png")
                 .createDate(LocalDateTime.now())
                 .updateDate(LocalDateTime.now())
                 .build();

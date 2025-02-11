@@ -7,6 +7,7 @@ import com.project.backend.common.response.ResponseCode;
 import com.project.backend.record.entity.ClimbingRecord;
 import com.project.backend.user.dto.request.ConvertRequestDto;
 import com.project.backend.user.dto.request.SignUpRequestDto;
+import com.project.backend.user.dto.request.UserImageRequestDto;
 import com.project.backend.user.dto.request.UserInfoRequestDto;
 import com.project.backend.user.dto.response.UserTierResponseDto;
 import com.project.backend.user.entity.User;
@@ -98,14 +99,21 @@ public class UserServiceImpl implements UserService {
     return userRepository.findByNickname(nickname);
   }
 
+  @Override
   public User userProfileFindById(Long id) {
     return userRepository.findById(id).orElseThrow(() -> new CustomException(ResponseCode.NOT_FOUND_USER));
   }
 
-  public User updateUserProfileById(Long id, UserInfoRequestDto requestDto) {
+  @Override
+  public void updateUserProfileById(Long id, UserInfoRequestDto requestDto) {
     User findUser = userRepository.findById(id).orElseThrow(() -> new CustomException(ResponseCode.NOT_FOUND_USER));
+    userRepository.save(findUser.setUserInfoRequestDto(requestDto));
+  }
 
-    return userRepository.save(findUser.setUserInfoRquestDto(requestDto));
+  @Override
+  public void updateUserImageById(Long id, UserImageRequestDto requestDto) {
+    User findUser = userRepository.findById(id).orElseThrow(() -> new CustomException(ResponseCode.NOT_FOUND_USER));
+    userRepository.save(findUser.setUserImageRequestDto(requestDto));
   }
 
   public UserTierResponseDto userTierFindById(Long id) {
