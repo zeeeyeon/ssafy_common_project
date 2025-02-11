@@ -45,6 +45,10 @@ dependencies:
   pretty_animated_buttons: ^0.0.2
   jwt_decoder: ^2.0.1
   shared_preferences: ^2.5.1
+  geolocator: ^13.0.2
+  logger: ^2.5.0
+  big_decimal: ^0.5.0
+  font_awesome_flutter: ^10.8.0
   url_launcher: ^6.3.1
 
 dev_dependencies:

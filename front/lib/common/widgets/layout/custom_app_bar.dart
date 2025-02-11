@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
@@ -30,7 +31,14 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
       leading: showBackButton
           ? IconButton(
               icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
-              onPressed: onBackPressed ?? () => Navigator.pop(context),
+              onPressed: ()  {
+                // onBackPressed가 null이 아니면 호출, 아니면 기본 동작
+                if (onBackPressed != null) {
+                  onBackPressed!();
+                } else {
+                  context.go('/calendar'); // 기본적으로 이동할 화면을 설정
+                }
+              }
             )
           : null,
       actions: actions,

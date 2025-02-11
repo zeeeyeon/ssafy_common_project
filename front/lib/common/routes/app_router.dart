@@ -6,6 +6,7 @@ import 'package:kkulkkulk/features/calendar/screens/calendar_screen.dart';
 import 'package:kkulkkulk/features/calendar/screens/calendar_detail_screen.dart';
 import 'package:kkulkkulk/features/camera/screens/camera_screen.dart';
 import 'package:kkulkkulk/features/challenge/screens/challenge_screen.dart';
+import 'package:kkulkkulk/features/place/screens/place_detail_screen.dart';
 import 'package:kkulkkulk/features/place/screens/place_screen.dart';
 import 'package:kkulkkulk/features/profile/screens/profile_screen.dart';
 import 'package:kkulkkulk/features/splash/screens/splash_screen.dart';
@@ -82,6 +83,13 @@ final router = GoRouter(
       builder: (context, state) => CalendarDetailScreen(
         date: state.pathParameters['date']!,
       ),
+    ),
+    GoRoute(
+      path: '/place/:id',
+      builder: (context, state) {
+        final id = int.parse(state.pathParameters['id']!);
+        return PlaceDetailScreen(id: id);
+      },
     ),
   ],
 );
