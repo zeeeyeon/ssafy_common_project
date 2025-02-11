@@ -3,56 +3,30 @@ import 'package:kkulkkulk/common/network/dio_client.dart';
 import 'package:kkulkkulk/features/profile/data/models/profile_model.dart';
 
 class ProfileRepository {
-  final DioClient _dioClient = DioClient();
+  final DioClient _dioClient;
 
-  // 🔹 1. 프로필 조회 (GET)
-  Future<ProfileModel> fetchUserProfile() async {
+  ProfileRepository(this._dioClient);
+
+  Future<UserProfile> fetchUserProfile() async {
+    print('🔥 fetchUserProfile 실행됨');
     try {
-      print("🔍 [API 요청] GET /api/user/");
-      final response = await _dioClient.dio.get('/api/user/profile');
-      print("✅ [API 응답] ${response.data}");
+      print('📡 API 요청 시작: /api/user/profile'); // 요청이 시작되는지 확인
 
-      return ProfileModel.fromJson(response.data);
-    } on DioException catch (e) {
-      print("❌ [API 오류] 프로필 조회 실패: ${e.response?.data ?? e.message}");
-      throw Exception('❌ 프로필 조회 실패: ${e.response?.data ?? e.message}');
+      final response = await _dioClient.dio.get(
+        '/api/user/profile',
+        options: Options(
+          headers: {
+            'Authorization':
+                'Bearer eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0MDFAbmF2ZXIuY29tIiwiaWF0IjoxNzM4ODkyODYzLCJleHAiOjE3Mzk0OTc2NjMsImlkIjoxLCJ1c2VybmFtZSI6InNvbmdEb25nSHllb24iLCJyb2xlIjoiVVNFUiJ9.ix-8keezfIvYp9rfSTfpnViStBKxPho4C3EDHViUfU9-17F9Y2SkHRsi9lj-10auwKmCuTTp2jM4WUtfQWz6Ig',
+          },
+        ),
+      );
+
+      print('✅ API 응답 데이터: ${response.data}'); // API 응답 확인
+      return UserProfile.fromJson(response.data['content']);
+    } catch (e) {
+      print('❌ API 요청 실패: $e');
+      throw Exception('Failed to load profile data: $e');
     }
   }
-
-  // 🔹 2. 프로필 업데이트 (닉네임, 키, 팔길이, 클라이밍 시작일을 한 번에 업데이트)
-  Future<void> updateProfile({
-    required String nickname,
-    required double height,
-    required double armSpan,
-    required DateTime? climbingStartDate,
-  }) async {
-    try {
-      final Map<String, dynamic> data = {
-        'nickname': nickname,
-        'height': height,
-        'arm_span': armSpan,
-        'climbing_start_date': climbingStartDate?.toIso8601String(),
-      };
-
-      print("🔍 [API 요청] PUT /api/user/info, 데이터: $data");
-      final response = await _dioClient.dio.put('/api/user/info', data: data);
-      print("✅ [API 응답] ${response.data}");
-    } on DioException catch (e) {
-      print("❌ [API 오류] 프로필 수정 실패: ${e.response?.data ?? e.message}");
-      throw Exception('❌ 프로필 수정 실패: ${e.response?.data ?? e.message}');
-    }
-  }
-
-  // 🔹 3. 프로필 이미지 변경 (이미지 업로드)
-  // Future<void> updateProfileImage(String imagePath) async {
-  //   try {
-  //     final formData = FormData.fromMap({
-  //       'profile_image': await MultipartFile.fromFile(imagePath),
-  //     });
-
-  //     await _dioClient.dio.put('/api/v1/my/', data: formData);
-  //   } on DioException catch (e) {
-  //     throw Exception('❌ 프로필 이미지 수정 실패: ${e.response?.data ?? e.message}');
-  //   }
-  // }
 }
