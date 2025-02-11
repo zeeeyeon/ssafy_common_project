@@ -5,8 +5,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:kkulkkulk/features/camera/data/models/album_model.dart';
 import 'package:kkulkkulk/features/camera/view_models/album_view_model.dart';
 import 'package:kkulkkulk/features/camera/providers/camera_providers.dart';
-import 'package:kkulkkulk/features/camera/screens/video_player_screen.dart';
-import 'package:kkulkkulk/common/utils/color_converter.dart';
 import 'package:logger/logger.dart';
 
 final logger = Logger();
@@ -35,10 +33,15 @@ class _AlbumScreenState extends ConsumerState<AlbumScreen>
     _tabController.addListener(() {
       if (!_tabController.indexIsChanging) {
         ref.read(currentTabProvider.notifier).state = _tabController.index;
-        _fetchAlbumData(isSuccess: _tabController.index == 0);
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _fetchAlbumData(isSuccess: _tabController.index == 0);
+        });
       }
     });
-    _fetchAlbumData(isSuccess: true);
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _fetchAlbumData(isSuccess: true);
+    });
   }
 
   @override
@@ -83,7 +86,7 @@ class _AlbumScreenState extends ConsumerState<AlbumScreen>
             icon: const Icon(Icons.camera_alt_rounded),
             iconSize: 30,
             onPressed: () {
-              context.go('/camera');
+              context.push('/camera');
             },
           ),
         ],
@@ -143,6 +146,17 @@ class _AlbumScreenState extends ConsumerState<AlbumScreen>
               );
             }
 
+            // success 값이 일치하는 항목만 필터링
+            final filteredItems = albumResponse.albumObject
+                .where((item) => albumResponse.success == isSuccess)
+                .toList();
+
+            if (filteredItems.isEmpty) {
+              return const Center(
+                child: Text('기록된 영상이 없습니다'),
+              );
+            }
+
             return GridView.builder(
               padding: const EdgeInsets.all(8),
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -150,13 +164,14 @@ class _AlbumScreenState extends ConsumerState<AlbumScreen>
                 crossAxisSpacing: 8,
                 mainAxisSpacing: 8,
               ),
-              itemCount: albumResponse.albumObject.length,
+              itemCount: filteredItems.length,
               itemBuilder: (context, index) {
-                final item = albumResponse.albumObject[index];
+                final item = filteredItems[index];
                 return _VideoGridItem(
                   albumItem: item,
                   selectedDate:
                       "${selectedDate.year}-${selectedDate.month}-${selectedDate.day}",
+                  isSuccess: albumResponse.success,
                 );
               },
             );
@@ -174,26 +189,23 @@ class _AlbumScreenState extends ConsumerState<AlbumScreen>
 class _VideoGridItem extends StatelessWidget {
   final AlbumItem albumItem;
   final String selectedDate;
+  final bool isSuccess;
 
   const _VideoGridItem({
     required this.albumItem,
     required this.selectedDate,
+    required this.isSuccess,
   });
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => VideoPlayerScreen(
-              albumItem.url,
-              selectedDate,
-              albumItem.isSuccess,
-            ),
-          ),
-        );
+        context.push('/video-player', extra: {
+          'url': albumItem.url,
+          'date': selectedDate,
+          'isSuccess': isSuccess,
+        });
       },
       child: Card(
         clipBehavior: Clip.antiAlias,
@@ -223,34 +235,12 @@ class _VideoGridItem extends StatelessWidget {
             Positioned(
               top: 8,
               left: 8,
-              child: Container(
-                width: 24,
-                height: 24,
-                decoration: BoxDecoration(
-                  color: ColorConverter.fromString(albumItem.color),
-                  shape: BoxShape.circle,
-                  border: Border.all(color: Colors.white, width: 2),
-                ),
-              ),
+              child: albumItem.buildColorIndicator(),
             ),
             Positioned(
               bottom: 8,
               right: 8,
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: Colors.black54,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text(
-                  albumItem.level,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
+              child: albumItem.buildLevelIndicator(),
             ),
           ],
         ),

@@ -16,16 +16,23 @@ class VisitLogRepository {
     required int userId,
     required double latitude,
     required double longitude,
-    required String date,
   }) async {
     try {
+      logger.d("방문 일지 API 요청", {
+        "url": "${_dio.options.baseUrl}$_path",
+        "body": {
+          "userId": userId,
+          "latitude": latitude,
+          "longitude": longitude,
+        }
+      });
+
       final response = await _dio.post(
         _path,
         data: {
           'userId': userId,
           'latitude': latitude,
           'longitude': longitude,
-          'date': date,
         },
         options: Options(
           headers: {
@@ -34,10 +41,15 @@ class VisitLogRepository {
         ),
       );
 
-      if (response.statusCode == 200) {
+      if (response.statusCode == 201 || response.statusCode == 208) {
+        logger.d("방문 일지 API 응답", {
+          "statusCode": response.statusCode,
+          "data": response.data,
+        });
         return VisitLogResponse.fromJson(response.data);
       } else {
-        throw Exception('Failed to create visit log');
+        final message = response.data['status']['message'] ?? '방문 일지 생성 실패';
+        throw Exception(message);
       }
     } catch (e) {
       logger.e("방문 일지 API 오류", e);

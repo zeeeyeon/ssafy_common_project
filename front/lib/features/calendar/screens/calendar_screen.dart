@@ -305,7 +305,7 @@ class CalendarScreenState extends ConsumerState<CalendarScreen> {
                 Icons.camera_alt,
                 Colors.blue,
                 () {
-                  context.go('/camera');
+                  context.push('/camera');
                 },
               ),
               const SizedBox(height: 10),
@@ -315,7 +315,7 @@ class CalendarScreenState extends ConsumerState<CalendarScreen> {
                 Icons.photo_album,
                 Colors.blue,
                 () {
-                  context.go('/album');
+                  context.push('/album');
                 },
               ),
             ],
@@ -340,7 +340,6 @@ class CalendarScreenState extends ConsumerState<CalendarScreen> {
         onPressed: () {
           Navigator.pop(context);
           onPressed();
-          // TODO: 각 버튼에 대한 기능 구현 (예: 카메라 실행, 앨범 열기 등)
         },
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,

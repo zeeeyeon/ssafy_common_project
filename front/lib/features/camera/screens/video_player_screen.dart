@@ -29,6 +29,16 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
       });
   }
 
+  void _skipBackward() {
+    final newPosition = _controller.value.position - const Duration(seconds: 1);
+    _controller.seekTo(newPosition);
+  }
+
+  void _skipForward() {
+    final newPosition = _controller.value.position + const Duration(seconds: 1);
+    _controller.seekTo(newPosition);
+  }
+
   @override
   void dispose() {
     _controller.dispose();
@@ -38,60 +48,80 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      extendBody: true,
+      extendBodyBehindAppBar: true,
       appBar: CustomAppBar(
         title: widget.selectedDate,
         showBackButton: true,
       ),
-      body: Center(
-        child: _isInitialized
-            ? AspectRatio(
-                aspectRatio: _controller.value.aspectRatio,
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    VideoPlayer(_controller),
-                    _PlayPauseOverlay(controller: _controller),
-                  ],
-                ),
-              )
-            : const CircularProgressIndicator(),
-      ),
-    );
-  }
-}
-
-class _PlayPauseOverlay extends StatelessWidget {
-  final VideoPlayerController controller;
-
-  const _PlayPauseOverlay({required this.controller});
-
-  @override
-  Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        AnimatedSwitcher(
-          duration: const Duration(milliseconds: 50),
-          reverseDuration: const Duration(milliseconds: 200),
-          child: controller.value.isPlaying
-              ? const SizedBox.shrink()
-              : Container(
-                  color: Colors.black26,
-                  child: const Center(
-                    child: Icon(
-                      Icons.play_arrow,
-                      color: Colors.white,
-                      size: 100.0,
-                      semanticLabel: 'Play',
+      body: Stack(
+        children: [
+          // 비디오 플레이어
+          _isInitialized
+              ? Container(
+                  color: Colors.black,
+                  child: Center(
+                    child: AspectRatio(
+                      aspectRatio: _controller.value.aspectRatio,
+                      child: VideoPlayer(_controller),
                     ),
                   ),
-                ),
+                )
+              : const Center(child: CircularProgressIndicator()),
+        ],
+      ),
+      bottomNavigationBar: Container(
+        padding: const EdgeInsets.only(bottom: 48),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.bottomCenter,
+            end: Alignment.topCenter,
+            colors: [
+              Colors.black.withOpacity(0.7),
+              Colors.transparent,
+            ],
+          ),
         ),
-        GestureDetector(
-          onTap: () {
-            controller.value.isPlaying ? controller.pause() : controller.play();
-          },
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            IconButton(
+              onPressed: _skipBackward,
+              icon: const Icon(
+                Icons.replay_10_rounded,
+                color: Colors.white,
+                size: 35,
+              ),
+            ),
+            ValueListenableBuilder(
+              valueListenable: _controller,
+              builder: (context, VideoPlayerValue value, child) {
+                return IconButton(
+                  onPressed: () {
+                    value.isPlaying ? _controller.pause() : _controller.play();
+                    setState(() {});
+                  },
+                  icon: Icon(
+                    value.isPlaying
+                        ? Icons.pause_circle_filled_rounded
+                        : Icons.play_circle_fill_rounded,
+                    color: Colors.white,
+                    size: 50,
+                  ),
+                );
+              },
+            ),
+            IconButton(
+              onPressed: _skipForward,
+              icon: const Icon(
+                Icons.forward_10_rounded,
+                color: Colors.white,
+                size: 35,
+              ),
+            ),
+          ],
         ),
-      ],
+      ),
     );
   }
 }

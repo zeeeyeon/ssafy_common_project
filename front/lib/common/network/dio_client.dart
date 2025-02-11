@@ -38,7 +38,7 @@ class DioClient {
 final dioClientProvider = Provider<DioClient>((ref) {
   final token = ref.watch(authTokenProvider); // 토큰 상태 감시
   return DioClient(
-    baseUrl: 'http://3.38.250.245:8080/api',
+    baseUrl: 'https://i12e206.p.ssafy.io/api',
     token: token,
   );
 });

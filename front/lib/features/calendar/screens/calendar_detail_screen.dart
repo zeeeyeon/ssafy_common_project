@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:kkulkkulk/features/calendar/data/repositories/calendar_repository.dart';
 import 'package:logger/logger.dart';
 import 'package:go_router/go_router.dart';
+import 'package:kkulkkulk/common/utils/color_converter.dart';
 
 final logger = Logger();
 
@@ -72,6 +73,7 @@ class CalendarDetailScreenState extends ConsumerState<CalendarDetailScreen> {
   void initState() {
     super.initState();
     logger.i('📌 CalendarDetailScreen initState() 실행됨. 받은 날짜: ${widget.date}');
+
     try {
       final dateParts = widget.date.split('-');
       selectedDate = DateTime(
@@ -85,8 +87,40 @@ class CalendarDetailScreenState extends ConsumerState<CalendarDetailScreen> {
     }
 
     Future.microtask(() {
+      // Provider 상태 초기화
+      ref
+          .read(statisticsProvider.notifier)
+          .setStatistics({"회차": "--", "완등 횟수": "--", "컨디션": "--", "완등률": "0"});
+      ref.read(problemProvider.notifier).setProblems([]);
+      ref.read(difficultyProvider.notifier).setDifficulties([]);
+
+      setState(() {
+        _climbGroundName = null;
+      });
+
       fetchAllData();
     });
+  }
+
+  @override
+  void didUpdateWidget(CalendarDetailScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.date != widget.date) {
+      // 날짜가 변경되었을 때도 Provider 상태 초기화
+      ref
+          .read(statisticsProvider.notifier)
+          .setStatistics({"회차": "--", "완등 횟수": "--", "컨디션": "--", "완등률": "0"});
+      ref.read(problemProvider.notifier).setProblems([]);
+      ref.read(difficultyProvider.notifier).setDifficulties([]);
+
+      setState(() {
+        _climbGroundName = null;
+      });
+
+      Future.microtask(() {
+        fetchAllData();
+      });
+    }
   }
 
   Future<void> fetchAllData() async {
@@ -110,59 +144,24 @@ class CalendarDetailScreenState extends ConsumerState<CalendarDetailScreen> {
         "완등률": detail.completionRate.toStringAsFixed(1),
       });
 
-      // 문제 데이터 업데이트 (colorAttempts, colorSuccesses 사용)
+      // 문제 데이터 업데이트
       List<Map<String, dynamic>> problems = [];
       detail.colorAttempts.forEach((colorName, attempts) {
         final success = detail.colorSuccesses[colorName] ?? 0;
         problems.add({
-          "color": getColorFromName(colorName),
+          "color": ColorConverter.fromString(colorName),
           "attempts": attempts,
           "success": success,
         });
       });
       ref.read(problemProvider.notifier).setProblems(problems);
 
-      // 난이도 업데이트 (holdColorLevel 사용)
+      // 난이도 업데이트
       List<Map<String, dynamic>> difficulties = [];
-      final List<String> colorOrder = [
-        'RED',
-        'ORANGE',
-        'YELLOW',
-        'GREEN',
-        'BLUE',
-        'NAVY',
-        'PURPLE',
-        'PINK',
-        'SKYBLUE',
-        'CYAN',
-        'TEAL',
-        'LIME',
-        'AMBER',
-        'DEEPORANGE',
-        'DEEPPURPLE',
-        'LIGHTGREEN',
-        'BROWN',
-        'GRAY', // 또는 'GREY'
-        'BLACK',
-        'WHITE',
-        'INDIGO',
-        'BLUEGREY',
-        'SODOMY',
-        'MAROON',
-        'OLIVE',
-        'CORAL',
-        'VIOLET',
-        'MAGENTA',
-        'AQUA',
-        'GOLD',
-        'SILVER'
-      ];
-      for (var color in colorOrder) {
-        if (detail.holdColorLevel.containsKey(color)) {
-          difficulties.add({
-            "color": getColorFromName(color),
-          });
-        }
+      for (var color in detail.holdColorLevel.keys) {
+        difficulties.add({
+          "color": ColorConverter.fromString(color),
+        });
       }
       ref.read(difficultyProvider.notifier).setDifficulties(difficulties);
     } catch (e) {
@@ -386,77 +385,6 @@ class CalendarDetailScreenState extends ConsumerState<CalendarDetailScreen> {
         textAlign: TextAlign.center,
       ),
     );
-  }
-
-  // 헬퍼 함수: 색상 이름을 Color로 변환 (30가지 색상)
-  Color getColorFromName(String name) {
-    switch (name.toUpperCase()) {
-      case 'RED':
-        return Colors.red;
-      case 'ORANGE':
-        return Colors.orange;
-      case 'YELLOW':
-        return Colors.yellow;
-      case 'GREEN':
-        return Colors.green;
-      case 'BLUE':
-        return Colors.blue;
-      case 'NAVY':
-        return const Color(0xFF000080); // 네이비
-      case 'PURPLE':
-        return Colors.purple;
-      case 'PINK':
-        return Colors.pink;
-      case 'SKYBLUE':
-        return Colors.lightBlueAccent; // 스카이블루
-      case 'CYAN':
-        return Colors.cyan;
-      case 'TEAL':
-        return Colors.teal;
-      case 'LIME':
-        return Colors.lime;
-      case 'AMBER':
-        return Colors.amber;
-      case 'DEEPORANGE':
-        return Colors.deepOrange;
-      case 'DEEPPURPLE':
-        return Colors.deepPurple;
-      case 'LIGHTGREEN':
-        return Colors.lightGreen;
-      case 'BROWN':
-        return Colors.brown;
-      case 'GREY':
-      case 'GRAY':
-        return Colors.grey;
-      case 'BLACK':
-        return Colors.black;
-      case 'WHITE':
-        return Colors.white;
-      case 'INDIGO':
-        return Colors.indigo;
-      case 'BLUEGREY':
-        return Colors.blueGrey;
-      case 'SODOMY':
-        return const Color(0xFF000000);
-      case 'MAROON':
-        return const Color(0xFF800000);
-      case 'OLIVE':
-        return const Color(0xFF808000);
-      case 'CORAL':
-        return const Color(0xFFFF7F50);
-      case 'VIOLET':
-        return const Color(0xFF8F00FF);
-      case 'MAGENTA':
-        return const Color(0xFFFF00FF);
-      case 'AQUA':
-        return const Color(0xFF00FFFF);
-      case 'GOLD':
-        return const Color(0xFFFFD700);
-      case 'SILVER':
-        return const Color(0xFFC0C0C0);
-      default:
-        return Colors.grey;
-    }
   }
 
   // 헬퍼 함수: 완등률에 따른 컨디션 문자열 반환

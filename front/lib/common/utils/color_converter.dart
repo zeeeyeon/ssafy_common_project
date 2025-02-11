@@ -44,6 +44,24 @@ class ColorConverter {
         return Colors.black;
       case 'WHITE':
         return Colors.white;
+      case 'SODOMY':
+        return const Color(0xFF000000);
+      case 'MAROON':
+        return const Color(0xFF800000);
+      case 'OLIVE':
+        return const Color(0xFF808000);
+      case 'CORAL':
+        return const Color(0xFFFF7F50);
+      case 'VIOLET':
+        return const Color(0xFF8F00FF);
+      case 'MAGENTA':
+        return const Color(0xFFFF00FF);
+      case 'AQUA':
+        return const Color(0xFF00FFFF);
+      case 'GOLD':
+        return const Color(0xFFFFD700);
+      case 'SILVER':
+        return const Color(0xFFC0C0C0);
       default:
         return Colors.grey;
     }
