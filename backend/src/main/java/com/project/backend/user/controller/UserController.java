@@ -66,7 +66,7 @@ public class UserController {
     return new ResponseEntity<>(Response.create(NO_EXISTED_USER_NICKNAME, null), NO_EXISTED_USER_NICKNAME.getHttpStatus());
   }
 
-  // 사용자 프로필 조회 ( 이름, 클라이밍 시작일, 키, 팔길이)
+  // 사용자 프로필 조회 ( 닉네임, 클라이밍 시작일, 키, 팔길이)
   @GetMapping("/profile")
   public ResponseEntity<?> findUserProfile(@AuthenticationPrincipal CustomUserDetails userDetails) {
     Long userId = userDetails.getUser().getId();
@@ -75,7 +75,7 @@ public class UserController {
     return new ResponseEntity<>(Response.create(ResponseCode.GET_USER_PROFILE, responseDto), GET_USER_PROFILE.getHttpStatus());
   }
 
-  // 사용자 프로필 수정 ( 이름, 클라이밍 시작일, 키, 팔길이)
+  // 사용자 프로필 수정 ( 닉네임, 클라이밍 시작일, 키, 팔길이)
   @PutMapping("/profile")
   public ResponseEntity<?> updateUserProfile(@AuthenticationPrincipal CustomUserDetails userDetails, @RequestBody UserInfoRequestDto requestDto) {
     Long userId = userDetails.getUser().getId();

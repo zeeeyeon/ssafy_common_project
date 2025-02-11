@@ -10,7 +10,7 @@ import java.time.temporal.ChronoUnit;
 
 @Data
 public class UserProfileResponseDto {
-  private String username;
+  private String nickname;
   private float height;
   private float armSpan;
   private String profileImageUrl;
@@ -21,7 +21,7 @@ public class UserProfileResponseDto {
     if (user == null) {
       throw new IllegalArgumentException("User cannot be null");
     }
-    this.username = user.getUsername() != null ? user.getUsername() : "";
+    this.nickname = user.getNickname() != null ? user.getNickname() : "";
     // armSpan handling
     this.armSpan = user.getReach();
 
