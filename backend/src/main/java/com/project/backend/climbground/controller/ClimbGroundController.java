@@ -12,10 +12,12 @@ import com.project.backend.climbground.service.ClimbGroundServiceImpl;
 import com.project.backend.common.advice.exception.CustomException;
 import com.project.backend.common.response.Response;
 import com.project.backend.common.response.ResponseCode;
+import com.project.backend.user.auth.CustomUserDetails;
 import com.project.backend.userclimbground.dto.responseDTO.UnLockClimbGroundDetailResponseDTO;
 import com.project.backend.userclimbground.service.UserClimbGroundServiceImp;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -77,7 +79,8 @@ public class ClimbGroundController {
     }
 
     @GetMapping("/lock-climbground/list")
-    public ResponseEntity<?> getLockClimbGroundList(@RequestParam(name = "userId") Long userId, @RequestParam(name = "latitude") double latitude, @RequestParam(name = "longitude") double longitude) {
+    public ResponseEntity<?> getLockClimbGroundList(@AuthenticationPrincipal CustomUserDetails userDetails, @RequestParam(name = "latitude") double latitude, @RequestParam(name = "longitude") double longitude) {
+        Long userId = userDetails.getUser().getId();
         List<LockClimbGroundAllResponseDTO> lockClimbGrounds = ClimbGroundService.findAllLockClimbGround(userId, latitude, longitude);
 
         if (!lockClimbGrounds.isEmpty()) {
@@ -87,7 +90,8 @@ public class ClimbGroundController {
     }
 
     @GetMapping("/lock-climbground/first")
-    public ResponseEntity<?> getLockClimbGround(@RequestParam(name = "userId") Long userId, @RequestParam(name = "latitude") double latitude, @RequestParam(name = "longitude") double longitude) {
+    public ResponseEntity<?> getLockClimbGround(@AuthenticationPrincipal CustomUserDetails userDetails, @RequestParam(name = "latitude") double latitude, @RequestParam(name = "longitude") double longitude) {
+        Long userId = userDetails.getUser().getId();
         LockClimbGroundAllResponseDTO lockClimbGround = ClimbGroundService.findAllLockClimbGroundFirst(userId, latitude, longitude);
 
         if (lockClimbGround != null) {
@@ -96,7 +100,8 @@ public class ClimbGroundController {
         throw new CustomException(ResponseCode.NOT_FOUND_CLIMB_GROUND);
     }
     @GetMapping("/lock-climbground/detail")
-    public ResponseEntity<?> getUnlockClimbGroundDetail(@RequestParam(name= "userId") Long userId, @RequestParam(name="climbGroundId") Long climbGroundId) {
+    public ResponseEntity<?> getUnlockClimbGroundDetail(@AuthenticationPrincipal CustomUserDetails userDetails, @RequestParam(name="climbGroundId") Long climbGroundId) {
+        Long userId = userDetails.getUser().getId();
         UnLockClimbGroundDetailResponseDTO responseDTO = userClimbGroundServiceImp.getUnlockClimbGroundDetail(userId, climbGroundId);
 
         return new ResponseEntity<>(Response.create(GET_CLIMB_GROUND_DETAIL, responseDTO), GET_CLIMB_GROUND_DETAIL.getHttpStatus());
@@ -104,7 +109,8 @@ public class ClimbGroundController {
 
     // 클라이밍장 전체조회(해금 여부 포함) -paginateion
     @GetMapping("/lock-climbground/list/page")
-    public ResponseEntity<?> getLockClimbGroundListPage(@RequestParam(name = "userId") Long userId, @RequestParam(name = "latitude") double latitude, @RequestParam(name = "longitude") double longitude, @RequestParam(name = "page") int page) {
+    public ResponseEntity<?> getLockClimbGroundListPage(@AuthenticationPrincipal CustomUserDetails userDetails, @RequestParam(name = "latitude") double latitude, @RequestParam(name = "longitude") double longitude, @RequestParam(name = "page") int page) {
+        Long userId = userDetails.getUser().getId();
         List<LockClimbGroundAllResponseDTO> lockClimbGrounds = ClimbGroundService.findAllLockClimbGroundPagination(userId, latitude, longitude,page);
 
         if (!lockClimbGrounds.isEmpty()) {
@@ -115,7 +121,8 @@ public class ClimbGroundController {
 
     // 클라이밍장 리스트 조회 (거리별 정렬) - 페이지네이션
     @GetMapping("/all/user-location/page")
-    public ResponseEntity<?> getAllDisCLimbsPage(@RequestParam(name = "userId") Long userId,@RequestParam(name = "latitude") double latitude, @RequestParam(name = "longitude") double longitude ,@RequestParam(name="page") int page) {
+    public ResponseEntity<?> getAllDisCLimbsPage(@AuthenticationPrincipal CustomUserDetails userDetails,@RequestParam(name = "latitude") double latitude, @RequestParam(name = "longitude") double longitude ,@RequestParam(name="page") int page) {
+        Long userId = userDetails.getUser().getId();
         List<ClimbGroundAllResponseDTO> climbGrounds = ClimbGroundService.findAllClimbGroundPagination(userId, latitude,longitude,page);
         if (!climbGrounds.isEmpty()) {
             return new ResponseEntity<>(Response.create(GET_CLIMB_GROUND_List, climbGrounds), GET_CLIMB_GROUND_List.getHttpStatus());
@@ -125,7 +132,8 @@ public class ClimbGroundController {
 
     // 클라이밍장 검색
     @GetMapping("/lock-climbground/search")
-    public ResponseEntity<?> searchLockClimbGround(@RequestParam(name= "userId") Long userId,@RequestParam(name = "keyword") String keyword, @RequestParam(name = "latitude") double latitude, @RequestParam(name = "longitude") double longitude) {
+    public ResponseEntity<?> searchLockClimbGround(@AuthenticationPrincipal CustomUserDetails userDetails ,@RequestParam(name = "keyword") String keyword, @RequestParam(name = "latitude") double latitude, @RequestParam(name = "longitude") double longitude) {
+        Long userId = userDetails.getUser().getId();
         List<LockClimbGroundAllResponseDTO> climbGrounds = ClimbGroundService.searchLockClimbGroundByKeyword(userId,keyword,latitude,longitude);
 
         if (!climbGrounds.isEmpty()) {

@@ -3,6 +3,7 @@ package com.project.backend.userdate.controller;
 import com.project.backend.common.advice.exception.CustomException;
 import com.project.backend.common.response.Response;
 import com.project.backend.common.response.ResponseCode;
+import com.project.backend.user.auth.CustomUserDetails;
 import com.project.backend.userdate.dto.ClimbGroundWithDistance;
 import com.project.backend.userdate.dto.request.UserDateCheckAndAddLocationRequestDTO;
 import com.project.backend.userdate.dto.request.UserDateCheckAndAddRequestDTO;
@@ -13,6 +14,7 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -49,8 +51,9 @@ public class UserDateController {
 
 
     @PostMapping("/unlock")
-    public ResponseEntity<?> startRecord (@RequestBody UserDateCheckAndAddRequestDTO requestDTO) {
-        ChallUnlockResponseDTO responseDTO = userDateService.ChallUserDateCheckAndAdd(requestDTO);
+    public ResponseEntity<?> startRecord (@AuthenticationPrincipal CustomUserDetails userDetails , @RequestBody UserDateCheckAndAddRequestDTO requestDTO) {
+        Long userId = userDetails.getUser().getId();
+        ChallUnlockResponseDTO responseDTO = userDateService.ChallUserDateCheckAndAdd(userId,requestDTO);
         if (responseDTO != null) {
             if (responseDTO.getUserDate().isNewlyCreated()){ //새로 생성 한것 이면
                 return new ResponseEntity<>(Response.create(POST_USER_DATE, responseDTO), POST_USER_DATE.getHttpStatus());
