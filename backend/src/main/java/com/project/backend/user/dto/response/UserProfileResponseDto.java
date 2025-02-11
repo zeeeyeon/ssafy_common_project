@@ -13,6 +13,7 @@ public class UserProfileResponseDto {
   private String username;
   private float height;
   private float armSpan;
+  private String profileImageUrl;
   private int Dday;  // Changed to Long to allow null
   private UserTierEnum userTier;
 
@@ -30,6 +31,7 @@ public class UserProfileResponseDto {
     // UserTier handling
     this.userTier = user.getTier() != null ? user.getTier() : UserTierEnum.UNRANK;  // Assuming there's a DEFAULT enum value
 
+    this.profileImageUrl = user.getProfileImageUrl();
     // D-day calculation with null check
     calculateDday(String.valueOf(user.getStartDate()));
   }
