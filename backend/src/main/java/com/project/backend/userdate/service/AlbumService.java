@@ -6,11 +6,10 @@ import com.project.backend.userdate.dto.response.AlbumResponseDTO;
 import com.project.backend.userdate.entity.UserDate;
 import com.project.backend.userdate.repository.UserDateRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
+import java.time.*;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -29,28 +28,36 @@ public class AlbumService {
         LocalDateTime startOfDayLDT = startOfDay.toLocalDateTime();
         LocalDateTime endOfDayLDT = endOfDay.toLocalDateTime();
 
-        log.info("Start of day: " + startOfDay);
-        log.info("End of day: " + endOfDay);
-        log.info("Start of day: " + startOfDayLDT);
-        log.info("End of day: " + endOfDayLDT);
+        log.info("Start" + startOfDayLDT);
+        log.info("End" + endOfDayLDT);
 
-        AlbumResponseDTO albumResponseDTO = new AlbumResponseDTO(date,isSuccess);
-        List<AlbumObjcet> albumObjcetList = userDateRepository.findUserDatesByUserAndClimbGroundAndIsSuccess(userId, startOfDayLDT, endOfDayLDT, isSuccess)
-                .stream()
-                .flatMap(userDate ->  userDate.getClimbingRecordList().stream().map(
-                            climbingRecord ->
-                                new AlbumObjcet(
-                                        userDate.getUserClimbGround().getClimbGround().getName(),
-                                        climbingRecord.getHold().getColor(),
-                                        climbingRecord.getHold().getLevel(),
-                                        climbingRecord.getVideo().getUrl(),
-                                        climbingRecord.getVideo().getThumbnail()
-                                ))).collect(Collectors.toList());
+        List<UserDate> userDates = userDateRepository.findUserDatesByUserAndClimbGroundAndIsSuccess(userId, startOfDayLDT, endOfDayLDT, isSuccess);
+
+        userDates.forEach(ud -> {
+            log.info("afterTimeCheck" + ud.getCreatedAt());
+            ud.getClimbingRecordList().forEach(cr -> {
+            });
+        });
+
+        AlbumResponseDTO albumResponseDTO = new AlbumResponseDTO(date, isSuccess);
+        List<AlbumObjcet> albumObjcetList = userDates.stream()
+                .flatMap(userDate -> userDate.getClimbingRecordList().stream().map(climbingRecord -> {
+
+                    return new AlbumObjcet(
+                            userDate.getUserClimbGround().getClimbGround().getName(),
+                            climbingRecord.getHold().getColor(),
+                            climbingRecord.getHold().getLevel(),
+                            climbingRecord.getVideo().getUrl(),
+                            climbingRecord.getVideo().getThumbnail()
+                    );
+                }))
+                .collect(Collectors.toList());
 
         List<AlbumObjcet> sortedAlbumObjcetList = albumObjcetList.stream()
                 .sorted(Comparator.comparing(AlbumObjcet::getLevel))
                 .collect(Collectors.toList());
         albumResponseDTO.setAlbumObject(sortedAlbumObjcetList);
+
         return albumResponseDTO;
     }
 }
