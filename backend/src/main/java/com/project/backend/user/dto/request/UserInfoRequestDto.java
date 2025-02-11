@@ -8,6 +8,6 @@ import java.time.LocalDateTime;
 public class UserInfoRequestDto {
     private String nickname;
     private Float height;
-    private Float reach;
+    private Float armSpan;
     private LocalDateTime startDate;
 }
