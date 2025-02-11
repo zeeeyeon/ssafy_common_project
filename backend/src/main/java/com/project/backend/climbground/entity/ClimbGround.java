@@ -41,6 +41,8 @@ public class ClimbGround extends BaseEntity {
 //    @Column(precision=12, scale=9, nullable = true)
     private double latitude;
 
+    @Lob
+    @Column(columnDefinition = "LONGTEXT")
     private String open;
 
     private String number;

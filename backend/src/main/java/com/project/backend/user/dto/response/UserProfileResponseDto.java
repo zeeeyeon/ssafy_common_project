@@ -23,10 +23,10 @@ public class UserProfileResponseDto {
     }
     this.nickname = user.getNickname() != null ? user.getNickname() : "";
     // armSpan handling
-    this.armSpan = user.getReach();
+    this.armSpan = user.getReach() != null ? user.getReach() : 0;
 
     // Height handling
-    this.height = user.getHeight();
+    this.height = user.getHeight() != null ? user.getHeight() : 0;
 
     // UserTier handling
     this.userTier = user.getTier() != null ? user.getTier() : UserTierEnum.UNRANK;  // Assuming there's a DEFAULT enum value
