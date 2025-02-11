@@ -6,7 +6,7 @@ import java.time.LocalDateTime;
 
 @Data
 public class UserInfoRequestDto {
-    private String username;
+    private String nickname;
     private Float height;
     private Float reach;
     private LocalDateTime startDate;

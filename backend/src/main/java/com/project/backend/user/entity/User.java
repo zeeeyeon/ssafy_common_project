@@ -95,7 +95,7 @@ public class User {
     }
 
     public User setUserInfoRequestDto(UserInfoRequestDto requestDto) {
-        this.username = requestDto.getUsername() != null ? requestDto.getUsername() : this.username;
+        this.nickname = requestDto.getNickname() != null ? requestDto.getNickname() : this.nickname;
         this.height = requestDto.getHeight() != null ? requestDto.getHeight() : this.height;
         this.reach = requestDto.getReach() != null ? requestDto.getReach() : this.reach;
         this.startDate = requestDto.getStartDate() != null ? requestDto.getStartDate() : this.startDate;
