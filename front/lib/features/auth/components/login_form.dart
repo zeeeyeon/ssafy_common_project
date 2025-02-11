@@ -4,31 +4,28 @@ import 'package:go_router/go_router.dart';
 import 'package:kkulkkulk/common/jwt/jwt_token_provider.dart';
 import 'package:kkulkkulk/features/auth/components/text_button_form.dart';
 import 'package:kkulkkulk/features/auth/components/text_form.dart';
-import 'package:kkulkkulk/features/auth/data/repositories/auth_repository.dart';
 import 'package:kkulkkulk/features/auth/view_models/log_in_view_model.dart';
-import 'package:sign_button/sign_button.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class LoginForm extends ConsumerWidget{
   final _formKey = GlobalKey<FormState>();
-  final AuthRepository _authRepository = AuthRepository();
+  // final AuthRepository _authRepository = AuthRepository();
 
   void _signup(BuildContext context) {
     context.go('/register');
   }
 
   // 카카오 로그인 페이지로 리다이렉트
-Future<void> kakaoLogin() async {
-  print('시작');
-  final kakaoLoginUrl = Uri.parse('https://kauth.kakao.com/oauth/authorize?client_id=클라이언트아이디&redirect_uri=리다이렉트&response_type=code');
-  
-  if (await canLaunchUrl(kakaoLoginUrl)) {
-    await launchUrl(kakaoLoginUrl);
-  } else {
-    throw '카카오 로그인 URL을 열 수 없습니다';
-  }
-}
+  // Future<void> kakaoLogin() async {
+  //   print('시작');
+  //   final kakaoLoginUrl = Uri.parse('https://kauth.kakao.com/oauth/authorize?client_id=클라이언트아이디&redirect_uri=리다이렉트&response_type=code');
+    
+  //   if (await canLaunchUrl(kakaoLoginUrl)) {
+  //     await launchUrl(kakaoLoginUrl);
+  //   } else {
+  //     throw '카카오 로그인 URL을 열 수 없습니다';
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -47,6 +44,7 @@ Future<void> kakaoLogin() async {
             try {
               // 토큰을 디코딩하여 username 추출
               final decodedToken = JwtDecoder.decode(token);
+              print('decodedToken: $decodedToken');
               username = decodedToken['username'];
             } catch (e) {
               // 토큰 디코딩 실패시 처리
@@ -56,7 +54,7 @@ Future<void> kakaoLogin() async {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('환영합니다 $username 님')),
           );
-          // context.go('/calendar');
+          context.go('/calendar');
         }else if(!flag) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('로그인 실패')),
@@ -83,6 +81,7 @@ Future<void> kakaoLogin() async {
           TextForm(
             'Password',
             logInViewModel.passwordController,
+            isPassword: true,
           ),
           SizedBox(height: 15),
           TextButtonForm(
@@ -107,7 +106,7 @@ Future<void> kakaoLogin() async {
             child: ElevatedButton(
               onPressed: () {
                 print("kakao");
-                kakaoLogin();
+                // kakaoLogin();
               }, 
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,

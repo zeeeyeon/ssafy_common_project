@@ -32,20 +32,20 @@ class LogInViewModel extends ChangeNotifier {
     try {
       isLoading = true;
       notifyListeners();
-      print('email: $email password: $password');
+      // print('email: $email password: $password');
       final Response response = await _authRepository.login(userLoginModel);
-      print('response: $response');
+      // print('response: $response');
       if (response.statusCode == 200) {
         final String? token = response.headers.value('authorization');
 
         if (token != null) {
           // Bearer 접두어 제거
           final String actualToken = token.replaceFirst('Bearer ', '');
-          print('actualToken: $actualToken');
+          // print('actualToken: $actualToken');
 
           await Storage.saveToken(token);
           final String? checkToken = await Storage.getToken();
-          print(checkToken);
+          print('checkToken => $checkToken');
           // 토큰을 업데이트
           ref.read(jwtTokenProvider.notifier).state = actualToken;
 
