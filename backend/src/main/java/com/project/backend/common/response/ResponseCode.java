@@ -22,7 +22,7 @@ public enum ResponseCode {
     EXISTED_USER_PHONE(400, HttpStatus.BAD_REQUEST, "이미 존재하는 전화번호 입니다."),
     GET_USER_PROFILE(successCode(), HttpStatus.OK, "사용자의 정보가 조회되었습니다."),
     UPDATE_USER_PROFILE(successCode(), HttpStatus.OK, "사용자의 정보가 갱신되었습니다."),
-
+    IMAGE_UPLOAD_FAILED(400, HttpStatus.BAD_REQUEST, "사용자의 이미지가 수정되지 않았습니다."),
     GET_USER_TIER(successCode(), HttpStatus.OK, "사용자의 티어가 조회되었습니다."),
     UPDATE_USER_TIER(successCode(), HttpStatus.OK, "사용자의 티어가 갱신되었습니다."),
 
