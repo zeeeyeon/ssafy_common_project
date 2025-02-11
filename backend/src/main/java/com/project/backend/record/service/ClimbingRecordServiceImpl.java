@@ -47,6 +47,7 @@ public class ClimbingRecordServiceImpl implements ClimbingRecordService {
         newClimbingRecord.setUserDate(userDate);
         climbingRecordRepository.save(newClimbingRecord);
 
+        // 캐싱처리
         String cacheKey = requestDTO.getUserId() + "_monthly_" + YearMonth.from(userDate.getCreatedAt());
         Optional.ofNullable(redisCacheManager.getCache("monthlyRecords"))
                 .ifPresent(cache -> cache.evictIfPresent(cacheKey));
