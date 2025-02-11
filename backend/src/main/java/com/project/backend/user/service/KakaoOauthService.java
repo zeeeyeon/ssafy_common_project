@@ -61,6 +61,7 @@ public class KakaoOauthService {
       return response.getBody();
     } catch (HttpClientErrorException e) {
       log.error("카카오 토큰 요청 에러: {}", e.getResponseBodyAsString());
+      log.info("카카오 토큰 요청 redirect_uri: {}", params.get("redirect_uri"));
       throw e;
     }
   }

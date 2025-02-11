@@ -7,6 +7,7 @@ import com.project.backend.common.response.ResponseCode;
 import com.project.backend.record.entity.ClimbingRecord;
 import com.project.backend.user.dto.request.ConvertRequestDto;
 import com.project.backend.user.dto.request.SignUpRequestDto;
+import com.project.backend.user.dto.request.UserImageRequestDto;
 import com.project.backend.user.dto.request.UserInfoRequestDto;
 import com.project.backend.user.dto.response.UserTierResponseDto;
 import com.project.backend.user.entity.User;
@@ -16,11 +17,14 @@ import com.project.backend.user.service.UserService;
 import com.project.backend.userclimbground.entity.UserClimbGround;
 import com.project.backend.userclimbground.entity.UserClimbGroundMedalEnum;
 import com.project.backend.userclimbground.repository.UserClimbGroundRepository;
+import com.project.backend.video.service.S3UploadService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
@@ -32,6 +36,7 @@ public class UserServiceImpl implements UserService {
   private final UserRepository userRepository;
   private final ClimbGroundRepository climbGroundRepository;
   private final UserClimbGroundRepository userClimbGroundRepository;
+  private final S3UploadService s3UploadService;
   private final BCryptPasswordEncoder passwordEncoder;
 
   public User getUserByUserName(String userName){
@@ -87,7 +92,6 @@ public class UserServiceImpl implements UserService {
     return userRepository.save(findUser);
   }
 
-
   @Override
   public Optional<User> checkEmailDuplication(String email) {
     return userRepository.findByEmail(email);
@@ -98,14 +102,43 @@ public class UserServiceImpl implements UserService {
     return userRepository.findByNickname(nickname);
   }
 
+  @Override
   public User userProfileFindById(Long id) {
     return userRepository.findById(id).orElseThrow(() -> new CustomException(ResponseCode.NOT_FOUND_USER));
   }
 
-  public User updateUserProfileById(Long id, UserInfoRequestDto requestDto) {
+  @Override
+  public void updateUserProfileById(Long id, UserInfoRequestDto requestDto) {
     User findUser = userRepository.findById(id).orElseThrow(() -> new CustomException(ResponseCode.NOT_FOUND_USER));
+    userRepository.save(findUser.setUserInfoRequestDto(requestDto));
+  }
 
-    return userRepository.save(findUser.setUserInfoRquestDto(requestDto));
+  @Override
+  public void updateUserImageById(Long id, MultipartFile image) {
+    User findUser = userRepository.findById(id)
+            .orElseThrow(() -> new CustomException(ResponseCode.NOT_FOUND_USER));
+
+    // 파일 검증: 이미지 파일 타입과 사이즈 체크
+    s3UploadService.checkImageFileTypeOrThrow(image);
+    s3UploadService.checkImageFileSizeOrThrow(image);
+
+    // 고유 파일명 생성 (타임스탬프와 원래 파일명 조합)
+    String originalFilename = image.getOriginalFilename();
+    String fileBaseName = org.apache.commons.io.FilenameUtils.getBaseName(originalFilename);
+    String fileExtension = org.apache.commons.io.FilenameUtils.getExtension(originalFilename);
+    String imageName = "profile_" + System.currentTimeMillis() + "_" + fileBaseName + "." + fileExtension;
+
+    try {
+      // S3에 파일 업로드 후, 업로드된 이미지 URL 획득
+      String imageUrl = s3UploadService.saveImage(image, imageName);
+
+      // User 엔티티의 프로필 이미지 URL 필드를 업데이트
+      findUser.setProfileImageUrl(imageUrl);
+      userRepository.save(findUser);
+    } catch (IOException e) {
+      // 업로드 실패시 커스텀 예외 발생 (ResponseCode는 필요에 따라 추가)
+      throw new CustomException(ResponseCode.IMAGE_UPLOAD_FAILED);
+    }
   }
 
   public UserTierResponseDto userTierFindById(Long id) {

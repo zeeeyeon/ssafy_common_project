@@ -6,7 +6,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -56,14 +55,8 @@ public interface UserDateRepository extends JpaRepository<UserDate, Long> {
             "WHERE uc.user.id = :userId " +
             "AND ud.createdAt >= :startOfDay AND ud.createdAt < :endOfDay " +
             "AND cr.isSuccess = :isSuccess ")
-    List<UserDate> findUserDatesByUserAndClimbGroundAndIsSuccess(Long userId, LocalDateTime startOfDay, LocalDateTime endOfDay, Boolean isSuccess);
-
-//    @Query("SELECT ud FROM UserDate ud " +
-//            "WHERE ud.userClimbGround.user.id = :userId " +
-//            "AND ud.createdAt BETWEEN :startOfDay AND :endOfDay ")
-//    List<UserDate> findUserDatesByUserAndClimbGroundAndIsSuccess(
-//            @Param("userId") Long userId,
-//            @Param("startOfDay") LocalDateTime startOfDay,
-//            @Param("endOfDay") LocalDateTime endOfDay,
-//            boolean isSuccess);
+    List<UserDate> findUserDatesByUserAndClimbGroundAndIsSuccess(@Param("userId")Long userId,
+                                                                 @Param("startOfDay") LocalDateTime startOfDay,
+                                                                 @Param("endOfDay") LocalDateTime endOfDay,
+                                                                 @Param("isSuccess") Boolean isSuccess);
 }

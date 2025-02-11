@@ -36,10 +36,11 @@ public class S3UploadService {
 
     private final AmazonS3 amazonS3;
 
-    private static final long MAX_FILE_SIZE = 1024L * 1024L * 1024L * 10L; // 10GB
-
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
+
+    private static final long MAX_FILE_SIZE = 1024L * 1024L * 1024L * 10L; // 10GB
+    private static final long MAX_IMAGE_SIZE = 1024L * 1024L * 5L; // 10GB
 
     public VideoSaveResponseDTO saveFile(MultipartFile multipartFile, ClimbingRecord climbingRecord) throws IOException {
 
@@ -71,6 +72,30 @@ public class S3UploadService {
         videoRepository.save(newVideo);
 
         return videoSaveResponseDTO;
+    }
+
+    // 이미지 업로드 메서드: MultipartFile과 원하는 파일명을 전달받음
+    public String saveImage(MultipartFile multipartFile, String imageName) throws IOException {
+        ObjectMetadata objectMetadata = new ObjectMetadata();
+        objectMetadata.setContentLength(multipartFile.getSize());
+        objectMetadata.setContentType(multipartFile.getContentType());
+        amazonS3.putObject(bucket, imageName, multipartFile.getInputStream(), objectMetadata);
+        return amazonS3.getUrl(bucket, imageName).toString();
+    }
+
+    // 이미지 파일 타입이 JPEG 혹은 PNG 인지 확인
+    public void checkImageFileTypeOrThrow(MultipartFile file) {
+        String contentType = file.getContentType();
+        if (!(contentType.equals("image/jpeg") || contentType.equals("image/png"))) {
+            throw new CustomException(ResponseCode.INVALID_FILETYPE);
+        }
+    }
+
+    // 이미지 파일 사이즈가 최대 허용 크기를 넘지 않는지 확인
+    public void checkImageFileSizeOrThrow(MultipartFile file) {
+        if (file.getSize() > MAX_IMAGE_SIZE) {
+            throw new CustomException(ResponseCode.FILE_SIZE_EXCEEDED);
+        }
     }
 
     /*

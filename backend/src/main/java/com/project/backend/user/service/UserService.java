@@ -3,11 +3,13 @@ package com.project.backend.user.service;
 import com.project.backend.user.dto.UserTierRequestDto;
 import com.project.backend.user.dto.request.ConvertRequestDto;
 import com.project.backend.user.dto.request.SignUpRequestDto;
+import com.project.backend.user.dto.request.UserImageRequestDto;
 import com.project.backend.user.dto.request.UserInfoRequestDto;
 import com.project.backend.user.dto.response.UserTierResponseDto;
 import com.project.backend.user.entity.User;
 import com.project.backend.userclimbground.entity.UserClimbGroundMedalEnum;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Optional;
 
@@ -21,7 +23,9 @@ public interface UserService {
   // 사용자 ID로 사용자 프로필 조회
   public User userProfileFindById(Long id);
   // 사용자 ID로 사용자 프로필 갱신
-  public User updateUserProfileById(Long id, UserInfoRequestDto requestDto);
+  public void updateUserProfileById(Long id, UserInfoRequestDto requestDto);
+  // 사용자 ID로 사용자 이미지 갱신
+  public void updateUserImageById(Long id, MultipartFile image);
   // 사용자 ID로 티어 조회
   public UserTierResponseDto userTierFindById(Long id);
   // 사용자 티어 갱신
