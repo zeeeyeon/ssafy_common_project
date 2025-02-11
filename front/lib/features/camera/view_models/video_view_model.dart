@@ -1,18 +1,18 @@
 import 'dart:io';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:dio/dio.dart';
-import 'package:video_compress/video_compress.dart';
 import 'package:logger/logger.dart';
 import 'package:kkulkkulk/features/camera/data/repositories/video_repository.dart';
+import 'package:kkulkkulk/features/camera/data/models/video_model.dart';
+import 'package:video_compress/video_compress.dart';
 
 final logger = Logger();
 
 final videoViewModelProvider =
-    StateNotifierProvider<VideoViewModel, AsyncValue<void>>(
+    StateNotifierProvider<VideoViewModel, AsyncValue<VideoResponse?>>(
   (ref) => VideoViewModel(ref.read(videoRepositoryProvider)),
 );
 
-class VideoViewModel extends StateNotifier<AsyncValue<void>> {
+class VideoViewModel extends StateNotifier<AsyncValue<VideoResponse?>> {
   final VideoRepository _repository;
 
   VideoViewModel(this._repository) : super(const AsyncValue.data(null));
@@ -25,21 +25,16 @@ class VideoViewModel extends StateNotifier<AsyncValue<void>> {
     required int holdId,
   }) async {
     state = const AsyncValue.loading();
+
     try {
-      // 파일 확장자 체크
-      final extension = videoFile.path.split('.').last.toLowerCase();
-      if (extension != 'mp4') {
-        throw Exception('MP4 형식의 파일만 업로드 가능합니다.');
-      }
+      logger.d("비디오 업로드 시작", {
+        "color": color,
+        "isSuccess": isSuccess,
+        "userDateId": userDateId,
+        "holdId": holdId,
+      });
 
-      // 원본 파일 크기 체크
-      final originalSize = await videoFile.length();
-      if (originalSize > 10 * 1024 * 1024 * 1024) {
-        // 10GB
-        throw Exception('파일 크기가 10GB를 초과합니다.');
-      }
-
-      // 비디오 압축
+      logger.d("비디오 압축 시작");
       final MediaInfo? mediaInfo = await VideoCompress.compressVideo(
         videoFile.path,
         quality: VideoQuality.MediumQuality,
@@ -51,27 +46,19 @@ class VideoViewModel extends StateNotifier<AsyncValue<void>> {
         throw Exception('비디오 압축 실패');
       }
 
-      // FormData 생성
-      final formData = FormData.fromMap({
-        'userId': 1, // TODO: 실제 사용자 ID로 변경 필요
-        'userDateId': userDateId,
-        'isSuccess': isSuccess,
-        'holdId': holdId,
-        'file': await MultipartFile.fromFile(
-          mediaInfo!.file!.path,
-          filename: '${color}_${DateTime.now().millisecondsSinceEpoch}.mp4',
-        ),
-      });
+      final response = await _repository.uploadVideo(
+        videoFile: mediaInfo!.file!,
+        userDateId: userDateId,
+        holdId: holdId,
+        isSuccess: isSuccess,
+      );
 
-      // 업로드 요청
-      await _repository.uploadVideo(formData);
-
-      // 압축된 임시 파일 삭제
       await mediaInfo.file?.delete();
 
-      state = const AsyncValue.data(null);
+      state = AsyncValue.data(response);
+      logger.d("비디오 업로드 완료", response.toJson());
     } catch (e, stack) {
-      logger.e('비디오 업로드 실패', e, stack);
+      logger.e("비디오 업로드 실패", e, stack);
       state = AsyncValue.error(e, stack);
       rethrow;
     }

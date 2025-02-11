@@ -18,6 +18,13 @@ class AlbumRepository {
   }) async {
     logger.d("앨범 API 호출: userId=$userId, date=$date, isSuccess=$isSuccess");
     try {
+      logger.d("요청 URL: $_path");
+      logger.d("요청 파라미터: ${{
+        'userId': userId,
+        'date': date,
+        'isSuccess': isSuccess,
+      }}");
+
       final response = await _dio.get(
         _path,
         queryParameters: {
@@ -26,10 +33,15 @@ class AlbumRepository {
           'isSuccess': isSuccess,
         },
       );
-      logger.d("앨범 API 응답: ${response.data}");
+
+      logger.d("응답 상태 코드: ${response.statusCode}");
+      logger.d("응답 데이터: ${response.data}");
       return response;
-    } catch (e) {
-      logger.e("앨범 API 오류", e);
+    } catch (e, stack) {
+      logger.e("앨범 API 오류", e, stack);
+      if (e is DioException && e.response != null) {
+        logger.e("에러 응답 데이터: ${e.response?.data}");
+      }
       rethrow;
     }
   }

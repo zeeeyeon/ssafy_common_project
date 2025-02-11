@@ -5,6 +5,7 @@ import 'package:kkulkkulk/features/calendar/screens/calendar_screen.dart';
 import 'package:kkulkkulk/features/calendar/screens/calendar_detail_screen.dart';
 import 'package:kkulkkulk/features/camera/screens/album_screen.dart';
 import 'package:kkulkkulk/features/camera/screens/camera_screen.dart';
+import 'package:kkulkkulk/features/camera/screens/video_player_screen.dart';
 import 'package:kkulkkulk/features/challenge/screens/challenge_screen.dart';
 import 'package:kkulkkulk/features/place/screens/place_screen.dart';
 import 'package:kkulkkulk/features/profile/screens/profile_screen.dart';
@@ -83,10 +84,23 @@ final router = GoRouter(
       ],
     ),
     // 전체 화면으로 표시되는 라우트들
-
     GoRoute(
       path: '/camera',
       builder: (context, state) => const CameraScreen(),
+      parentNavigatorKey: _rootNavigatorKey,
+    ),
+
+    // 비디오 플레이어 라우트도 ShellRoute 밖에 있음
+    GoRoute(
+      path: '/video-player',
+      builder: (context, state) {
+        final videoUrl = state.extra as Map<String, dynamic>;
+        return VideoPlayerScreen(
+          videoUrl['url'],
+          videoUrl['date'],
+          videoUrl['isSuccess'],
+        );
+      },
       parentNavigatorKey: _rootNavigatorKey,
     ),
   ],

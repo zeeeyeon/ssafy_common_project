@@ -11,9 +11,9 @@ class Hold {
 
   factory Hold.fromJson(Map<String, dynamic> json) {
     return Hold(
-      level: json["level"],
-      color: json["color"],
-      id: json["id"],
+      level: json["level"] as String,
+      color: json["color"] as String,
+      id: json["id"] as int,
     );
   }
 
@@ -43,10 +43,12 @@ class VisitLogResponse {
     final content = json['content'] as Map<String, dynamic>;
     final holdsJson = content['holds'] as List;
     return VisitLogResponse(
-      userDateId: content['userDateId'],
-      name: content['name'],
-      holds: holdsJson.map((e) => Hold.fromJson(e)).toList(),
-      newlyCreated: content['newlyCreated'],
+      userDateId: content['userDateId'] as int,
+      name: content['name'] as String,
+      holds: holdsJson
+          .map((e) => Hold.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      newlyCreated: content['newlyCreated'] as bool,
     );
   }
 

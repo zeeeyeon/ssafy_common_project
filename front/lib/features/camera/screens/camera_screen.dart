@@ -8,8 +8,9 @@ import 'package:kkulkkulk/common/utils/color_converter.dart';
 import 'package:kkulkkulk/features/camera/data/models/visit_log_model.dart';
 import 'package:kkulkkulk/features/camera/view_models/visit_log_view_model.dart';
 import 'package:kkulkkulk/features/camera/view_models/video_view_model.dart';
-import 'package:kkulkkulk/common/widgets/layout/custom_app_bar.dart';
 import 'package:logger/logger.dart';
+import 'package:go_router/go_router.dart';
+import 'package:geolocator/geolocator.dart';
 
 final logger = Logger();
 
@@ -21,7 +22,7 @@ class CameraScreen extends ConsumerStatefulWidget {
 }
 
 class _CameraScreenState extends ConsumerState<CameraScreen> {
-  late CameraController _controller;
+  CameraController? _controller;
   bool isRecording = false;
   List<CameraDescription>? cameras;
   Hold? selectedHold;
@@ -33,7 +34,9 @@ class _CameraScreenState extends ConsumerState<CameraScreen> {
   void initState() {
     super.initState();
     _initCamera();
-    _checkVisitLog();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkVisitLog();
+    });
   }
 
   Future<void> _checkVisitLog() async {
@@ -50,7 +53,7 @@ class _CameraScreenState extends ConsumerState<CameraScreen> {
           ResolutionPreset.medium,
           enableAudio: true,
         );
-        await _controller.initialize();
+        await _controller!.initialize();
         setState(() {});
       }
     } catch (e) {
@@ -58,28 +61,157 @@ class _CameraScreenState extends ConsumerState<CameraScreen> {
     }
   }
 
-  Future<void> _requestPermissions() async {
+  Future<bool> _requestPermissions() async {
+    // 카메라, 마이크, 저장소 권한 요청
     await Permission.camera.request();
     await Permission.microphone.request();
     await Permission.storage.request();
+
+    // GPS 서비스 활성화 확인
+    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      if (mounted) {
+        final bool? shouldOpenSettings = await showDialog<bool>(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('GPS 서비스 비활성화'),
+            content:
+                const Text('클라이밍장 위치 확인을 위해 GPS 서비스가 필요합니다.\n설정에서 활성화해주세요.'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: const Text('취소'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(context, true),
+                child: const Text('설정으로 이동'),
+              ),
+            ],
+          ),
+        );
+
+        if (shouldOpenSettings == true) {
+          await Geolocator.openLocationSettings();
+        }
+      }
+      return false;
+    }
+
+    // GPS 권한 확인 및 요청
+    LocationPermission permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('위치 권한이 필요합니다')),
+          );
+        }
+        return false;
+      }
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      if (mounted) {
+        final bool? shouldOpenSettings = await showDialog<bool>(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('위치 권한 거부됨'),
+            content:
+                const Text('클라이밍장 위치 확인을 위해 위치 권한이 필요합니다.\n설정에서 권한을 허용해주세요.'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: const Text('취소'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(context, true),
+                child: const Text('설정으로 이동'),
+              ),
+            ],
+          ),
+        );
+
+        if (shouldOpenSettings == true) {
+          await openAppSettings();
+        }
+      }
+      return false;
+    }
+
+    return true;
   }
 
   @override
   void dispose() {
     _recordingTimer?.cancel();
-    _controller.dispose();
+    _controller?.dispose();
     super.dispose();
   }
 
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      extendBody: true,
+      body: _buildVideoWithOverlay(),
+      bottomNavigationBar: Container(
+        padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.bottomCenter,
+            end: Alignment.topCenter,
+            colors: [
+              Colors.black.withOpacity(0.7),
+              Colors.transparent,
+            ],
+          ),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            IconButton(
+              icon: const Icon(Icons.photo_library,
+                  color: Colors.white, size: 30),
+              onPressed: () {
+                final location = GoRouterState.of(context).uri.toString();
+
+                if (location.contains('/album/camera')) {
+                  context.pop();
+                } else {
+                  context.go('/album');
+                }
+              },
+            ),
+            _buildIOSRecordButton(),
+            GestureDetector(
+              onTap: _showColorPicker,
+              child: Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: selectedHold != null
+                      ? ColorConverter.fromString(selectedHold!.color)
+                      : Colors.white,
+                  shape: BoxShape.circle,
+                  border: Border.all(color: Colors.white, width: 2),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildVideoWithOverlay() {
-    if (!_controller.value.isInitialized) {
+    if (_controller == null || !_controller!.value.isInitialized) {
       return const Center(child: CircularProgressIndicator());
     }
 
     return Stack(
       children: [
         Positioned.fill(
-          child: CameraPreview(_controller),
+          child: CameraPreview(_controller!),
         ),
         Positioned(
           top: 30,
@@ -160,6 +292,7 @@ class _CameraScreenState extends ConsumerState<CameraScreen> {
 
   Future<void> _startRecording() async {
     if (isRecording) return;
+    if (_controller == null) return;
 
     final visitLogState = ref.read(visitLogViewModelProvider);
     if (visitLogState is! AsyncData || visitLogState.value == null) {
@@ -177,7 +310,7 @@ class _CameraScreenState extends ConsumerState<CameraScreen> {
     }
 
     try {
-      await _controller.startVideoRecording();
+      await _controller!.startVideoRecording();
       setState(() => isRecording = true);
       _recordingTimer?.cancel();
       _recordingDuration.value = Duration.zero;
@@ -191,10 +324,10 @@ class _CameraScreenState extends ConsumerState<CameraScreen> {
   }
 
   Future<void> _stopRecording() async {
-    if (!isRecording) return;
+    if (!isRecording || _controller == null) return;
 
     try {
-      final XFile video = await _controller.stopVideoRecording();
+      final XFile video = await _controller!.stopVideoRecording();
       setState(() => isRecording = false);
       _recordingTimer?.cancel();
       _recordingDuration.value = Duration.zero;
@@ -333,55 +466,6 @@ class _CameraScreenState extends ConsumerState<CameraScreen> {
           ),
         );
       },
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: const CustomAppBar(title: '운동 촬영'),
-      extendBodyBehindAppBar: true,
-      body: _buildVideoWithOverlay(),
-      bottomNavigationBar: Container(
-        padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.bottomCenter,
-            end: Alignment.topCenter,
-            colors: [
-              Colors.black.withOpacity(0.7),
-              Colors.transparent,
-            ],
-          ),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            IconButton(
-              icon: const Icon(Icons.photo_library,
-                  color: Colors.white, size: 30),
-              onPressed: () {
-                Navigator.pop(context);
-              },
-            ),
-            _buildIOSRecordButton(),
-            GestureDetector(
-              onTap: _showColorPicker,
-              child: Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: selectedHold != null
-                      ? ColorConverter.fromString(selectedHold!.color)
-                      : Colors.white,
-                  shape: BoxShape.circle,
-                  border: Border.all(color: Colors.white, width: 2),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }
