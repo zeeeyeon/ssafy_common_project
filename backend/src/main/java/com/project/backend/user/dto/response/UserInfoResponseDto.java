@@ -13,11 +13,13 @@ public class UserInfoResponseDto {
     private float height;
     private float reach;
     private LocalDateTime startDate;
+    private String profileImageUrl;
 
     public UserInfoResponseDto(User user) {
         this.username = user.getUsername();
         this.height = user.getHeight();
         this.reach = user.getReach();
         this.startDate = user.getStartDate();
+        this.profileImageUrl = user.getProfileImageUrl();
     }
 }

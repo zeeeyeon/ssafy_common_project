@@ -6,8 +6,8 @@ import java.time.LocalDateTime;
 
 @Data
 public class UserInfoRequestDto {
-    private String username;
-    private float height;
-    private float reach;
+    private String nickname;
+    private Float height;
+    private Float reach;
     private LocalDateTime startDate;
 }
