@@ -84,13 +84,15 @@ public class User {
 
 
     @Builder
-    public User(Long id, String username, String email, String nickname, int score, UserTierEnum tier) {
+    public User(Long id, String username, String email, String nickname, int score, UserTierEnum tier, Float height, Float reach) {
         this.id = id;
         this.username = username;
         this.email = email;
         this.nickname = nickname;
         this.score = score;
         this.tier = tier;
+        this.height = height;
+        this.reach = reach;
     }
 
     public User setUserInfoRequestDto(UserInfoRequestDto requestDto) {
