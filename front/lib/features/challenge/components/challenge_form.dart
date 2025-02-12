@@ -107,14 +107,14 @@ class _ChallengeFormState extends State<ChallengeForm> {
       final response = await _challengeRepository.unlockChallenge(UnlockChallengeModel(
           userId: userId, 
           climbGroundId: climbGroundId, 
-          // latitude: 37.650919453,
-          // longitude: 126.778892137,
+          // latitude: 37.497598695,
+          // longitude: 127.032002150,
           latitude: position.latitude, 
           longitude: position.longitude
         ));
 
       if(response.statusCode == 201) {
-        // context.push('/challenge/detail/${unlockChallengeModel.climbGroundId}');
+        context.push('/challenge/detail/${climbGroundId}');
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('해당 클라이밍장이 성공적으로 해금되었습니다'))
         );
