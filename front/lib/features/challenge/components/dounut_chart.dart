@@ -7,14 +7,16 @@ class DonutChart extends StatefulWidget {
   final double strokeWidth;
   final double total;
   final double value;
+  final Color progressColor;  // 진행 색상을 받는 파라미터
   final Widget? child;
 
   DonutChart({
     super.key,
-    this.radius = 100,
+    required this.radius,
     this.strokeWidth = 20,
     required this.total,
     required this.value,
+    required this.progressColor,  // color 파라미터 추가
     this.child,
   });
 
@@ -23,10 +25,9 @@ class DonutChart extends StatefulWidget {
 }
 
 class _DonutChartState extends State<DonutChart> with SingleTickerProviderStateMixin {
-  
   late AnimationController _controller;
   late Animation<double> _valueAnimation;
-  
+
   @override
   void initState() {
     super.initState();
@@ -66,6 +67,7 @@ class _DonutChartState extends State<DonutChart> with SingleTickerProviderStateM
       painter: _DonutChartProgressBar(
         strokeWidth: widget.strokeWidth,
         valueProgress: _valueAnimation.value,
+        progressColor: widget.progressColor,  // 진행 색상 전달
       ),
       child: widget.child,  // 추가적인 자식 위젯을 여기에 삽입할 수 있음
     );
@@ -75,8 +77,9 @@ class _DonutChartState extends State<DonutChart> with SingleTickerProviderStateM
 class _DonutChartProgressBar extends CustomPainter {
   final double strokeWidth;
   final double valueProgress;
+  final Color progressColor;  // 색상을 받는 파라미터
 
-  _DonutChartProgressBar({required this.strokeWidth, required this.valueProgress});
+  _DonutChartProgressBar({required this.strokeWidth, required this.valueProgress, required this.progressColor});
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -87,7 +90,7 @@ class _DonutChartProgressBar extends CustomPainter {
       ..strokeCap = StrokeCap.round;
     
     Paint valuePaint = Paint()
-      ..color = Color(0xFF7373C9)  // 진행 표시 색상
+      ..color = progressColor  // 진행 색상
       ..strokeWidth = strokeWidth
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round;

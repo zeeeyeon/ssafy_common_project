@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:go_router/go_router.dart';
+import 'package:kkulkkulk/common/gps/gps.dart';
 import 'package:kkulkkulk/features/place/data/models/place_detail_model.dart';
 import 'package:kkulkkulk/features/place/data/repositories/place_repository.dart';
 import 'package:kkulkkulk/common/widgets/layout/custom_app_bar.dart'; // CustomAppBar 경로 수정
@@ -99,20 +101,50 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
                               )
                             ],
                           ),
-                          // SizedBox(height: 8),
                           Row(
                             children: [
                               FaIcon(
                                 FontAwesomeIcons.instagram,
                                 color: Colors.pinkAccent,
                               ),
-                              SizedBox(width: 8.0),
+                              SizedBox(width: 12.0),
                               TextButton(
                                 onPressed: () async {
                                   final snsUrl = Uri.parse(place.snsUrl);
                                   await launchUrl(snsUrl);
                                 },
                                 child: Text('인스타그램',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold, // 글자 두께를 굵게 설정
+                                ),),
+                                style: TextButton.styleFrom(
+                                  foregroundColor: Colors.black, // 글자 색상 설정
+                                ),
+                              ),
+                            ],
+                          ),
+                          Row(
+                            children: [
+                              FaIcon(
+                                FontAwesomeIcons.mapLocation,
+                                color: Colors.green,
+                              ),
+                              // SizedBox(width: 4.0),
+                              TextButton(
+                                onPressed: () async {
+                                  Position position = await determinePosition();
+                                  String naverAppUrl = "intent://place?lat=${place.latitude}&lng=${place.longitude}&name=${place.name}&appname=climb#Intent;scheme=nmap;action=android.intent.action.VIEW;category=android.intent.category.BROWSABLE;package=com.nhn.android.nmap;end";
+                                  String naverWebUrl = "https://map.naver.com/v5/search/${place.name}";
+                                  try {
+                                    bool launched = await launchUrl(Uri.parse(naverAppUrl));
+                                    if (!launched) {
+                                      await launchUrl(Uri.parse(naverWebUrl), mode: LaunchMode.externalApplication);
+                                    }
+                                  } catch (e) {
+                                    await launchUrl(Uri.parse(naverWebUrl), mode: LaunchMode.externalApplication);
+                                  }
+                                },
+                                child: Text('지도',
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold, // 글자 두께를 굵게 설정
                                 ),),
