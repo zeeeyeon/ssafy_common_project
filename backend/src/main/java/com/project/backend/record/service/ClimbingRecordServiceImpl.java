@@ -9,8 +9,10 @@ import com.project.backend.record.entity.ClimbingRecord;
 import com.project.backend.record.repository.ClimbingRecordRepository;
 import com.project.backend.user.entity.User;
 import com.project.backend.user.repository.jpa.UserRepository;
+import com.project.backend.userdate.dto.response.MonthlyClimbingRecordResponse;
 import com.project.backend.userdate.entity.UserDate;
 import com.project.backend.userdate.repository.UserDateRepository;
+import com.project.backend.userdate.service.UserDateService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +31,7 @@ public class ClimbingRecordServiceImpl implements ClimbingRecordService {
     private final UserDateRepository userDateRepository;
     private final ClimbingRecordRepository climbingRecordRepository;
     private final CacheManager redisCacheManager;
+    private final UserDateService userDateService;
 
     @Override
     @Transactional
@@ -48,9 +51,14 @@ public class ClimbingRecordServiceImpl implements ClimbingRecordService {
         climbingRecordRepository.save(newClimbingRecord);
 
         // 캐싱처리
-//        String cacheKey = requestDTO.getUserId() + "_monthly_" + YearMonth.from(userDate.getCreatedAt());
-//        Optional.ofNullable(redisCacheManager.getCache("monthlyRecords"))
-//                .ifPresent(cache -> cache.evictIfPresent(cacheKey));
+        String cacheKey = userId + "_monthly_" + YearMonth.from(userDate.getCreatedAt());
+
+        Optional.ofNullable(redisCacheManager.getCache("monthlyRecords"))
+                .ifPresent(cache -> cache.evictIfPresent(cacheKey));
+
+        MonthlyClimbingRecordResponse updatedRecords = userDateService.getMonthlyRecords(YearMonth.from(userDate.getCreatedAt()), userId);
+        Optional.ofNullable(redisCacheManager.getCache("monthlyRecords"))
+                .ifPresent(cache -> cache.put(cacheKey, updatedRecords));
 
         return Optional.of(newClimbingRecord);
 

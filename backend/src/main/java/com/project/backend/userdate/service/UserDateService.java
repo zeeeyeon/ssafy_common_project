@@ -115,7 +115,7 @@ public class UserDateService {
                 .build();
     }
 
-//    @Cacheable(value = "monthlyRecords", key = "#userId + '_' + 'monthly_' + #selectedMonth")
+    @Cacheable(value = "monthlyRecords", key = "#userId + '_' + 'monthly_' + #selectedMonth")
     public MonthlyClimbingRecordResponse getMonthlyRecords(YearMonth selectedMonth, Long userId) {
         int year = selectedMonth.getYear();
         int month = selectedMonth.getMonthValue();
