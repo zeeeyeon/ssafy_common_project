@@ -36,6 +36,16 @@ class ProfileViewModel extends StateNotifier<AsyncValue<UserProfile>> {
       state = AsyncValue.error(e, stackTrace);
     }
   }
+
+  /// 🔥 팔길이 측정 요청
+  Future<double> measureArmSpan(String imagePath, double height) async {
+    try {
+      final armSpan = await _repository.measureArmSpan(imagePath, height);
+      return armSpan;
+    } catch (e) {
+      throw Exception("팔길이 측정 실패");
+    }
+  }
 }
 
 /// ✅ ProfileRepository Provider
