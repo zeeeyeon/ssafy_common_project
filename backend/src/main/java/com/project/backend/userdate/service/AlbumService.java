@@ -28,36 +28,23 @@ public class AlbumService {
         LocalDateTime startOfDayLDT = startOfDay.toLocalDateTime();
         LocalDateTime endOfDayLDT = endOfDay.toLocalDateTime();
 
-        log.info("Start" + startOfDayLDT);
-        log.info("End" + endOfDayLDT);
-
-        List<UserDate> userDates = userDateRepository.findUserDatesByUserAndClimbGroundAndIsSuccess(userId, startOfDayLDT, endOfDayLDT, isSuccess);
-
-        userDates.forEach(ud -> {
-            log.info("afterTimeCheck" + ud.getCreatedAt());
-            ud.getClimbingRecordList().forEach(cr -> {
-            });
-        });
-
-        AlbumResponseDTO albumResponseDTO = new AlbumResponseDTO(date, isSuccess);
-        List<AlbumObjcet> albumObjcetList = userDates.stream()
-                .flatMap(userDate -> userDate.getClimbingRecordList().stream().map(climbingRecord -> {
-
-                    return new AlbumObjcet(
-                            userDate.getUserClimbGround().getClimbGround().getName(),
-                            climbingRecord.getHold().getColor(),
-                            climbingRecord.getHold().getLevel(),
-                            climbingRecord.getVideo().getUrl(),
-                            climbingRecord.getVideo().getThumbnail()
-                    );
-                }))
-                .collect(Collectors.toList());
+        AlbumResponseDTO albumResponseDTO = new AlbumResponseDTO(date,isSuccess);
+        List<AlbumObjcet> albumObjcetList = userDateRepository.findUserDatesByUserAndClimbGroundAndIsSuccess(userId, startOfDayLDT, endOfDayLDT, isSuccess)
+                .stream()
+                .flatMap(userDate ->  userDate.getClimbingRecordList().stream().map(
+                            climbingRecord ->
+                                new AlbumObjcet(
+                                        userDate.getUserClimbGround().getClimbGround().getName(),
+                                        climbingRecord.getHold().getColor(),
+                                        climbingRecord.getHold().getLevel(),
+                                        climbingRecord.getVideo().getUrl(),
+                                        climbingRecord.getVideo().getThumbnail()
+                                ))).collect(Collectors.toList());
 
         List<AlbumObjcet> sortedAlbumObjcetList = albumObjcetList.stream()
                 .sorted(Comparator.comparing(AlbumObjcet::getLevel))
                 .collect(Collectors.toList());
         albumResponseDTO.setAlbumObject(sortedAlbumObjcetList);
-
         return albumResponseDTO;
     }
 }
