@@ -13,6 +13,6 @@ public class UserDateCheckAndAddLocationRequestDTO {
 //    private Long userId;
     private BigDecimal latitude;
     private BigDecimal longitude;
-    private LocalDate date;
+//    private LocalDate date;
 
 }
