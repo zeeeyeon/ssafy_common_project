@@ -32,13 +32,13 @@ public class ClimbingRecordServiceImpl implements ClimbingRecordService {
 
     @Override
     @Transactional
-    public Optional<ClimbingRecord> saveRecord(RecordSaveRequestDTO requestDTO){
+    public Optional<ClimbingRecord> saveRecord(Long userId ,RecordSaveRequestDTO requestDTO){
         ClimbingRecord newClimbingRecord = new ClimbingRecord();
         // Hold, User, UserDate 객체를 데이터베이스에서 찾고, 존재하지 않을 경우 예외 발생
         Hold hold = holdRepository.findById(requestDTO.getHoldId())
                 .orElseThrow(() -> new CustomException(ResponseCode.BAD_REQUEST));
-        User user = userRepository.findById(requestDTO.getUserId())
-                .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + requestDTO.getUserId()));
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + userId));
         UserDate userDate = userDateRepository.findById(requestDTO.getUserDateId())
                 .orElseThrow(() -> new EntityNotFoundException("UserDate not found with id: " + requestDTO.getUserDateId()));
         newClimbingRecord.setSuccess(requestDTO.getIsSuccess());
