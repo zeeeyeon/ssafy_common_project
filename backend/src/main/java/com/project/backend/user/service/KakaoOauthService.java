@@ -36,6 +36,7 @@ public class KakaoOauthService {
   private static final String USER_INFO_URL = "https://kapi.kakao.com/v2/user/me";
 
   public String getAuthorizationUrl() {
+    log.info("요청 확인");
     return UriComponentsBuilder.fromHttpUrl(AUTHORIZATION_URL)
             .queryParam("client_id", clientId)
             .queryParam("redirect_uri", redirectUri)
