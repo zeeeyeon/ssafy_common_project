@@ -15,7 +15,7 @@ import static com.project.backend.common.response.Response.*;
 import static com.project.backend.common.response.ResponseCode.GET_CLIMB_GROUND_3D;
 
 @RestController
-@RequestMapping("/api/climbgound/glb")
+@RequestMapping("/api/climbground/glb")
 @RequiredArgsConstructor
 public class GlbFileController {
 
