@@ -5,6 +5,7 @@ import com.project.backend.user.entity.UserTierEnum;
 import lombok.Data;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
 
@@ -33,21 +34,12 @@ public class UserProfileResponseDto {
 
     this.profileImageUrl = user.getProfileImageUrl();
     // D-day calculation with null check
-    calculateDday(String.valueOf(user.getStartDate()));
+    this.Dday = calculateDday(String.valueOf(user.getStartDate()));
   }
 
-  private void calculateDday(String startDateStr) {
-    if (startDateStr == null || startDateStr.trim().isEmpty()) {
-      this.Dday = 0;
-      return;
-    }
-
-    try {
-      LocalDate startDate = LocalDate.parse(startDateStr);
-      LocalDate currentDate = LocalDate.now();
-      this.Dday = (int) ChronoUnit.DAYS.between(startDate, currentDate);
-    } catch (DateTimeParseException e) {
-      this.Dday = 0;
-    }
+  private int calculateDday(String startDateStr) {
+    LocalDateTime startDate = LocalDateTime.parse(startDateStr);
+    LocalDateTime currentDate = LocalDateTime.now();
+    return (int) ChronoUnit.DAYS.between(startDate, currentDate);
   }
 }
