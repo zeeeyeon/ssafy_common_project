@@ -9,9 +9,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
+import java.time.*;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -24,13 +22,14 @@ public class AlbumService {
     private final UserDateRepository userDateRepository;
 
     public AlbumResponseDTO getAlbum(Long userId, LocalDate date, Boolean isSuccess) {
-        LocalDateTime startOfDay = date.atStartOfDay();
-        LocalDateTime endOfDay = date.atTime(LocalTime.MAX);
-        log.info("Start of day: " + startOfDay);
-        log.info("End of day: " + endOfDay);
+        ZonedDateTime startOfDay = date.atStartOfDay(ZoneId.of("Asia/Seoul"));
+        ZonedDateTime endOfDay = date.atTime(LocalTime.MAX).atZone(ZoneId.of("Asia/Seoul"));
+
+        LocalDateTime startOfDayLDT = startOfDay.toLocalDateTime();
+        LocalDateTime endOfDayLDT = endOfDay.toLocalDateTime();
 
         AlbumResponseDTO albumResponseDTO = new AlbumResponseDTO(date,isSuccess);
-        List<AlbumObjcet> albumObjcetList = userDateRepository.findUserDatesByUserAndClimbGroundAndIsSuccess(userId, startOfDay,endOfDay, isSuccess)
+        List<AlbumObjcet> albumObjcetList = userDateRepository.findUserDatesByUserAndClimbGroundAndIsSuccess(userId, startOfDayLDT, endOfDayLDT, isSuccess)
                 .stream()
                 .flatMap(userDate ->  userDate.getClimbingRecordList().stream().map(
                             climbingRecord ->

@@ -1,12 +1,14 @@
 package com.project.backend.userdate.controller;
 
 import com.project.backend.common.response.Response;
+import com.project.backend.user.auth.CustomUserDetails;
 import com.project.backend.userdate.dto.response.AlbumResponseDTO;
 import com.project.backend.userdate.service.AlbumService;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -26,10 +28,11 @@ public class AlbumController {
 
     @GetMapping("/daily")
     ResponseEntity<?> getAlbumDaily(
-            @RequestParam(name = "userId") Long userId,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestParam(name = "date") LocalDate date,
             @RequestParam(name = "isSuccess") Boolean isSuccess
     ) {
+        Long userId = userDetails.getUser().getId();
         AlbumResponseDTO responseDTO= albumService.getAlbum(userId,date, isSuccess);
 
         if(responseDTO.getAlbumObject().isEmpty()) {
