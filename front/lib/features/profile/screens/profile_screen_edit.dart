@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:kkulkkulk/features/profile/data/models/profile_model.dart';
 import 'package:kkulkkulk/features/profile/view_models/profile_view_model.dart';
 import 'package:table_calendar/table_calendar.dart';
+import 'camera_screen.dart';
 
 class ProfileScreenEdit extends ConsumerStatefulWidget {
   const ProfileScreenEdit({super.key});
@@ -78,7 +79,8 @@ class _ProfileScreenEditState extends ConsumerState<ProfileScreenEdit> {
             const SizedBox(height: 24),
             _buildBodyMetricsInput(),
             const SizedBox(height: 16),
-            _buildMeasureButton(), // 🔥 측정 버튼 추가
+            _buildMeasureButton(context,
+                double.tryParse(_heightController.text) ?? 0.0) // 🔥 측정 버튼 추가
           ],
         ),
       ),
@@ -206,16 +208,11 @@ class _ProfileScreenEditState extends ConsumerState<ProfileScreenEdit> {
   }
 
   /// 🔹 **측정 버튼 추가**
-  Widget _buildMeasureButton() {
+  Widget _buildMeasureButton(BuildContext context, double height) {
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton(
-        onPressed: () {
-          // TODO: 측정 기능 추가 시 화면 이동
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("측정 기능이 준비 중입니다.")),
-          );
-        },
+        onPressed: () => _openCameraScreen(context),
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.black,
           padding: const EdgeInsets.symmetric(vertical: 14.0),
@@ -226,5 +223,46 @@ class _ProfileScreenEditState extends ConsumerState<ProfileScreenEdit> {
         ),
       ),
     );
+  }
+
+  /// 🔥 카메라 화면 열기
+  void _openCameraScreen(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => CameraScreen(
+          onImageCaptured: (imagePath) {
+            _sendImageToServer(imagePath);
+          },
+        ),
+      ),
+    );
+  }
+
+  /// 🔥 서버에 이미지 전송 & 팔길이 응답 받기
+  Future<void> _sendImageToServer(String imagePath) async {
+    final double? height = double.tryParse(_heightController.text);
+    if (height == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("키를 입력한 후 측정을 진행해주세요.")),
+      );
+      return;
+    }
+
+    try {
+      // 서버 요청 (height 값과 함께 이미지 전송)
+      final newArmSpan = await ref
+          .read(profileProvider.notifier)
+          .measureArmSpan(imagePath, height);
+
+      setState(() {
+        _armSpanController.text = newArmSpan.toString();
+      });
+    } catch (e) {
+      debugPrint("❌ 팔길이 측정 실패: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("팔길이 측정에 실패했습니다.")),
+      );
+    }
   }
 }

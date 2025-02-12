@@ -48,6 +48,32 @@ class ProfileRepository {
     }
   }
 
+  /// ✅ 팔길이 측정 요청
+  Future<double> measureArmSpan(String imagePath, double height) async {
+    try {
+      FormData formData = FormData.fromMap({
+        "height": height,
+        "image":
+            await MultipartFile.fromFile(imagePath, filename: "arm_image.jpg"),
+      });
+
+      final response = await _dioClient.dio.post(
+        "/fastapi/user/wingspan",
+        data: formData,
+        options: Options(headers: _authHeaders),
+      );
+
+      if (response.statusCode == 200) {
+        return response.data["armSpan"] ?? 0.0; // 팔길이 반환
+      } else {
+        throw Exception("팔길이 측정 실패: ${response.data}");
+      }
+    } catch (e) {
+      debugPrint("❌ 팔길이 측정 요청 실패: $e");
+      throw Exception("팔길이 측정 실패");
+    }
+  }
+
   /// ✅ 공통 인증 헤더 (Bearer Token)
   Map<String, String> get _authHeaders => {
         'Authorization':
