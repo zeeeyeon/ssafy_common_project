@@ -58,6 +58,7 @@ public enum ResponseCode {
 
     GET_DAILY_RECORD(successCode(), HttpStatus.OK, "해당 날짜의 클라이밍 기록이 조회되었습니다."),
     GET_MONTHLY_RECORD(successCode(), HttpStatus.OK, "한달 클라이밍 기록이 조회되었습니다."),
+    NOT_FOUND_USER_DATE(404, HttpStatus.NOT_FOUND, "사용자의 날짜 기록이 존재하지 않습니다."),
 
     POST_UNLUCK_CLIMB_GROUND(201,HttpStatus.CREATED,"클라이밍장 해금에 성공했습니다"),
     ALEADY_UNLUCKED(208, HttpStatus.ALREADY_REPORTED,"이미 해금된 클라이밍장입니다."),

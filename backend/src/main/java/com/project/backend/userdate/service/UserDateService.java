@@ -34,6 +34,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.project.backend.common.response.ResponseCode.NOT_FOUND_CLIMB_GROUND_OR_USER;
+import static com.project.backend.common.response.ResponseCode.NOT_FOUND_USER_DATE;
 
 @Service
 @RequiredArgsConstructor
@@ -48,61 +49,21 @@ public class UserDateService {
 
     public DailyClimbingRecordResponse getDailyRecord(LocalDate selectedDate, Long userId) {
 
-        // baseEntity, LocalDateTime 으로 설정되어있어서
         LocalDateTime startOfDay = selectedDate.atStartOfDay();
         LocalDateTime endOfDay = selectedDate.atTime(LocalTime.MAX);
 
-        // 해당 날짜 기록이 존재하는지 확인
-        Optional<UserDate> userDate = userDateRepository.findByDateAndUserId(startOfDay, endOfDay, userId);
-        if (!userDate.isPresent()) {
-            throw new CustomException(NOT_FOUND_CLIMB_GROUND_OR_USER);
-        }
+        UserDate userDate = getUserDate(startOfDay, endOfDay, userId);
+        String climbingGround = userDate.getUserClimbGround().getClimbGround().getName();
 
-        // 클라이밍장 이름
-        String climbingGround = userDate.get().getUserClimbGround().getClimbGround().getName();
+        int visitCount = getVisitCount(startOfDay, endOfDay, userDate);
 
-        // 해당 클라이밍장 방문 횟수
-        int visitCount = userDateRepository.countVisits(startOfDay, endOfDay, userDate.get().getUserClimbGround().getClimbGround().getId());
+        Set<ClimbingRecord> climbingRecords = userDate.getClimbingRecordList();
+        long successCount = getSuccessCount(climbingRecords);
+        double completionRate = calculateCompletionRate(climbingRecords, successCount);
 
-        // 완등 횟수
-        Set<ClimbingRecord> climbingRecords = userDate.get().getClimbingRecordList();
-        int totalCount = climbingRecords.size();
-        long successCount = climbingRecords.stream()
-                .filter(ClimbingRecord::isSuccess)
-                .count();
-
-        // 완등률
-        double completionRate = totalCount > 0 ? (double) successCount / totalCount * 100 : 0;
-
-        // 클라이밍장 난이도
-        // 클라이밍장 홀드 정보 조회
-        Long climbingHoldGround = userDate.get().getUserClimbGround().getClimbGround().getId();
-        List<HoldColorLevelDto> holdColorLevelInfo = holdRepository.findHoldColorLevelByClimbGroundId(climbingHoldGround);
-
-        Map<HoldColorEnum, HoldLevelEnum> holdColorLevel = holdColorLevelInfo.stream()
-                .sorted(Comparator.comparing(dto -> dto.getLevel().getValue()))
-                .collect(Collectors.toMap(
-                        HoldColorLevelDto::getColor,
-                        HoldColorLevelDto::getLevel,
-                        (existing, replacement) -> existing,
-                        LinkedHashMap::new
-                ));
-
-        // 해당 난이도 완등률
-        // 색상별 시도 횟수
-        Map<HoldColorEnum, Long> colorAttempts = climbingRecords.stream()
-                .collect(Collectors.groupingBy(
-                        record -> record.getHold().getColor(),
-                        Collectors.counting()
-                ));
-
-        // 색상별 성공 횟수
-        Map<HoldColorEnum, Long> colorSuccesses = climbingRecords.stream()
-                .filter(ClimbingRecord::isSuccess)
-                .collect(Collectors.groupingBy(
-                        record -> record.getHold().getColor(),
-                        Collectors.counting()
-                ));
+        Map<HoldColorEnum, HoldLevelEnum> holdColorLevel = getHoldColorLevel(userDate);
+        Map<HoldColorEnum, Long> colorAttempts = getColorAttempts(climbingRecords);
+        Map<HoldColorEnum, Long> colorSuccesses = getColorSuccesses(climbingRecords);
 
         return DailyClimbingRecordResponse.builder()
                 .climbGroundName(climbingGround)
@@ -113,6 +74,64 @@ public class UserDateService {
                 .colorAttempts(colorAttempts)
                 .colorSuccesses(colorSuccesses)
                 .build();
+    }
+
+    // 해당 날짜 기록이 존재하는지 확인
+    private UserDate getUserDate(LocalDateTime startOfDay, LocalDateTime endOfDay, Long userId) {
+        return userDateRepository.findByDateAndUserId(startOfDay, endOfDay, userId)
+                .orElseThrow(() -> new CustomException(NOT_FOUND_USER_DATE));
+    }
+
+    // 해당 클라이밍장 방문 횟수
+    private int getVisitCount(LocalDateTime startOfDay, LocalDateTime endOfDay, UserDate userDate) {
+        return userDateRepository.countVisits(startOfDay, endOfDay, userDate.getUserClimbGround().getClimbGround().getId());
+    }
+
+    // 완등 횟수
+    private long getSuccessCount(Set<ClimbingRecord> climbingRecords) {
+        return climbingRecords.stream()
+                .filter(ClimbingRecord::isSuccess)
+                .count();
+    }
+
+    // 완등률
+    private double calculateCompletionRate(Set<ClimbingRecord> climbingRecords, long successCount) {
+        int totalCount = climbingRecords.size();
+        return totalCount > 0 ? (double) successCount / totalCount * 100 : 0;
+    }
+
+    // 클라이밍장 난이도 정보 매핑
+    private Map<HoldColorEnum, HoldLevelEnum> getHoldColorLevel(UserDate userDate) {
+        Long climbingHoldGround = userDate.getUserClimbGround().getClimbGround().getId();
+        List<HoldColorLevelDto> holdColorLevelInfo = holdRepository.findHoldColorLevelByClimbGroundId(climbingHoldGround);
+
+        return holdColorLevelInfo.stream()
+                .sorted(Comparator.comparing(dto -> dto.getLevel().getValue()))
+                .collect(Collectors.toMap(
+                        HoldColorLevelDto::getColor,
+                        HoldColorLevelDto::getLevel,
+                        (existing, replacement) -> existing,
+                        LinkedHashMap::new
+                ));
+    }
+
+    // 색상별 시도 횟수
+    private Map<HoldColorEnum, Long> getColorAttempts(Set<ClimbingRecord> climbingRecords) {
+        return climbingRecords.stream()
+                .collect(Collectors.groupingBy(
+                        record -> record.getHold().getColor(),
+                        Collectors.counting()
+                ));
+    }
+
+    //색상별 성공 횟수
+    private Map<HoldColorEnum, Long> getColorSuccesses(Set<ClimbingRecord> climbingRecords) {
+        return climbingRecords.stream()
+                .filter(ClimbingRecord::isSuccess)
+                .collect(Collectors.groupingBy(
+                        record -> record.getHold().getColor(),
+                        Collectors.counting()
+                ));
     }
 
     @Cacheable(value = "monthlyRecords", key = "#userId + '_' + 'monthly_' + #selectedMonth")
@@ -244,6 +263,4 @@ public class UserDateService {
 
         return responseDTO;
     }
-
-
 }
