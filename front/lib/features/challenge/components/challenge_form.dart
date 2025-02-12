@@ -297,10 +297,18 @@ class _ChallengeFormState extends State<ChallengeForm> {
                         ),
                       ),
                       // 장소 ID 표시
+                      // Padding(
+                      //   padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                      //   child: Text(
+                      //     "장소 ID: ${place.climbGroundId}",
+                      //     style: TextStyle(fontSize: 14, color: Colors.grey),
+                      //   ),
+                      // ),
+                      // 주소 표시
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 8.0),
                         child: Text(
-                          "장소 ID: ${place.climbGroundId}",
+                          place.address ?? "주소 정보 없음",
                           style: TextStyle(fontSize: 14, color: Colors.grey),
                         ),
                       ),
@@ -308,15 +316,7 @@ class _ChallengeFormState extends State<ChallengeForm> {
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 8.0),
                         child: Text(
-                          "장소 상태: ${place.locked ? '잠김' : '열림'} ${place.locked}",
-                          style: TextStyle(fontSize: 14, color: Colors.grey),
-                        ),
-                      ),
-                      // 주소 표시
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                        child: Text(
-                          place.address ?? "주소 정보 없음",
+                          "해금 상태: ${place.locked ? '잠김' : '열림'}",
                           style: TextStyle(fontSize: 14, color: Colors.grey),
                         ),
                       ),
