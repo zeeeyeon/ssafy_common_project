@@ -8,10 +8,12 @@ import com.project.backend.record.entity.ClimbingRecord;
 import com.project.backend.record.service.ClimbingRecordService;
 import com.project.backend.record.service.ClimbingRecordServiceImpl;
 import com.project.backend.record.service.VideoUploadService;
+import com.project.backend.user.auth.CustomUserDetails;
 import com.project.backend.video.dto.responseDTO.VideoSaveResponseDTO;
 import com.project.backend.video.service.S3UploadService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -30,8 +32,9 @@ public class RecordController {
     private final S3UploadService s3UploadService;
 
     @PostMapping("/save")
-    public ResponseEntity<?> saveRecord(@ModelAttribute RecordSaveRequestDTO requestDTO) {
+    public ResponseEntity<?> saveRecord(@AuthenticationPrincipal CustomUserDetails userDetails ,@ModelAttribute RecordSaveRequestDTO requestDTO) {
 
+        Long userId = userDetails.getUser().getId();
         s3UploadService.checkFileTypeOrThrow(requestDTO.getFile()); // 파일 타입 체크
         s3UploadService.checkFileSizeOrThrow(requestDTO.getFile()); // 파일 크기 체크
 
@@ -40,7 +43,7 @@ public class RecordController {
             throw new CustomException(ResponseCode.EMPTY_FILE);
         }
 
-        Optional<ClimbingRecord> optionalClimbingRecord = climbingRecordService.saveRecord(requestDTO); // 기록부터 일단 저장
+        Optional<ClimbingRecord> optionalClimbingRecord = climbingRecordService.saveRecord(userId,requestDTO); // 기록부터 일단 저장
         ClimbingRecord climbingRecord;
 
         if (optionalClimbingRecord.isPresent()) {

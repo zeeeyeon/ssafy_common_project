@@ -10,7 +10,7 @@ import java.time.LocalDate;
 @Setter
 public class UserDateCheckAndAddLocationRequestDTO {
 
-    private Long userId;
+//    private Long userId;
     private BigDecimal latitude;
     private BigDecimal longitude;
     private LocalDate date;
