@@ -12,8 +12,8 @@ class DioClient {
     dio = Dio(
       BaseOptions(
         baseUrl: 'https://i12e206.p.ssafy.io', // API 서버 URL
-        connectTimeout: const Duration(seconds: 5),
-        receiveTimeout: const Duration(seconds: 3),
+        connectTimeout: const Duration(seconds: 10),
+        receiveTimeout: const Duration(seconds: 10),
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',

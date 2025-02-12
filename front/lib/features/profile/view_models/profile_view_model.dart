@@ -22,12 +22,13 @@ class ProfileViewModel extends StateNotifier<AsyncValue<UserProfile>> {
     }
   }
 
-  /// ✅ 프로필 정보 업데이트
+  /// ✅ 프로필 정보 업데이트 후 최신 프로필 다시 불러오기
   Future<void> updateUserProfile(UserProfile updatedProfile) async {
     try {
       await _repository.updateUserProfile(updatedProfile);
+
+      // ✅ 프로필 수정 후, 다시 조회하여 최신 데이터 반영
       await _loadUserProfile();
-      state = AsyncValue.data(updatedProfile);
     } catch (e) {
       state = AsyncValue.error(e, StackTrace.current);
     }
