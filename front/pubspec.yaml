@@ -83,6 +83,10 @@ flutter:
   assets:
     - assets/fonts/
     - assets/oauth/
+    - assets/challenge/GOLD.png
+    - assets/challenge/SILVER.png
+    - assets/challenge/BRONZE.png
+    - assets/challenge/NONE.png
 
   fonts:
     - family: Pretendard
