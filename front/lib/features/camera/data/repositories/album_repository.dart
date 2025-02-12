@@ -12,15 +12,13 @@ class AlbumRepository {
   AlbumRepository() : _dio = DioClient().dio;
 
   Future<Response> getAlbums({
-    required int userId,
     required String date,
     required bool isSuccess,
   }) async {
-    logger.d("앨범 API 호출: userId=$userId, date=$date, isSuccess=$isSuccess");
+    logger.d("앨범 API 호출: date=$date, isSuccess=$isSuccess");
     try {
       logger.d("요청 URL: $_path");
       logger.d("요청 파라미터: ${{
-        'userId': userId,
         'date': date,
         'isSuccess': isSuccess,
       }}");
@@ -28,7 +26,6 @@ class AlbumRepository {
       final response = await _dio.get(
         _path,
         queryParameters: {
-          'userId': userId,
           'date': date,
           'isSuccess': isSuccess,
         },

@@ -12,20 +12,17 @@ class CalendarRepository {
 
   CalendarRepository(this._dio);
 
-  Future<List<CalendarModel>> getCalendar(int userId, DateTime date) async {
+  Future<List<CalendarModel>> getCalendar(DateTime date) async {
     try {
       final formattedDate = DateFormat('yyyy-MM').format(date);
-      logger.i(
-          "📡 API 요청: api/record/monthly/$userId?date=$formattedDate"); // ✅ 요청 로그 추가
-
+      logger.i("📡 API 요청: api/record/monthly?date=$formattedDate");
       final response = await _dio.get(
-        '/api/record/monthly/$userId',
+        '/api/record/monthly',
         queryParameters: {'date': formattedDate},
       );
 
-      logger.d("✅ API 응답 데이터: ${response.data}"); // ✅ 응답 로그 추가
+      logger.d("✅ API 응답 데이터: ${response.data}");
 
-      // ✅ "content" 부분만 추출
       final content = response.data['content'];
       if (content == null) {
         throw Exception("❌ 응답에서 'content' 필드를 찾을 수 없음.");
@@ -34,18 +31,18 @@ class CalendarRepository {
       return [CalendarModel.fromJson(content)];
     } on DioException catch (e) {
       throw Exception("API 요청 실패: ${e.message}");
-    } catch (e, stackTrace) {
+    } catch (e) {
       throw Exception("알 수 없는 오류 발생: $e");
     }
   }
 
-  Future<CalendarDetailModel> fetchDailyData(int userId, DateTime date) async {
+  Future<CalendarDetailModel> fetchDailyData(DateTime date) async {
     try {
       final formattedDate = DateFormat('yyyy-MM-dd').format(date);
-      logger.i("📡 API 요청: /record/daily/$userId?date=$formattedDate");
+      logger.i("📡 API 요청: /record/daily?date=$formattedDate");
 
       final response = await _dio.get(
-        '/api/record/daily/$userId',
+        '/api/record/daily',
         queryParameters: {'date': formattedDate},
       );
 

@@ -18,9 +18,9 @@ class CalendarViewModel extends StateNotifier<List<CalendarModel>?> {
     _repository = _ref.read(calendarRepositoryProvider); // ✅ Riverpod을 통한 주입
   }
 
-  Future<void> fetchCalendarData(int userId, DateTime date) async {
+  Future<void> fetchCalendarData(DateTime date) async {
     try {
-      final data = await _repository.getCalendar(userId, date);
+      final data = await _repository.getCalendar(date);
       state = data;
     } catch (e) {
       state = null;

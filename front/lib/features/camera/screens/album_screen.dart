@@ -10,9 +10,6 @@ import 'package:logger/logger.dart';
 
 final logger = Logger();
 
-// 유저 id 가져오기 (임시)
-final userIdProvider = StateProvider<int>((ref) => 1);
-
 class AlbumScreen extends ConsumerStatefulWidget {
   const AlbumScreen({super.key});
 
@@ -83,10 +80,9 @@ class _AlbumScreenState extends ConsumerState<AlbumScreen>
   Future<void> _navigateToCalendar() async {
     try {
       // 캘린더 데이터 새로고침
-      final userId = ref.read(userIdProvider);
       await ref
           .read(calendarProvider.notifier)
-          .fetchCalendarData(userId, DateTime.now());
+          .fetchCalendarData(DateTime.now());
 
       logger.d("캘린더 데이터 새로고침 완료");
 
