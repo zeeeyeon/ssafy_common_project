@@ -33,7 +33,6 @@ public class RecordController {
     private final S3UploadService s3UploadService;
 
     @PostMapping("/save")
-    @CacheEvict(value = "monthlyRecords", key = "#userId + '_monthly_' + T(java.time.YearMonth).from(#userDate.getCreatedAt())", beforeInvocation = true)
     public ResponseEntity<?> saveRecord(@AuthenticationPrincipal CustomUserDetails userDetails ,@ModelAttribute RecordSaveRequestDTO requestDTO) {
 
         Long userId = userDetails.getUser().getId();
