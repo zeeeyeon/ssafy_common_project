@@ -30,28 +30,32 @@ class _ProfileScreenEditState extends ConsumerState<ProfileScreenEdit> {
     }
   }
 
-  /// 🔥 프로필 저장 함수
+  /// 🔥 달력 가시성 토글
+  void _toggleCalendarVisibility() {
+    setState(() {
+      _isCalendarVisible = !_isCalendarVisible;
+    });
+  }
+
+  /// 🔥 프로필 저장
   void _saveProfile() {
     final double? newHeight = double.tryParse(_heightController.text);
     final double? newArmSpan = double.tryParse(_armSpanController.text);
-    final userProfile = ref.read(profileProvider).value; // ✅ 기존 프로필 가져오기
+    final userProfile = ref.read(profileProvider).value;
 
     if (newHeight != null && newArmSpan != null && userProfile != null) {
       final updatedProfile = UserProfile(
-          nickname: _nicknameController.text,
-          height: newHeight,
-          armSpan: newArmSpan,
-          profileImageUrl: userProfile.profileImageUrl, // ✅ 기존 값 유지
-          userTier: userProfile.userTier, // ✅ 기존 티어 값 유지
-          dday: userProfile.dday, // ✅ 기존 D-Day 유지
-          startDate: _selectedStartDate);
+        nickname: _nicknameController.text,
+        height: newHeight,
+        armSpan: newArmSpan,
+        profileImageUrl: userProfile.profileImageUrl, // ✅ 기존 값 유지
+        userTier: userProfile.userTier, // ✅ 기존 티어 유지
+        dday: userProfile.dday, // ✅ 기존 D-Day 유지
+        startDate: _selectedStartDate,
+      );
 
       ref.read(profileProvider.notifier).updateUserProfile(updatedProfile);
-
-      // 🔹 프로필을 다시 불러와서 최신 데이터 반영
-      // ref.read(profileProvider.notifier).loadUserProfile();
-
-      Navigator.pop(context);
+      Navigator.pop(context); // ✅ 저장 후 화면 닫기
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("키와 팔길이를 올바르게 입력하세요!")),
@@ -62,125 +66,17 @@ class _ProfileScreenEditState extends ConsumerState<ProfileScreenEdit> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('프로필 수정'),
-        centerTitle: true,
-      ),
+      appBar: AppBar(title: const Text('프로필 수정'), centerTitle: true),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 🔹 닉네임 입력
-            const Text('닉네임',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 8),
-            TextField(
-              controller: _nicknameController,
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
-                hintText: '닉네임을 입력하세요.',
-              ),
-            ),
+            _buildTextField("닉네임", _nicknameController),
             const SizedBox(height: 24),
-
-            // 🔹 클라이밍 시작일 선택
-            const Text('클라이밍 시작일',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-            GestureDetector(
-              onTap: () {
-                setState(() {
-                  _isCalendarVisible = !_isCalendarVisible;
-                });
-              },
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 16.0, vertical: 12.0),
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey),
-                  borderRadius: BorderRadius.circular(8.0),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      _selectedStartDate != null
-                          ? "${_selectedStartDate!.year}-${_selectedStartDate!.month}-${_selectedStartDate!.day}"
-                          : "클라이밍 시작일을 선택해주세요.",
-                      style: const TextStyle(fontSize: 16, color: Colors.grey),
-                    ),
-                    const Icon(Icons.arrow_drop_down),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 8),
-
-            // 🔹 달력 표시
-            AnimatedCrossFade(
-              firstChild: const SizedBox.shrink(),
-              secondChild: TableCalendar(
-                firstDay: DateTime(2000),
-                lastDay: DateTime(2100),
-                focusedDay: _selectedStartDate ?? DateTime.now(),
-                selectedDayPredicate: (day) =>
-                    isSameDay(_selectedStartDate, day),
-                onDaySelected: (selectedDay, focusedDay) {
-                  setState(() {
-                    _selectedStartDate = selectedDay;
-                    _isCalendarVisible = false;
-                  });
-                },
-              ),
-              crossFadeState: _isCalendarVisible
-                  ? CrossFadeState.showSecond
-                  : CrossFadeState.showFirst,
-              duration: const Duration(milliseconds: 300),
-            ),
+            _buildStartDateSelector(),
             const SizedBox(height: 24),
-
-            // 🔹 키 & 팔길이 입력
-            Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text('키 (cm)',
-                          style: TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.bold)),
-                      const SizedBox(height: 8),
-                      TextField(
-                        controller: _heightController,
-                        keyboardType: const TextInputType.numberWithOptions(
-                            decimal: true),
-                        decoration: const InputDecoration(
-                            border: OutlineInputBorder(), hintText: '키 입력'),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text('팔길이 (cm)',
-                          style: TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.bold)),
-                      const SizedBox(height: 8),
-                      TextField(
-                        controller: _armSpanController,
-                        keyboardType: const TextInputType.numberWithOptions(
-                            decimal: true),
-                        decoration: const InputDecoration(
-                            border: OutlineInputBorder(), hintText: '팔길이 입력'),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
+            _buildBodyMetricsInput(),
           ],
         ),
       ),
@@ -195,6 +91,111 @@ class _ProfileScreenEditState extends ConsumerState<ProfileScreenEdit> {
               style: TextStyle(fontSize: 18, color: Colors.white)),
         ),
       ),
+    );
+  }
+
+  /// 🔹 **텍스트 입력 필드 공통 위젯**
+  Widget _buildTextField(String label, TextEditingController controller) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label,
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+        const SizedBox(height: 8),
+        TextField(
+          controller: controller,
+          decoration: const InputDecoration(
+            border: OutlineInputBorder(),
+            hintText: '값을 입력하세요.',
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// 🔹 **클라이밍 시작일 선택 UI**
+  Widget _buildStartDateSelector() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text('클라이밍 시작일',
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+        const SizedBox(height: 8),
+        GestureDetector(
+          onTap: _toggleCalendarVisibility,
+          child: Container(
+            padding:
+                const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.grey),
+              borderRadius: BorderRadius.circular(8.0),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  _selectedStartDate != null
+                      ? "${_selectedStartDate!.year}-${_selectedStartDate!.month}-${_selectedStartDate!.day}"
+                      : "클라이밍 시작일을 선택해주세요.",
+                  style: const TextStyle(fontSize: 16, color: Colors.grey),
+                ),
+                const Icon(Icons.arrow_drop_down),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 8),
+        AnimatedCrossFade(
+          firstChild: const SizedBox.shrink(),
+          secondChild: TableCalendar(
+            firstDay: DateTime(2000),
+            lastDay: DateTime(2100),
+            focusedDay: _selectedStartDate ?? DateTime.now(),
+            selectedDayPredicate: (day) => isSameDay(_selectedStartDate, day),
+            onDaySelected: (selectedDay, focusedDay) {
+              setState(() {
+                _selectedStartDate = selectedDay;
+                _isCalendarVisible = false;
+              });
+            },
+          ),
+          crossFadeState: _isCalendarVisible
+              ? CrossFadeState.showSecond
+              : CrossFadeState.showFirst,
+          duration: const Duration(milliseconds: 300),
+        ),
+      ],
+    );
+  }
+
+  /// 🔹 **키 & 팔길이 입력 UI**
+  Widget _buildBodyMetricsInput() {
+    return Row(
+      children: [
+        Expanded(child: _buildNumberTextField("키 (cm)", _heightController)),
+        const SizedBox(width: 16),
+        Expanded(child: _buildNumberTextField("팔길이 (cm)", _armSpanController)),
+      ],
+    );
+  }
+
+  /// 🔹 **숫자 입력 필드 공통 위젯**
+  Widget _buildNumberTextField(String label, TextEditingController controller) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label,
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+        const SizedBox(height: 8),
+        TextField(
+          controller: controller,
+          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          decoration: const InputDecoration(
+            border: OutlineInputBorder(),
+            hintText: '숫자를 입력하세요.',
+          ),
+        ),
+      ],
     );
   }
 }
