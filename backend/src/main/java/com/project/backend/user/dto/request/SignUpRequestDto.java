@@ -35,6 +35,7 @@ public class SignUpRequestDto {
                 .reach((float) 0)
                 .height((float) 0)
                 .profileImageUrl("https://ssafy-ori-bucket.s3.ap-northeast-2.amazonaws.com/profile_default.png")
+                .startDate(LocalDateTime.now())
                 .createDate(LocalDateTime.now())
                 .updateDate(LocalDateTime.now())
                 .build();
