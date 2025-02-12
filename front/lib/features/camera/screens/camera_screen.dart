@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:async';
+import 'dart:typed_data'; // <-- 추가
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -11,6 +12,8 @@ import 'package:kkulkkulk/features/camera/view_models/video_view_model.dart';
 import 'package:logger/logger.dart';
 import 'package:go_router/go_router.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:kkulkkulk/features/motionai/utils/pose_detector.dart'; // CustomPoseDetector
+import 'package:kkulkkulk/features/motionai/view_models/pose_view_model.dart';
 
 final logger = Logger();
 
@@ -29,18 +32,29 @@ class _CameraScreenState extends ConsumerState<CameraScreen> {
 
   Timer? _recordingTimer;
   final _recordingDuration = ValueNotifier<Duration>(Duration.zero);
+  late final CustomPoseDetector _poseDetector;
+  bool _isProcessingFrame = false;
+  bool _isAutoMode = false; // 기본값: 수동 모드
+  DateTime? _recordingStartTime;
+  static const _minRecordingTime = Duration(seconds: 5);
 
   @override
   void initState() {
     super.initState();
     _initCamera();
+    _initPoseDetector();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _checkVisitLog();
     });
   }
 
   Future<void> _checkVisitLog() async {
+    // 방문 로그(클라이밍장 정보) 불러오기
     await ref.read(visitLogViewModelProvider.notifier).fetchVisitLog();
+  }
+
+  Future<void> _initPoseDetector() async {
+    _poseDetector = await CustomPoseDetector.create();
   }
 
   Future<void> _initCamera() async {
@@ -52,17 +66,26 @@ class _CameraScreenState extends ConsumerState<CameraScreen> {
           cameras![0],
           ResolutionPreset.medium,
           enableAudio: true,
+          imageFormatGroup: ImageFormatGroup.yuv420, // Android에서 주로 사용
         );
         await _controller!.initialize();
         setState(() {});
+
+        // 자동 모드일 때만 이미지 스트림 처리
+        await _controller!.startImageStream((image) {
+          if (_isAutoMode && !_isProcessingFrame) {
+            _isProcessingFrame = true;
+            _processFrame(image);
+          }
+        });
       }
     } catch (e) {
       logger.e("Camera initialization error: $e");
     }
   }
 
+  // 카메라/마이크/저장소/GPS 권한 요청
   Future<bool> _requestPermissions() async {
-    // 카메라, 마이크, 저장소 권한 요청
     await Permission.camera.request();
     await Permission.microphone.request();
     await Permission.storage.request();
@@ -89,7 +112,6 @@ class _CameraScreenState extends ConsumerState<CameraScreen> {
             ],
           ),
         );
-
         if (shouldOpenSettings == true) {
           await Geolocator.openLocationSettings();
         }
@@ -110,7 +132,6 @@ class _CameraScreenState extends ConsumerState<CameraScreen> {
         return false;
       }
     }
-
     if (permission == LocationPermission.deniedForever) {
       if (mounted) {
         final bool? shouldOpenSettings = await showDialog<bool>(
@@ -131,14 +152,12 @@ class _CameraScreenState extends ConsumerState<CameraScreen> {
             ],
           ),
         );
-
         if (shouldOpenSettings == true) {
           await openAppSettings();
         }
       }
       return false;
     }
-
     return true;
   }
 
@@ -174,7 +193,6 @@ class _CameraScreenState extends ConsumerState<CameraScreen> {
                   color: Colors.white, size: 30),
               onPressed: () {
                 final location = GoRouterState.of(context).uri.toString();
-
                 if (location.contains('/album/camera')) {
                   context.pop();
                 } else {
@@ -183,6 +201,7 @@ class _CameraScreenState extends ConsumerState<CameraScreen> {
               },
             ),
             _buildIOSRecordButton(),
+            _buildModeToggleButton(),
             GestureDetector(
               onTap: _showColorPicker,
               child: Container(
@@ -207,7 +226,6 @@ class _CameraScreenState extends ConsumerState<CameraScreen> {
     if (_controller == null || !_controller!.value.isInitialized) {
       return const Center(child: CircularProgressIndicator());
     }
-
     return Stack(
       children: [
         Positioned.fill(
@@ -266,8 +284,8 @@ class _CameraScreenState extends ConsumerState<CameraScreen> {
 
   Widget _buildIOSRecordButton() {
     return GestureDetector(
-      onTapDown: (_) => _startRecording(),
-      onTapUp: (_) => _stopRecording(),
+      onTapDown: (_) => _isAutoMode ? null : _startManualRecording(),
+      onTapUp: (_) => _isAutoMode ? null : _stopManualRecording(),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         width: isRecording ? 70 : 80,
@@ -275,22 +293,33 @@ class _CameraScreenState extends ConsumerState<CameraScreen> {
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           border: Border.all(
-            color: Colors.white,
+            color: _isAutoMode ? Colors.grey : Colors.white,
             width: isRecording ? 4 : 6,
           ),
         ),
-        child: Container(
-          margin: const EdgeInsets.all(6),
-          decoration: BoxDecoration(
-            color: isRecording ? Colors.red : Colors.white,
-            shape: BoxShape.circle,
-          ),
+        child: Stack(
+          children: [
+            Container(
+              margin: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: isRecording
+                    ? Colors.red
+                    : (_isAutoMode ? Colors.grey : Colors.white),
+                shape: BoxShape.circle,
+              ),
+            ),
+            if (_isAutoMode)
+              const Center(
+                child: Icon(Icons.auto_awesome, color: Colors.white, size: 24),
+              ),
+          ],
         ),
       ),
     );
   }
 
-  Future<void> _startRecording() async {
+  // ============= 수동 녹화 로직 =============
+  Future<void> _startManualRecording() async {
     if (isRecording) return;
     if (_controller == null) return;
 
@@ -323,7 +352,7 @@ class _CameraScreenState extends ConsumerState<CameraScreen> {
     }
   }
 
-  Future<void> _stopRecording() async {
+  Future<void> _stopManualRecording() async {
     if (!isRecording || _controller == null) return;
 
     try {
@@ -357,6 +386,7 @@ class _CameraScreenState extends ConsumerState<CameraScreen> {
         ),
       );
 
+      // 비디오 업로드
       if (isSuccess != null && selectedHold != null) {
         final visitLogState = ref.read(visitLogViewModelProvider);
         if (visitLogState is AsyncData && visitLogState.value != null) {
@@ -389,6 +419,26 @@ class _CameraScreenState extends ConsumerState<CameraScreen> {
     }
   }
 
+  // ============= 자동/수동 모드 전환 =============
+  Widget _buildModeToggleButton() {
+    return IconButton(
+      icon: Icon(_isAutoMode ? Icons.auto_awesome : Icons.touch_app,
+          color: Colors.white),
+      onPressed: () {
+        setState(() {
+          _isAutoMode = !_isAutoMode;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(_isAutoMode ? '포즈 인식 모드' : '수동 모드'),
+            duration: const Duration(seconds: 1),
+          ),
+        );
+      },
+    );
+  }
+
+  // ============= 색상 선택 (홀드) =============
   void _showColorPicker() {
     final visitLogState = ref.read(visitLogViewModelProvider);
     if (visitLogState is! AsyncData || visitLogState.value == null) {
@@ -466,6 +516,72 @@ class _CameraScreenState extends ConsumerState<CameraScreen> {
           ),
         );
       },
+    );
+  }
+
+  // ============= 카메라 프레임 -> 포즈 인식 =============
+  Future<void> _processFrame(CameraImage image) async {
+    try {
+      final sensorOrientation = _controller?.description.sensorOrientation;
+      logger.d('Processing frame with sensor orientation: $sensorOrientation');
+
+      final poses = await _poseDetector.processImage(
+        image,
+        sensorOrientation: sensorOrientation,
+      );
+
+      if (poses.isEmpty) {
+        logger.d('포즈 감지되지 않음');
+        return;
+      }
+
+      final pose = poses.first;
+      logger.d('포즈 감지됨: ${pose.landmarks.length}개의 랜드마크');
+      logger.d(
+          '랜드마크 위치들: ${pose.landmarks.entries.map((e) => '${e.key}: (${e.value.x}, ${e.value.y})').join(', ')}');
+
+      if (!isRecording) {
+        // 시작 포즈 감지
+        final isPoseValid =
+            ref.read(poseViewModelProvider.notifier).checkStartPose(pose);
+        if (isPoseValid) {
+          logger.i('시작 포즈 감지 - 녹화 시작');
+          await _startManualRecording();
+          _recordingStartTime = DateTime.now();
+        }
+      } else {
+        // 결과 포즈 감지
+        final hasResult =
+            ref.read(poseViewModelProvider.notifier).checkResultPose(pose);
+        if (hasResult) {
+          logger.i('결과 포즈 감지 - 녹화 종료');
+          await _stopManualRecording();
+          _showPoseResultDialog(ref.read(poseViewModelProvider));
+        }
+      }
+    } catch (e, stackTrace) {
+      logger.e('Frame processing error', error: e, stackTrace: stackTrace);
+    } finally {
+      _isProcessingFrame = false;
+    }
+  }
+
+  void _showPoseResultDialog(bool isSuccess) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        title: Text(isSuccess ? '성공! 🎉' : '실패... 😢'),
+        content: Text(
+          isSuccess ? '왼팔을 들어 성공으로 표시했습니다!' : '오른팔을 들어 실패로 표시했습니다.',
+        ),
+        actions: [
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('확인'),
+          ),
+        ],
+      ),
     );
   }
 }
