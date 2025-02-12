@@ -17,7 +17,6 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.CacheManager;
-import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 
 import java.time.YearMonth;
@@ -37,9 +36,6 @@ public class ClimbingRecordServiceImpl implements ClimbingRecordService {
     @Override
     @Transactional
     public Optional<ClimbingRecord> saveRecord(Long userId ,RecordSaveRequestDTO requestDTO){
-
-        System.out.println("🚀 트랜잭션 시작: saveRecord() 실행 중");
-
         ClimbingRecord newClimbingRecord = new ClimbingRecord();
         // Hold, User, UserDate 객체를 데이터베이스에서 찾고, 존재하지 않을 경우 예외 발생
         Hold hold = holdRepository.findById(requestDTO.getHoldId())
@@ -54,11 +50,13 @@ public class ClimbingRecordServiceImpl implements ClimbingRecordService {
         newClimbingRecord.setUserDate(userDate);
         climbingRecordRepository.save(newClimbingRecord);
 
+        // 캐싱처리
         String cacheKey = userId + "_monthly_" + YearMonth.from(userDate.getCreatedAt());
+
+        Optional.ofNullable(redisCacheManager.getCache("monthlyRecords"))
+                .ifPresent(cache -> cache.evictIfPresent(cacheKey));
+
         MonthlyClimbingRecordResponse updatedRecords = userDateService.getMonthlyRecords(YearMonth.from(userDate.getCreatedAt()), userId);
-
-        System.out.println("캐시 저장 전 상태: " + redisCacheManager.getCache("monthlyRecords").get(cacheKey));
-
         Optional.ofNullable(redisCacheManager.getCache("monthlyRecords"))
                 .ifPresent(cache -> cache.put(cacheKey, updatedRecords));
 
