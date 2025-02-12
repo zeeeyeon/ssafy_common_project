@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:kkulkkulk/common/widgets/layout/custom_app_bar.dart';
 import 'package:kkulkkulk/features/profile/view_models/profile_view_model.dart';
 import 'package:kkulkkulk/features/profile/data/models/profile_model.dart';
+import 'profile_screen_edit.dart';
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
@@ -15,43 +16,61 @@ class ProfileScreen extends ConsumerWidget {
     return Scaffold(
       appBar: const CustomAppBar(title: 'My Page'),
       body: profileState.when(
-        data: (userProfile) => _buildProfileUI(userProfile),
-        loading: () =>
-            const Center(child: CircularProgressIndicator()), // 🔹 로딩 상태
-        error: (error, _) =>
-            Center(child: Text('데이터 불러오기 실패: $error')), // 🔹 에러 상태
+        data: (userProfile) {
+          print("🔥 UI에 표시될 프로필 데이터: ${userProfile.toJson()}");
+          return _buildProfileUI(context, userProfile); // ✅ context 전달
+        },
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (error, _) => Center(child: Text('데이터 불러오기 실패: $error')),
       ),
     );
   }
 
-  // 🔥 프로필 UI 구성
-  Widget _buildProfileUI(UserProfile userProfile) {
+  // 🔥 프로필 UI 구성 (context 매개변수 추가)
+  Widget _buildProfileUI(BuildContext context, UserProfile userProfile) {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16.0),
       child: Column(
         children: [
           // 🔹 프로필 사진 & 닉네임
           Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              CircleAvatar(
-                radius: 40,
-                backgroundImage: NetworkImage(userProfile.profileImageUrl),
-              ),
-              const SizedBox(width: 16),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              Row(
                 children: [
-                  Text(
-                    userProfile.nickname,
-                    style: const TextStyle(
-                        fontSize: 18, fontWeight: FontWeight.bold),
+                  CircleAvatar(
+                    radius: 40,
+                    backgroundImage: NetworkImage(userProfile.profileImageUrl),
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    "클라이밍 시작: ${userProfile.dDay}일",
-                    style: TextStyle(color: Colors.grey[600]),
+                  const SizedBox(width: 16),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        userProfile.nickname,
+                        style: const TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        "클라이밍 시작: ${userProfile.dday}일",
+                        style: TextStyle(color: Colors.grey[600]),
+                      ),
+                    ],
                   ),
                 ],
+              ),
+              // 🔥 프로필 수정 아이콘 버튼 추가
+              IconButton(
+                icon: const Icon(Icons.edit, color: Colors.grey),
+                onPressed: () {
+                  Navigator.push(
+                    context, // ✅ 수정: context 추가
+                    MaterialPageRoute(
+                      builder: (context) => const ProfileScreenEdit(),
+                    ),
+                  );
+                },
               ),
             ],
           ),
@@ -72,7 +91,7 @@ class ProfileScreen extends ConsumerWidget {
                     style: TextStyle(fontSize: 16, color: Colors.white)),
                 const SizedBox(height: 8),
                 Text(
-                  "${userProfile.dDay}일",
+                  "${userProfile.dday}일",
                   style: const TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.bold,

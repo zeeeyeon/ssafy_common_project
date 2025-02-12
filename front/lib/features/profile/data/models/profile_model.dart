@@ -2,14 +2,14 @@
 const String defaultProfileImage =
     "https://ssafy-ori-bucket.s3.ap-northeast-2.amazonaws.com/profile_default.png";
 
-/// ✅ 사용자 프로필 데이터 모델
 class UserProfile {
-  final String nickname; // 닉네임
-  final double height; // 키
-  final double armSpan; // 팔길이
-  final String profileImageUrl; // 프로필 이미지 URL
-  final String userTier; // 클라이밍 티어
-  final int dDay; // 클라이밍 시작일 기준 D-Day
+  final String nickname;
+  final double height;
+  final double armSpan;
+  final String profileImageUrl;
+  final String userTier;
+  final int dday; // ✅ dDay 필드 추가
+  final DateTime? startDate;
 
   UserProfile({
     required this.nickname,
@@ -17,20 +17,36 @@ class UserProfile {
     required this.armSpan,
     required this.profileImageUrl,
     required this.userTier,
-    required this.dDay,
+    required this.dday, // ✅ dDay 필드 추가
+    this.startDate,
   });
 
-  /// ✅ API 응답 JSON을 UserProfile 객체로 변환
   factory UserProfile.fromJson(Map<String, dynamic> json) {
+    final content = json['content'] ?? {}; // ✅ content 내부 값 가져오기
     return UserProfile(
-      nickname: json['content']['nickname'] ?? "클라이머",
-      height: (json['content']['height'] as num).toDouble(),
-      armSpan: (json['content']['armSpan'] as num).toDouble(),
+      nickname: content['nickname'] ?? "클라이머", // ✅ 올바르게 매핑
+      height: (content['height'] as num?)?.toDouble() ?? 0.0, // ✅ 올바르게 매핑
+      armSpan: (content['armSpan'] as num?)?.toDouble() ?? 0.0, // ✅ 올바르게 매핑
       profileImageUrl:
-          json['content']['profileImageUrl'] ?? defaultProfileImage,
-      userTier: json['content']['userTier'] ?? "UNRANK",
-      dDay: json['content']['dday'] as int,
+          content['profileImageUrl'] ?? defaultProfileImage, // ✅ 기본값 유지
+      userTier: content['userTier'] ?? "UNRANK", // ✅ 올바르게 매핑
+      dday: content['dday'] ?? 0, // ✅ 올바르게 매핑
+      startDate: content['startDate'] != null
+          ? DateTime.parse(content['startDate'])
+          : null, // ✅ null 허용
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'nickname': nickname,
+      'height': height,
+      'armSpan': armSpan,
+      'profileImageUrl': profileImageUrl,
+      'userTier': userTier,
+      'dday': dday,
+      'startDate': startDate?.toIso8601String(),
+    };
   }
 
   /// ✅ 클라이밍 티어에 따른 이미지 경로 반환

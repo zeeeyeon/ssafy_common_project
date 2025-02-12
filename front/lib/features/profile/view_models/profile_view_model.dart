@@ -14,7 +14,20 @@ class ProfileViewModel extends StateNotifier<AsyncValue<UserProfile>> {
     // ✅ 내부에서 실행되도록 변경
     try {
       final profile = await _repository.fetchUserProfile();
+      print("✅ 받아온 프로필 데이터: ${profile.toJson()}"); // 🔥 JSON으로 변환하여 출력
       state = AsyncValue.data(profile);
+    } catch (e) {
+      print("❌ 프로필 데이터 로딩 실패: $e");
+      state = AsyncValue.error(e, StackTrace.current);
+    }
+  }
+
+  /// ✅ 프로필 정보 업데이트
+  Future<void> updateUserProfile(UserProfile updatedProfile) async {
+    try {
+      await _repository.updateUserProfile(updatedProfile);
+      await _loadUserProfile();
+      state = AsyncValue.data(updatedProfile);
     } catch (e) {
       state = AsyncValue.error(e, StackTrace.current);
     }

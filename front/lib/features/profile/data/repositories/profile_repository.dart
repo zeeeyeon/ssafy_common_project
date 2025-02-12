@@ -34,4 +34,20 @@ class ProfileRepository {
       throw Exception('Failed to fetch user profile: $e');
     }
   }
+
+  /// ✅ 프로필 정보 수정 (PUT 요청)
+  Future<void> updateUserProfile(UserProfile updatedProfile) async {
+    try {
+      await _dioClient.dio.put(
+        '/api/user/profile',
+        data: updatedProfile.toJson(),
+        options: Options(headers: {
+          'Authorization':
+              'Bearer Bearer eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0MDFAbmF2ZXIuY29tIiwiaWF0IjoxNzM4ODkyODYzLCJleHAiOjE3Mzk0OTc2NjMsImlkIjoxLCJ1c2VybmFtZSI6InNvbmdEb25nSHllb24iLCJyb2xlIjoiVVNFUiJ9.ix-8keezfIvYp9rfSTfpnViStBKxPho4C3EDHViUfU9-17F9Y2SkHRsi9lj-10auwKmCuTTp2jM4WUtfQWz6Ig',
+        }),
+      );
+    } catch (e) {
+      throw Exception('Failed to update profile: $e');
+    }
+  }
 }
