@@ -9,7 +9,7 @@ import lombok.Setter;
 @AllArgsConstructor
 public class UnlockClimbGroundRequestDTO {
 
-    Long userId;
+//    Long userId;
     Long climbGroundId;
 
 }
