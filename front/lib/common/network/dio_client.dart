@@ -1,6 +1,9 @@
 import 'package:dio/dio.dart';
-
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:logger/logger.dart';
 import '../storage/storage.dart';
+
+final logger = Logger();
 
 class DioClient {
   static final DioClient _instance = DioClient._internal();
@@ -29,18 +32,17 @@ class DioClient {
         onRequest: (options, handler) async {
           // 요청 전에 토큰을 가져와서 헤더에 추가
           String? token = await Storage.getToken();
-          
+
           if (token != null) {
-            options.headers['Authorization'] = token;  // Bearer 토큰 추가
+            options.headers['Authorization'] = token; // Bearer 토큰 추가
           }
+
           return handler.next(options);
         },
         onResponse: (response, handler) {
-          // 응답 처리
           return handler.next(response);
         },
         onError: (error, handler) {
-          // 에러 처리
           return handler.next(error);
         },
       ),
@@ -51,4 +53,14 @@ class DioClient {
   //   // 여기서 Riverpod 상태를 읽어서 토큰을 가져옵니다.
   //   return Future.value(DioClient._instance.dio.options.headers['Authorization']);
   // }
+
+  // 토큰을 가져오는 함수 (Riverpod 사용)
+  Future<String?> _getToken() async {
+    // 여기서 Riverpod 상태를 읽어서 토큰을 가져옵니다.
+    return Future.value(
+        DioClient._instance.dio.options.headers['Authorization']);
+  }
 }
+
+// Provider 정의
+final dioClientProvider = Provider<DioClient>((ref) => DioClient());
