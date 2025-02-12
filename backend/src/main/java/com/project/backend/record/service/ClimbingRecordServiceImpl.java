@@ -25,7 +25,6 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-@CacheEvict(value = "monthlyRecords", key = "#userId + '_monthly_' + T(java.time.YearMonth).from(#userDate.getCreatedAt())")
 public class ClimbingRecordServiceImpl implements ClimbingRecordService {
 
     private final HoldRepository holdRepository;
@@ -37,7 +36,9 @@ public class ClimbingRecordServiceImpl implements ClimbingRecordService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "monthlyRecords", key = "#userId + '_monthly_' + T(java.time.YearMonth).from(#userDate.getCreatedAt())", beforeInvocation = true)
     public Optional<ClimbingRecord> saveRecord(Long userId ,RecordSaveRequestDTO requestDTO){
+
         ClimbingRecord newClimbingRecord = new ClimbingRecord();
         // Hold, User, UserDate 객체를 데이터베이스에서 찾고, 존재하지 않을 경우 예외 발생
         Hold hold = holdRepository.findById(requestDTO.getHoldId())
@@ -53,8 +54,10 @@ public class ClimbingRecordServiceImpl implements ClimbingRecordService {
         climbingRecordRepository.save(newClimbingRecord);
 
         String cacheKey = userId + "_monthly_" + YearMonth.from(userDate.getCreatedAt());
-
         MonthlyClimbingRecordResponse updatedRecords = userDateService.getMonthlyRecords(YearMonth.from(userDate.getCreatedAt()), userId);
+
+        System.out.println("캐시 저장 전 상태: " + redisCacheManager.getCache("monthlyRecords").get(cacheKey));
+
         Optional.ofNullable(redisCacheManager.getCache("monthlyRecords"))
                 .ifPresent(cache -> cache.put(cacheKey, updatedRecords));
 
