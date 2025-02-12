@@ -12,6 +12,7 @@ import com.project.backend.user.auth.CustomUserDetails;
 import com.project.backend.video.dto.responseDTO.VideoSaveResponseDTO;
 import com.project.backend.video.service.S3UploadService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -32,6 +33,7 @@ public class RecordController {
     private final S3UploadService s3UploadService;
 
     @PostMapping("/save")
+    @CacheEvict(value = "monthlyRecords", key = "#userId + '_monthly_' + T(java.time.YearMonth).from(#userDate.getCreatedAt())", beforeInvocation = true)
     public ResponseEntity<?> saveRecord(@AuthenticationPrincipal CustomUserDetails userDetails ,@ModelAttribute RecordSaveRequestDTO requestDTO) {
 
         Long userId = userDetails.getUser().getId();

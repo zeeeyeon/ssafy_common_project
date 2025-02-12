@@ -36,8 +36,9 @@ public class ClimbingRecordServiceImpl implements ClimbingRecordService {
 
     @Override
     @Transactional
-    @CacheEvict(value = "monthlyRecords", key = "#userId + '_monthly_' + T(java.time.YearMonth).from(#userDate.getCreatedAt())", beforeInvocation = true)
     public Optional<ClimbingRecord> saveRecord(Long userId ,RecordSaveRequestDTO requestDTO){
+
+        System.out.println("🚀 트랜잭션 시작: saveRecord() 실행 중");
 
         ClimbingRecord newClimbingRecord = new ClimbingRecord();
         // Hold, User, UserDate 객체를 데이터베이스에서 찾고, 존재하지 않을 경우 예외 발생
