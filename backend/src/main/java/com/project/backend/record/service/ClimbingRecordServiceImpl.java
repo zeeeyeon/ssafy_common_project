@@ -9,12 +9,15 @@ import com.project.backend.record.entity.ClimbingRecord;
 import com.project.backend.record.repository.ClimbingRecordRepository;
 import com.project.backend.user.entity.User;
 import com.project.backend.user.repository.jpa.UserRepository;
+import com.project.backend.userdate.dto.response.MonthlyClimbingRecordResponse;
 import com.project.backend.userdate.entity.UserDate;
 import com.project.backend.userdate.repository.UserDateRepository;
+import com.project.backend.userdate.service.UserDateService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 
 import java.time.YearMonth;
@@ -22,6 +25,7 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@CacheEvict(value = "monthlyRecords", key = "#userId + '_monthly_' + T(java.time.YearMonth).from(#userDate.getCreatedAt())")
 public class ClimbingRecordServiceImpl implements ClimbingRecordService {
 
     private final HoldRepository holdRepository;
@@ -29,6 +33,7 @@ public class ClimbingRecordServiceImpl implements ClimbingRecordService {
     private final UserDateRepository userDateRepository;
     private final ClimbingRecordRepository climbingRecordRepository;
     private final CacheManager redisCacheManager;
+    private final UserDateService userDateService;
 
     @Override
     @Transactional
@@ -47,10 +52,11 @@ public class ClimbingRecordServiceImpl implements ClimbingRecordService {
         newClimbingRecord.setUserDate(userDate);
         climbingRecordRepository.save(newClimbingRecord);
 
-        // 캐싱처리
-//        String cacheKey = requestDTO.getUserId() + "_monthly_" + YearMonth.from(userDate.getCreatedAt());
-//        Optional.ofNullable(redisCacheManager.getCache("monthlyRecords"))
-//                .ifPresent(cache -> cache.evictIfPresent(cacheKey));
+        String cacheKey = userId + "_monthly_" + YearMonth.from(userDate.getCreatedAt());
+
+        MonthlyClimbingRecordResponse updatedRecords = userDateService.getMonthlyRecords(YearMonth.from(userDate.getCreatedAt()), userId);
+        Optional.ofNullable(redisCacheManager.getCache("monthlyRecords"))
+                .ifPresent(cache -> cache.put(cacheKey, updatedRecords));
 
         return Optional.of(newClimbingRecord);
 
