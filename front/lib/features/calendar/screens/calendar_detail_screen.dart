@@ -122,11 +122,10 @@ class CalendarDetailScreenState extends ConsumerState<CalendarDetailScreen> {
 
   Future<void> fetchAllData() async {
     try {
-      // 예시로 userId를 1로 가정
-      const userId = 1;
+      // userId 파라미터 제거
       final detail = await ref
           .read(calendarRepositoryProvider)
-          .fetchDailyData(userId, selectedDate);
+          .fetchDailyData(selectedDate);
 
       // 클라이밍장 이름 업데이트
       setState(() {

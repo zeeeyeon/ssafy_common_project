@@ -48,18 +48,6 @@ class DioClient {
       ),
     );
   }
-  // 토큰을 가져오는 함수 (Riverpod 사용)
-  // Future<String?> _getToken() async {
-  //   // 여기서 Riverpod 상태를 읽어서 토큰을 가져옵니다.
-  //   return Future.value(DioClient._instance.dio.options.headers['Authorization']);
-  // }
-
-  // 토큰을 가져오는 함수 (Riverpod 사용)
-  Future<String?> _getToken() async {
-    // 여기서 Riverpod 상태를 읽어서 토큰을 가져옵니다.
-    return Future.value(
-        DioClient._instance.dio.options.headers['Authorization']);
-  }
 }
 
 // Provider 정의

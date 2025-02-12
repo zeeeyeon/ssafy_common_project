@@ -19,11 +19,11 @@ class DailyDetailViewModel extends StateNotifier<DailyDetailState> {
 
   DailyDetailViewModel(this._repository) : super(DailyDetailState());
 
-  Future<void> loadDailyData(int userId, DateTime date) async {
+  Future<void> loadDailyData(DateTime date) async {
     state = DailyDetailState(isLoading: true);
 
     try {
-      final data = await _repository.fetchDailyData(userId, date);
+      final data = await _repository.fetchDailyData(date);
       state = DailyDetailState(data: data);
     } catch (e) {
       state = DailyDetailState(error: e.toString());

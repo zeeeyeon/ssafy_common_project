@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:kkulkkulk/features/calendar/data/models/calendar_model.dart';
 import 'package:kkulkkulk/features/calendar/view_models/calendar_view_model.dart';
-import 'package:kkulkkulk/common/providers/user_provider.dart';
 import 'package:logger/logger.dart';
 import 'package:intl/intl.dart';
 
@@ -39,8 +38,7 @@ class CalendarScreenState extends ConsumerState<CalendarScreen> {
 
   // 📌 초기 데이터 로드 및 달 변경 시 호출
   void _initializeDate() {
-    final userId = ref.read(userIdProvider);
-    ref.read(calendarProvider.notifier).fetchCalendarData(userId, currentMonth);
+    ref.read(calendarProvider.notifier).fetchCalendarData(currentMonth);
   }
 
   // 현재 화면이 캘린더 화면인지 확인하고 새로고침하는 함수
@@ -57,7 +55,6 @@ class CalendarScreenState extends ConsumerState<CalendarScreen> {
     int monthDiff = pageIndex - previousPage; // 🔹 이전 페이지와 현재 페이지 비교
     previousPage = pageIndex; // 🔹 이전 페이지 값 업데이트
 
-    final userId = ref.read(userIdProvider);
     setState(() {
       int newYear = currentMonth.year;
       int newMonth = currentMonth.month + monthDiff;
@@ -73,7 +70,7 @@ class CalendarScreenState extends ConsumerState<CalendarScreen> {
       currentMonth = DateTime(newYear, newMonth);
     });
 
-    ref.read(calendarProvider.notifier).fetchCalendarData(userId, currentMonth);
+    ref.read(calendarProvider.notifier).fetchCalendarData(currentMonth);
   }
 
   @override

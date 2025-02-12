@@ -26,11 +26,7 @@ class AlbumViewModel extends AsyncNotifier<AlbumResponse?> {
     try {
       logger.d("앨범 데이터 요청 시작: date=$date, isSuccess=$isSuccess");
 
-      // TODO: userId는 실제 로그인된 사용자 ID로 변경 필요
-      const userId = 1;
-
       final response = await _repository.getAlbums(
-        userId: userId,
         date: date,
         isSuccess: isSuccess,
       );
