@@ -31,7 +31,7 @@ import static com.project.backend.common.response.ResponseCode.GET_MONTHLY_RECOR
 public class UserDateController {
     private final UserDateService userDateService;
 
-    @GetMapping("daily/{userId}")
+    @GetMapping("/daily")
     public ResponseEntity<?> getDailyRecord (
             @RequestParam("date") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate selectedDate,
             @AuthenticationPrincipal CustomUserDetails userDetails
@@ -41,7 +41,7 @@ public class UserDateController {
         return new ResponseEntity<>(Response.create(GET_DAILY_RECORD, dailyRecord), GET_DAILY_RECORD.getHttpStatus());
     }
 
-    @GetMapping("/monthly/{userId}")
+    @GetMapping("/monthly")
     public ResponseEntity<?> getMonthlyRecords(
             @RequestParam("date") @DateTimeFormat(pattern = "yyyy-MM") YearMonth selectedMonth,
             @AuthenticationPrincipal CustomUserDetails userDetails
