@@ -1,111 +1,109 @@
 import 'dart:io';
-import 'dart:ui' as ui;
+import 'dart:ui';
 import 'package:camera/camera.dart';
-import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:google_mlkit_pose_detection/google_mlkit_pose_detection.dart';
 import 'package:logger/logger.dart';
 
 final logger = Logger();
 
 class CustomPoseDetector {
-  final poseDetector = PoseDetector(
-    options: PoseDetectorOptions(
-      mode: PoseDetectionMode.stream,
-      model: PoseDetectionModel.base,
-    ),
-  );
+  final PoseDetector _poseDetector;
+  bool _isBusy = false;
+  final Map<DeviceOrientation, int> _orientations = {
+    DeviceOrientation.portraitUp: 0,
+    DeviceOrientation.landscapeLeft: 90,
+    DeviceOrientation.portraitDown: 180,
+    DeviceOrientation.landscapeRight: 270,
+  };
+
+  CustomPoseDetector._(this._poseDetector);
 
   static Future<CustomPoseDetector> create() async {
-    return CustomPoseDetector();
+    try {
+      final detector = PoseDetector(
+        options: PoseDetectorOptions(
+          mode: PoseDetectionMode.stream,
+          model: PoseDetectionModel.accurate,
+        ),
+      );
+      return CustomPoseDetector._(detector);
+    } catch (e) {
+      logger.e('PoseDetector 생성 실패: $e');
+      rethrow;
+    }
   }
 
-  Future<List<Pose>> processImage(CameraImage image,
-      {int? sensorOrientation}) async {
+  Future<List<Pose>> processImage(
+    CameraImage image,
+    bool isFrontCamera, {
+    CameraController? controller,
+  }) async {
+    if (_isBusy) return [];
+    _isBusy = true;
+
     try {
-      final inputImage = _convertCameraImage(image, sensorOrientation);
+      final inputImage = _convertCameraImageToInputImage(
+        image,
+        isFrontCamera,
+        controller,
+      );
+
       if (inputImage == null) {
-        logger.e('Failed to convert camera image');
+        logger.e('이미지 변환 실패');
         return [];
       }
 
-      logger.d(
-          'Image format: ${image.format.raw}, planes: ${image.planes.length}');
-      return await poseDetector.processImage(inputImage);
+      return await _poseDetector.processImage(inputImage);
     } catch (e) {
-      logger.e('Error processing image: $e');
+      logger.e('포즈 감지 중 오류 발생: $e');
       return [];
+    } finally {
+      _isBusy = false;
     }
   }
 
-  InputImage? _convertCameraImage(CameraImage image, int? sensorOrientation) {
-    if (!Platform.isAndroid) return null;
+  InputImage? _convertCameraImageToInputImage(
+      CameraImage image, bool isFrontCamera, CameraController? controller) {
+    final sensorOrientation = controller?.description.sensorOrientation ?? 0;
+    var rotationCompensation =
+        _orientations[controller?.value.deviceOrientation] ?? 0;
 
-    // 1) YUV420 플레인 데이터 처리
-    final WriteBuffer allBytes = WriteBuffer();
-    for (final Plane plane in image.planes) {
-      allBytes.putUint8List(plane.bytes);
+    if (isFrontCamera) {
+      rotationCompensation = (sensorOrientation + rotationCompensation) % 360;
+    } else {
+      rotationCompensation =
+          (sensorOrientation - rotationCompensation + 360) % 360;
     }
-    final bytes = allBytes.done().buffer.asUint8List();
 
-    // =============== 2) Plane 별 메타데이터 생성 ===============
-    final planeData = image.planes.map((Plane plane) {
-      return InputImagePlaneMetadata(
-        bytesPerRow: plane.bytesPerRow,
-        // height와 width가 라이브러리 버전에 따라 없을 수 있음
-      );
-    }).toList();
+    final InputImageRotation rotation =
+        InputImageRotationValue.fromRawValue(rotationCompensation) ??
+            InputImageRotation.rotation0deg;
 
-    // 3) 이미지 포맷 확인
-    const format = InputImageFormat.yuv420;
+    if (image.format.group != ImageFormatGroup.nv21) {
+      logger.e('지원하지 않는 이미지 포맷: ${image.format.group}');
+      return null;
+    }
 
-    // 4) 회전 각도 계산
-    final rotation = sensorOrientation != null
-        ? _rotationIntToRotation(sensorOrientation)
-        : InputImageRotation.rotation0deg;
+    if (image.planes.length != 1) {
+      logger.e('잘못된 이미지 플레인 수: ${image.planes.length}');
+      return null;
+    }
 
-    logger.d('''
-      Converting image:
-      - Format (raw): ${image.format.raw}
-      - Size: ${image.width}x${image.height}
-      - Rotation: $rotation
-      - Plane count: ${planeData.length}
-      - bytesPerRow for each plane: ${planeData.map((p) => p.bytesPerRow).join(', ')}
-    ''');
-
-    // 5) 메타데이터 생성
-    final metadata = InputImageMetadata(
-      size: ui.Size(
-        image.width.toDouble(),
-        image.height.toDouble(),
-      ),
-      rotation: rotation,
-      format: format,
-      planeData: planeData,
-    );
+    final plane = image.planes.first;
 
     return InputImage.fromBytes(
-      bytes: bytes,
-      metadata: metadata,
+      bytes: plane.bytes,
+      metadata: InputImageMetadata(
+        size: Size(image.width.toDouble(), image.height.toDouble()),
+        rotation: rotation,
+        format: InputImageFormat.nv21,
+        bytesPerRow: plane.bytesPerRow,
+      ),
     );
   }
 
   void dispose() {
-    poseDetector.close();
-  }
-
-  // sensorOrientation (예: 0, 90, 180, 270)를 InputImageRotation으로 변환하는 헬퍼 함수
-  InputImageRotation _rotationIntToRotation(int sensorOrientation) {
-    switch (sensorOrientation) {
-      case 0:
-        return InputImageRotation.rotation0deg;
-      case 90:
-        return InputImageRotation.rotation90deg;
-      case 180:
-        return InputImageRotation.rotation180deg;
-      case 270:
-        return InputImageRotation.rotation270deg;
-      default:
-        return InputImageRotation.rotation0deg;
-    }
+    _poseDetector.close();
   }
 }
