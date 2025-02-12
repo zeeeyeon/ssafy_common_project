@@ -106,16 +106,17 @@ public class UserClimbGroundServiceImp implements UserClimbGroundService{
     }
 
     @Override
-    public ResponseCode saveUnlockClimbGround(UnlockClimbGroundRequestDTO requestDTO) {
-        Boolean is_unlock = userClimbGroundRepository.existsUserCLimbGroundByUserIdAndClimbGroundId(requestDTO.getUserId(),requestDTO.getClimbGroundId());
+    public ResponseCode saveUnlockClimbGround(Long userId,
+                                              Long climbGroundId) {
+        Boolean is_unlock = userClimbGroundRepository.existsUserCLimbGroundByUserIdAndClimbGroundId(userId, climbGroundId);
 
         // 이미 해금되어 있으면
         if (is_unlock) {
             return ResponseCode.ALEADY_UNLUCKED;
         }
 
-        User user = userRepository.findById(requestDTO.getUserId()).orElse(null);
-        ClimbGround climbGround = climbGroundRepository.findById(requestDTO.getClimbGroundId()).orElse(null);
+        User user = userRepository.findById(userId).orElse(null);
+        ClimbGround climbGround = climbGroundRepository.findById(climbGroundId).orElse(null);
         if (user == null || climbGround == null) { // 유저나 클라이밍장이 없으면
             return ResponseCode.NOT_FOUND_CLIMB_GROUND_OR_USER;
         }

@@ -115,7 +115,7 @@ public class UserDateService {
                 .build();
     }
 
-    @Cacheable(value = "monthlyRecords", key = "#userId + '_' + 'monthly_' + #selectedMonth")
+//    @Cacheable(value = "monthlyRecords", key = "#userId + '_' + 'monthly_' + #selectedMonth")
     public MonthlyClimbingRecordResponse getMonthlyRecords(YearMonth selectedMonth, Long userId) {
         int year = selectedMonth.getYear();
         int month = selectedMonth.getMonthValue();
@@ -154,19 +154,19 @@ public class UserDateService {
         return dayRecords;
     }
 
-    public ChallUnlockResponseDTO ChallUserDateCheckAndAdd(UserDateCheckAndAddRequestDTO requestDTO) {
+    public ChallUnlockResponseDTO ChallUserDateCheckAndAdd(Long userId,UserDateCheckAndAddRequestDTO requestDTO) {
         ClimbGroundWithDistance climbGround = climbGroundRepository.findClimbGroundByIDAndDistance(requestDTO.getClimbGroundId(),requestDTO.getLatitude(), requestDTO.getLongitude());
         if (climbGround.getDistance() > 0.5){ // 500 미터 이상이면
             throw new CustomException(ResponseCode.NOT_FOUND_NEAR_CLIMB);
         }
         //  클라이밍장이 해금 되어 있는지 부터 체크
-        UserClimbGround userClimbGround = CheckUserClimbGround(requestDTO.getUserId(), requestDTO.getClimbGroundId());
+        UserClimbGround userClimbGround = CheckUserClimbGround(userId, requestDTO.getClimbGroundId());
 
         // userDate가 있는지 체크
-        UserDateCheckAndAddResponseDTO userDateDTO= CheckAndAdd(requestDTO.getUserId(),userClimbGround);
+        UserDateCheckAndAddResponseDTO userDateDTO= CheckAndAdd(userId,userClimbGround);
 
         // detail
-        UnLockClimbGroundDetailResponseDTO detailResponseDTO = userClimbGroundServiceImp.getUnlockClimbGroundDetail(requestDTO.getUserId(), requestDTO.getClimbGroundId());
+        UnLockClimbGroundDetailResponseDTO detailResponseDTO = userClimbGroundServiceImp.getUnlockClimbGroundDetail(userId, requestDTO.getClimbGroundId());
 
         ChallUnlockResponseDTO responseDTO = new ChallUnlockResponseDTO(
                 userDateDTO, detailResponseDTO
@@ -175,16 +175,16 @@ public class UserDateService {
         return responseDTO;
     }
 
-    public UserDateCheckAndAddResponseDTO UserDateCheckAndAdd(UserDateCheckAndAddLocationRequestDTO requestDTO) {
+    public UserDateCheckAndAddResponseDTO UserDateCheckAndAdd(Long userId,UserDateCheckAndAddLocationRequestDTO requestDTO) {
         ClimbGroundWithDistance nearClimbGround = climbGroundRepository.findClimbGroundByDistance(requestDTO.getLatitude(), requestDTO.getLongitude());
         if (nearClimbGround.getDistance() > 0.5){ // 500 미터 이상이면
             throw new CustomException(ResponseCode.NOT_FOUND_NEAR_CLIMB);
         }
         //  클라이밍장이 해금 되어 있는지 부터 체크
-        UserClimbGround userClimbGround = CheckUserClimbGround(requestDTO.getUserId(), nearClimbGround.getClimbGroundId());
+        UserClimbGround userClimbGround = CheckUserClimbGround(userId, nearClimbGround.getClimbGroundId());
 
         // userDate가 있는지 체크
-        UserDateCheckAndAddResponseDTO responseDTO= CheckAndAdd(requestDTO.getUserId(),userClimbGround);
+        UserDateCheckAndAddResponseDTO responseDTO= CheckAndAdd(userId,userClimbGround);
 
         return responseDTO;
     }
