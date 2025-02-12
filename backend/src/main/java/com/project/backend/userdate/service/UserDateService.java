@@ -263,6 +263,4 @@ public class UserDateService {
 
         return responseDTO;
     }
-
-
 }
