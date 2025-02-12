@@ -77,6 +77,8 @@ class _ProfileScreenEditState extends ConsumerState<ProfileScreenEdit> {
             _buildStartDateSelector(),
             const SizedBox(height: 24),
             _buildBodyMetricsInput(),
+            const SizedBox(height: 16),
+            _buildMeasureButton(), // 🔥 측정 버튼 추가
           ],
         ),
       ),
@@ -158,6 +160,10 @@ class _ProfileScreenEditState extends ConsumerState<ProfileScreenEdit> {
                 _isCalendarVisible = false;
               });
             },
+            headerStyle: const HeaderStyle(
+              formatButtonVisible: false,
+              titleCentered: true,
+            ),
           ),
           crossFadeState: _isCalendarVisible
               ? CrossFadeState.showSecond
@@ -196,6 +202,29 @@ class _ProfileScreenEditState extends ConsumerState<ProfileScreenEdit> {
           ),
         ),
       ],
+    );
+  }
+
+  /// 🔹 **측정 버튼 추가**
+  Widget _buildMeasureButton() {
+    return SizedBox(
+      width: double.infinity,
+      child: ElevatedButton(
+        onPressed: () {
+          // TODO: 측정 기능 추가 시 화면 이동
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("측정 기능이 준비 중입니다.")),
+          );
+        },
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.black,
+          padding: const EdgeInsets.symmetric(vertical: 14.0),
+        ),
+        child: const Text(
+          '팔길이 측정',
+          style: TextStyle(fontSize: 18, color: Colors.white),
+        ),
+      ),
     );
   }
 }
