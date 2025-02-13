@@ -9,12 +9,12 @@ class PlaceScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: CustomAppBar(
-        title: '장소'
+        title: '장소',
+        showBackButton: false,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: PlaceForm(),
-        
       ),
     );
   }

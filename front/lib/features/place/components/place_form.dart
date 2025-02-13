@@ -37,7 +37,8 @@ class _PlaceFormState extends State<PlaceForm> {
       Position position = await determinePosition();
 
       List<PlaceResponseModel> places = await _placeRepository.getAllDisCLimbs(
-        PlaceAllModel(latitude: position.latitude, longitude: position.longitude),
+        PlaceAllModel(
+            latitude: position.latitude, longitude: position.longitude),
       );
       setState(() {
         allPlaces = places;
@@ -65,8 +66,12 @@ class _PlaceFormState extends State<PlaceForm> {
 
       try {
         Position position = await determinePosition();
-        List<PlaceResponseModel> places = await _placeRepository.searchClimbGround(
-          SearchPlaceAllModel(keyword: keyword, latitude: position.latitude, longitude: position.longitude),
+        List<PlaceResponseModel> places =
+            await _placeRepository.searchClimbGround(
+          SearchPlaceAllModel(
+              keyword: keyword,
+              latitude: position.latitude,
+              longitude: position.longitude),
         );
         setState(() {
           filteredPlaces = places;
@@ -112,15 +117,18 @@ class _PlaceFormState extends State<PlaceForm> {
                 : null,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(20), // 둥근 테두리
-              borderSide: BorderSide(color: Color(0xFF8A9EA6), width: 1), // 테두리 색과 두께
+              borderSide:
+                  BorderSide(color: Color(0xFF8A9EA6), width: 1), // 테두리 색과 두께
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(20),
-              borderSide: BorderSide(color: Color(0xFF8A9EA6), width: 2), // 포커스된 테두리
+              borderSide:
+                  BorderSide(color: Color(0xFF8A9EA6), width: 2), // 포커스된 테두리
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(20),
-              borderSide: BorderSide(color: Color(0xFF8A9EA6), width: 1), // 비활성화된 테두리
+              borderSide:
+                  BorderSide(color: Color(0xFF8A9EA6), width: 1), // 비활성화된 테두리
             ),
           ),
           // 검색어가 완료되면 엔터키(완료 버튼) 눌렀을 때 검색
@@ -154,7 +162,8 @@ class _PlaceFormState extends State<PlaceForm> {
                       // 이미지 표시
                       place.image != null
                           ? ClipRRect(
-                              borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
+                              borderRadius: BorderRadius.vertical(
+                                  top: Radius.circular(12)),
                               child: Image.network(
                                 place.image!,
                                 width: double.infinity,
@@ -171,18 +180,10 @@ class _PlaceFormState extends State<PlaceForm> {
                         padding: const EdgeInsets.all(8.0),
                         child: Text(
                           place.name,
-                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                          style: TextStyle(
+                              fontSize: 18, fontWeight: FontWeight.bold),
                         ),
                       ),
-                      // 장소 ID 표시
-                      // Padding(
-                      //   padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                      //   child: Text(
-                      //     "장소 ID: ${place.id}",
-                      //     style: TextStyle(fontSize: 14, color: Colors.grey),
-                      //   ),
-                      // ),
-                      // 주소 표시
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 8.0),
                         child: Text(
