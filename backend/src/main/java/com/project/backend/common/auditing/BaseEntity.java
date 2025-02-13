@@ -35,4 +35,5 @@ public class BaseEntity {
     public void preUpdate() {
         this.updatedAt = LocalDateTime.now(ZoneId.of("Asia/Seoul"));
     }
+
 }
