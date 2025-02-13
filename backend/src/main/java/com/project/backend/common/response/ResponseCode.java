@@ -39,6 +39,7 @@ public enum ResponseCode {
 
     GET_CLIMB_GROUND_DETAIL(successCode(), HttpStatus.OK, "해당 클라이밍장의 정보가 조회되었습니다. "),
     GET_CLIMB_GROUND_List(successCode(), HttpStatus.OK, "해당 클라이밍장 리스트 정보가 조회되었습니다. "),
+    GET_CLIMB_GROUND_3D(successCode(), HttpStatus.OK, "해당 클라이밍장 3D 정보가 조회되었습니다. "),
     BINDING_ERROR(2000, HttpStatus.BAD_REQUEST, "입력값 중 검증에 실패한 값이 있습니다."),
     BAD_REQUEST(2001, HttpStatus.BAD_REQUEST, "올바르지 않은 요청입니다."),
     ENTITY_NOT_FOUND(404, HttpStatus.NOT_FOUND, "요청하신 데이터를 찾을 수 없습니다."),
@@ -76,7 +77,8 @@ public enum ResponseCode {
     GET_ALBUM(successCode(), HttpStatus.OK, "사용자의 클라이밍 영상이 조회되었습니다."),
     NO_CONTENT_ALBUM(204, HttpStatus.OK, "해당 날짜에 클라이밍 영상을 찾을 수 없습니다."),
     NOT_FOUND_NEAR_CLIMB(404,HttpStatus.NOT_FOUND, "현재 위치에서 오차범위 안에 있는 클라이밍장을 찾을 수 없습니다."),
-    NOT_UNLOCK_CLIMB(400,HttpStatus.BAD_REQUEST,"해금되지 않은 클라이밍장 입니다.");
+    NOT_UNLOCK_CLIMB(400,HttpStatus.BAD_REQUEST,"해금되지 않은 클라이밍장 입니다."),
+    NO_EXISTED_GLB_FILE(400, HttpStatus.BAD_REQUEST, "GLB 파일이 없습니다.");
 
     private int code;
     private HttpStatus httpStatus;
