@@ -69,6 +69,9 @@ class ProfileScreen extends ConsumerWidget {
                       await ref
                           .read(profileImageProvider.notifier)
                           .uploadProfileImage(newImage);
+
+                      // ✅ 업로드 후 프로필 정보 다시 불러오기 (UI 업데이트)
+                      await ref.read(profileProvider.notifier).refreshProfile();
                     }
                   },
                   child: Container(

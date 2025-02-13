@@ -46,6 +46,11 @@ class ProfileViewModel extends StateNotifier<AsyncValue<UserProfile>> {
       throw Exception("팔길이 측정 실패");
     }
   }
+
+  /// 🔥 **프로필 새로고침 (UI 업데이트)**
+  Future<void> refreshProfile() async {
+    await fetchUserProfile(); // ✅ 프로필 정보 새로 불러오기
+  }
 }
 
 /// ✅ ProfileRepository Provider
