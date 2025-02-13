@@ -9,11 +9,13 @@ class ChallengeScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
-      appBar: CustomAppBar(title: '챌린지',),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: ChallengeForm(), 
-      )
-    );
+        appBar: CustomAppBar(
+          title: '챌린지',
+          showBackButton: false,
+        ),
+        body: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: ChallengeForm(),
+        ));
   }
 }
