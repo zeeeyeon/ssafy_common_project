@@ -16,12 +16,15 @@ import com.project.backend.userdate.service.UserDateService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.CacheManager;
 import org.springframework.stereotype.Service;
 
 import java.time.YearMonth;
+import java.time.ZoneId;
 import java.util.Optional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ClimbingRecordServiceImpl implements ClimbingRecordService {
@@ -49,6 +52,9 @@ public class ClimbingRecordServiceImpl implements ClimbingRecordService {
         newClimbingRecord.setUser(user);
         newClimbingRecord.setUserDate(userDate);
         climbingRecordRepository.save(newClimbingRecord);
+
+        log.info("Climbing record saved: " + newClimbingRecord.getCreatedAt());
+        log.info(String.valueOf(ZoneId.systemDefault()));
 
         String cacheKey = userId + "_monthly_" + YearMonth.from(userDate.getCreatedAt());
 
