@@ -4,6 +4,9 @@ import 'package:kkulkkulk/common/widgets/layout/custom_app_bar.dart';
 import 'package:kkulkkulk/features/profile/view_models/profile_view_model.dart';
 import 'package:kkulkkulk/features/profile/data/models/profile_model.dart';
 import 'profile_screen_edit.dart';
+import 'dart:io';
+import 'profile_image_picker.dart';
+import 'package:kkulkkulk/features/profile/view_models/profile_image_view_model.dart';
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
@@ -49,28 +52,48 @@ class ProfileScreen extends ConsumerWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Row(
+        Stack(
+          alignment: Alignment.bottomRight,
           children: [
             CircleAvatar(
-              radius: 40,
+              radius: 50,
               backgroundImage: NetworkImage(userProfile.profileImageUrl),
             ),
-            const SizedBox(width: 16),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  userProfile.nickname,
-                  style: const TextStyle(
-                      fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  "클라이밍 시작: ${userProfile.dday}일",
-                  style: TextStyle(color: Colors.grey[600]),
-                ),
-              ],
+            Consumer(
+              builder: (context, ref, child) {
+                return GestureDetector(
+                  onTap: () async {
+                    File? newImage =
+                        await ProfileImagePicker.pickImageFromGallery();
+                    if (newImage != null) {
+                      await ref
+                          .read(profileImageProvider.notifier)
+                          .uploadProfileImage(newImage);
+                    }
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.blueAccent,
+                      border: Border.all(color: Colors.white, width: 2),
+                    ),
+                    child: const Icon(Icons.add, color: Colors.white, size: 20),
+                  ),
+                );
+              },
             ),
+          ],
+        ),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(userProfile.nickname,
+                style:
+                    const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 4),
+            Text("클라이밍 시작: ${userProfile.dday}일",
+                style: TextStyle(color: Colors.grey[600])),
           ],
         ),
         IconButton(
