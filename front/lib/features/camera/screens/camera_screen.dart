@@ -5,19 +5,28 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_mlkit_pose_detection/google_mlkit_pose_detection.dart';
 import 'package:kkulkkulk/common/utils/color_converter.dart';
 import 'package:kkulkkulk/features/camera/data/models/visit_log_model.dart';
 import 'package:kkulkkulk/features/camera/view_models/visit_log_view_model.dart';
-import 'package:kkulkkulk/features/camera/view_models/video_view_model.dart';
 import 'package:logger/logger.dart';
 import 'package:go_router/go_router.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:kkulkkulk/features/motionai/utils/pose_detector.dart'; // CustomPoseDetector
 import 'package:kkulkkulk/features/motionai/view_models/pose_view_model.dart';
 import 'package:flutter_tts/flutter_tts.dart';
+import '../widgets/camera_controls.dart';
+import '../widgets/recording_indicator.dart';
+import '../widgets/success_failure_dialog.dart';
 
 final logger = Logger();
+
+// TTS 메시지 상수 정의
+class TTSMessages {
+  static const String selectColor = "오른손으로 색 선택을 시작하세요";
+  static const String startRecording = "만세 자세로 색 선택 및 녹화를 시작하세요";
+  static const String recordingFinished = "녹화가 종료되었습니다";
+  static const String selectGesture = "O 또는 X 동작으로 성공 여부를 선택해주세요";
+}
 
 class CameraScreen extends ConsumerStatefulWidget {
   const CameraScreen({super.key});
@@ -26,7 +35,8 @@ class CameraScreen extends ConsumerStatefulWidget {
   _CameraScreenState createState() => _CameraScreenState();
 }
 
-class _CameraScreenState extends ConsumerState<CameraScreen> {
+class _CameraScreenState extends ConsumerState<CameraScreen>
+    with WidgetsBindingObserver {
   CameraController? _controller;
   bool isRecording = false;
   List<CameraDescription>? cameras;
@@ -47,15 +57,38 @@ class _CameraScreenState extends ConsumerState<CameraScreen> {
   List<Hold> holds = [];
   bool _colorSelectionStarted = false;
   XFile? _lastRecordedVideo;
+  bool _showGestureGuide = false; // O/X 선택 안내 표시 여부
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _initCamera();
     _initTTS();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _checkVisitLog();
     });
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    try {
+      _recordingTimer?.cancel();
+      if (_controller != null) {
+        final bool isStreaming = _controller!.value.isStreamingImages;
+        if (isStreaming) {
+          _controller!.stopImageStream();
+        }
+        _controller!.dispose();
+      }
+      _poseDetector?.dispose();
+      _colorSelectionTimer?.cancel();
+      flutterTts.stop();
+    } catch (e) {
+      logger.e("리소스 해제 중 오류 발생: $e");
+    }
+    super.dispose();
   }
 
   Future<void> _checkVisitLog() async {
@@ -80,42 +113,65 @@ class _CameraScreenState extends ConsumerState<CameraScreen> {
     await flutterTts.setSpeechRate(0.5);
     await flutterTts.setVolume(1.0);
     await flutterTts.setPitch(1.0);
+
+    // TTS 완료 이벤트 리스너 추가
+    flutterTts.setCompletionHandler(() {
+      logger.d("TTS 완료");
+    });
+
+    // TTS 에러 이벤트 리스너 추가
+    flutterTts.setErrorHandler((msg) {
+      logger.e("TTS 에러: $msg");
+    });
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (_controller == null || !mounted) return;
+
+    if (state == AppLifecycleState.inactive) {
+      _controller?.dispose();
+    } else if (state == AppLifecycleState.resumed) {
+      _initCamera();
+    }
   }
 
   Future<void> _initCamera() async {
-    await _requestPermissions();
     try {
+      if (_controller != null) {
+        await _controller!.dispose();
+      }
+
       cameras = await availableCameras();
-      if (cameras != null && cameras!.isNotEmpty) {
-        if (_controller != null) {
-          await _controller!.dispose();
-        }
+      if (cameras == null || cameras!.isEmpty) {
+        throw Exception('카메라를 찾을 수 없습니다.');
+      }
 
-        _controller = CameraController(
-          cameras![_isFrontCamera ? 1 : 0],
-          ResolutionPreset.medium,
-          enableAudio: true,
-          imageFormatGroup: ImageFormatGroup.nv21,
-        );
+      _controller = CameraController(
+        cameras![_isFrontCamera ? 1 : 0],
+        ResolutionPreset.max,
+        enableAudio: true,
+      );
 
-        await _controller!.initialize();
-        await _initPoseDetector();
+      // 카메라 초기화 완료 대기
+      await _controller!.initialize();
 
-        if (mounted) {
-          setState(() {});
-        }
+      if (mounted) {
+        setState(() {});
+      }
 
-        if (_isAutoMode) {
-          await _controller!.startImageStream((image) {
-            if (!_isProcessingFrame) {
-              _isProcessingFrame = true;
-              _processFrame(image);
-            }
-          });
-        }
+      await _initPoseDetector();
+
+      if (_isAutoMode) {
+        await _controller!.startImageStream((image) {
+          if (!_isProcessingFrame) {
+            _isProcessingFrame = true;
+            _processFrame(image);
+          }
+        });
       }
     } catch (e) {
-      logger.e("Camera initialization error: $e");
+      logger.e("카메라 초기화 오류: $e");
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('카메라 초기화 중 오류가 발생했습니다')),
@@ -164,9 +220,8 @@ class _CameraScreenState extends ConsumerState<CameraScreen> {
       // 4. 새 카메라 초기화
       _controller = CameraController(
         cameras![_isFrontCamera ? 1 : 0],
-        ResolutionPreset.medium,
+        ResolutionPreset.max,
         enableAudio: true,
-        imageFormatGroup: ImageFormatGroup.nv21,
       );
 
       // 5. 카메라 초기화 대기
@@ -279,363 +334,118 @@ class _CameraScreenState extends ConsumerState<CameraScreen> {
   }
 
   @override
-  void dispose() {
-    try {
-      _recordingTimer?.cancel();
-      if (_controller != null) {
-        final bool isStreaming = _controller!.value.isStreamingImages;
-        if (isStreaming) {
-          _controller!.stopImageStream();
-        }
-        _controller!.dispose();
-      }
-      _poseDetector?.dispose();
-      _colorSelectionTimer?.cancel();
-      flutterTts.stop();
-    } catch (e) {
-      logger.e("리소스 해제 중 오류 발생: $e");
-    }
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final visitLogState = ref.watch(visitLogViewModelProvider);
-    final holds = visitLogState.value?.holds ?? [];
-
     return Scaffold(
-      extendBody: true,
-      body: Stack(
-        children: [
-          _buildVideoWithOverlay(),
-
-          // 상단 앱바
-          Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
-            child: SafeArea(
-              child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Colors.black.withOpacity(0.7),
-                      Colors.transparent,
-                    ],
+      extendBodyBehindAppBar: true,
+      body: _controller != null
+          ? Stack(
+              children: [
+                // 전체 화면 카메라 프리뷰
+                AspectRatio(
+                  aspectRatio: 1 / _controller!.value.aspectRatio,
+                  child: CameraPreview(_controller!),
+                ),
+                // 상단 앱바
+                Positioned(
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  child: Container(
+                    padding: const EdgeInsets.only(
+                        top: 40, left: 16, right: 16, bottom: 8),
+                    color: Colors.black.withOpacity(0.3),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.photo_library,
+                              color: Colors.white),
+                          onPressed: () {
+                            // 화면 전환 시 자동으로 dispose 되도록 함
+                            if (mounted) {
+                              context.go('/album');
+                            }
+                          },
+                        ),
+                        Row(
+                          children: [
+                            TextButton(
+                              onPressed: _toggleMode,
+                              child: Text(
+                                _isAutoMode ? '자동' : '수동',
+                                style: const TextStyle(color: Colors.white),
+                              ),
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.help_outline,
+                                  color: Colors.white),
+                              onPressed: _showPoseGuide,
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    IconButton(
-                      icon:
-                          const Icon(Icons.photo_library, color: Colors.white),
-                      onPressed: () {
-                        final location =
-                            GoRouterState.of(context).uri.toString();
-                        if (location.contains('/album/camera')) {
-                          context.pop();
-                        } else {
-                          context.go('/album');
-                        }
-                      },
-                    ),
-                    Row(
+                // 하단 컨트롤바
+                Positioned(
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 20),
+                    color: Colors.black.withOpacity(0.3),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
-                        GestureDetector(
-                          onTap: () => _toggleMode(),
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 6,
+                        IconButton(
+                          icon: const Icon(Icons.flip_camera_ios,
+                              color: Colors.white),
+                          onPressed: _toggleCamera,
+                        ),
+                        CameraControls(
+                          isRecording: isRecording,
+                          onRecordPressed: _startManualRecording,
+                          onStopPressed: _stopRecording,
+                        ),
+                        Container(
+                          width: 50,
+                          height: 50,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: Colors.white,
+                              width: 2,
                             ),
-                            decoration: BoxDecoration(
-                              color: Colors.black38,
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: Row(
-                              children: [
-                                Icon(
-                                  _isAutoMode
-                                      ? Icons.auto_awesome
-                                      : Icons.touch_app,
-                                  color: Colors.white,
-                                  size: 20,
-                                ),
-                                const SizedBox(width: 4),
-                                Text(
-                                  _isAutoMode ? '자동' : '수동',
-                                  style: const TextStyle(color: Colors.white),
-                                ),
-                              ],
-                            ),
+                            color: selectedHold != null
+                                ? ColorConverter.fromString(selectedHold!.color)
+                                : Colors.transparent,
+                          ),
+                          child: IconButton(
+                            icon:
+                                const Icon(Icons.palette, color: Colors.white),
+                            onPressed: _showColorPicker,
                           ),
                         ),
-                        const SizedBox(width: 12),
-                        IconButton(
-                          icon: const Icon(Icons.help_outline,
-                              color: Colors.white),
-                          onPressed: _showPoseGuide,
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-
-          // 색상 선택 상태 표시
-          if (_isSelectingColor &&
-              _currentColorIndex >= 0 &&
-              _currentColorIndex < holds.length)
-            Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    _colorSelectionStarted
-                        ? '원하는 색상에서 오른팔을 들어주세요\n왼팔을 들면 초기화됩니다'
-                        : '색상 선택을 시작합니다',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      shadows: [
-                        Shadow(
-                          offset: Offset(2.0, 2.0),
-                          blurRadius: 3.0,
-                          color: Colors.black,
-                        ),
-                      ],
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 20),
-                  Container(
-                    margin: const EdgeInsets.only(top: 16),
-                    width: 50,
-                    height: 50,
-                    decoration: BoxDecoration(
-                      color: ColorConverter.fromString(
-                          holds[_currentColorIndex].color),
-                      shape: BoxShape.circle,
-                      border: Border.all(color: Colors.white, width: 2),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.3),
-                          spreadRadius: 2,
-                          blurRadius: 5,
-                          offset: const Offset(0, 2),
-                        ),
                       ],
                     ),
                   ),
-                  const SizedBox(height: 10),
-                  Text(
-                    '${holds[_currentColorIndex].color} ${holds[_currentColorIndex].level}',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      shadows: [
-                        Shadow(
-                          offset: Offset(2.0, 2.0),
-                          blurRadius: 3.0,
-                          color: Colors.black,
-                        ),
-                      ],
+                ),
+                // 상단 녹화 시간
+                if (isRecording)
+                  Positioned(
+                    top: 30,
+                    left: 0,
+                    right: 0,
+                    child: Center(
+                      child: RecordingIndicator(
+                        duration: _recordingDuration.value,
+                      ),
                     ),
                   ),
-                ],
-              ),
-            ),
-
-          // 안내 메시지 (수동 모드에서는 표시하지 않음)
-          if (_isAutoMode && !_isSelectingColor)
-            Positioned(
-              bottom: 120,
-              left: 0,
-              right: 0,
-              child: Center(
-                child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  decoration: BoxDecoration(
-                    color: Colors.black54,
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Text(
-                    selectedHold == null
-                        ? '오른팔을 들어 색상을 선택해주세요'
-                        : '양팔을 들어 녹화를 시작하세요',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-        ],
-      ),
-      bottomNavigationBar: Container(
-        padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.bottomCenter,
-            end: Alignment.topCenter,
-            colors: [
-              Colors.black.withOpacity(0.7),
-              Colors.transparent,
-            ],
-          ),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            IconButton(
-              icon: const Icon(
-                Icons.flip_camera_ios_rounded,
-                color: Colors.white,
-                size: 30,
-              ),
-              onPressed: _toggleCamera,
-            ),
-            _buildIOSRecordButton(),
-            GestureDetector(
-              onTap: _showColorPicker,
-              child: Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: selectedHold != null
-                      ? ColorConverter.fromString(selectedHold!.color)
-                      : Colors.white,
-                  shape: BoxShape.circle,
-                  border: Border.all(color: Colors.white, width: 2),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.3),
-                      spreadRadius: 2,
-                      blurRadius: 5,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildVideoWithOverlay() {
-    if (_controller == null || !_controller!.value.isInitialized) {
-      return const Center(child: CircularProgressIndicator());
-    }
-    return Stack(
-      children: [
-        Positioned.fill(
-          child: CameraPreview(_controller!),
-        ),
-        Positioned(
-          top: 30,
-          left: 0,
-          right: 0,
-          child: Center(child: _buildRecordingTimer()),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildRecordingTimer() {
-    return ValueListenableBuilder<Duration>(
-      valueListenable: _recordingDuration,
-      builder: (context, duration, child) {
-        if (!isRecording) return const SizedBox.shrink();
-        return Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-          decoration: BoxDecoration(
-            color: Colors.black54,
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 6,
-                height: 6,
-                decoration: const BoxDecoration(
-                  color: Colors.red,
-                  shape: BoxShape.circle,
-                ),
-              ),
-              const SizedBox(width: 4),
-              Text(
-                _formatDuration(duration),
-                style: const TextStyle(color: Colors.white),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  String _formatDuration(Duration duration) {
-    String twoDigits(int n) => n.toString().padLeft(2, '0');
-    final minutes = twoDigits(duration.inMinutes.remainder(60));
-    final seconds = twoDigits(duration.inSeconds.remainder(60));
-    return "$minutes:$seconds";
-  }
-
-  Widget _buildIOSRecordButton() {
-    return InkWell(
-      onTap: () {
-        if (_isAutoMode) return;
-
-        if (isRecording) {
-          _stopRecording();
-        } else {
-          _startManualRecording();
-        }
-      },
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        width: isRecording ? 70 : 80,
-        height: isRecording ? 70 : 80,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          border: Border.all(
-            color: _isAutoMode ? Colors.grey : Colors.white,
-            width: isRecording ? 4 : 6,
-          ),
-        ),
-        child: Stack(
-          children: [
-            Container(
-              margin: const EdgeInsets.all(6),
-              decoration: BoxDecoration(
-                color: isRecording
-                    ? Colors.red
-                    : (_isAutoMode ? Colors.grey : Colors.white),
-                shape: BoxShape.circle,
-              ),
-            ),
-            if (_isAutoMode)
-              const Center(
-                child: Icon(Icons.auto_awesome, color: Colors.white, size: 24),
-              ),
-          ],
-        ),
-      ),
+              ],
+            )
+          : const Center(child: CircularProgressIndicator()),
     );
   }
 
@@ -694,9 +504,18 @@ class _CameraScreenState extends ConsumerState<CameraScreen> {
 
       if (!mounted) return;
 
+      // 마지막 녹화된 비디오 저장
+      _lastRecordedVideo = video;
+
       // 자동 모드일 때만 TTS 실행
       if (_isAutoMode) {
         await flutterTts.speak('녹화가 종료되었습니다. O 또는 X 포즈로 성공 여부를 알려주세요');
+        setState(() {
+          _showGestureGuide = true; // O/X 선택 안내 표시
+        });
+      } else {
+        // 수동 모드일 때는 바로 다이얼로그 표시
+        _showManualSuccessDialog(true, video);
       }
 
       // 녹화 종료 후 자동 모드였다면 이미지 스트림 재시작
@@ -708,11 +527,6 @@ class _CameraScreenState extends ConsumerState<CameraScreen> {
           }
         });
       }
-
-      // 수동 모드일 때는 항상 모달 표시, 자동 모드일 때는 포즈 인식 사용
-      if (!_isAutoMode) {
-        await _showManualSuccessDialog(video);
-      }
     } catch (e) {
       logger.e("녹화 종료 중 오류 발생: $e");
       setState(() => isRecording = false);
@@ -722,109 +536,10 @@ class _CameraScreenState extends ConsumerState<CameraScreen> {
     }
   }
 
-  Future<void> _handleRecordingComplete(XFile video, bool isSuccess) async {
-    try {
-      logger.d('녹화 완료 처리 시작 - 성공여부: $isSuccess');
-
-      final visitLogState = ref.read(visitLogViewModelProvider);
-      if (visitLogState.value == null) {
-        logger.e('방문 기록이 없습니다.');
-        return;
-      }
-
-      final selectedHold = ref.read(selectedHoldProvider);
-      if (selectedHold == null) {
-        logger.e('선택된 홀드가 없습니다.');
-        return;
-      }
-
-      logger.d(
-          '비디오 업로드 시작 - userDateId: ${visitLogState.value!.userDateId}, holdId: ${selectedHold.id}');
-
-      await ref.read(videoViewModelProvider.notifier).uploadVideo(
-            videoFile: File(video.path),
-            color: selectedHold.color,
-            isSuccess: isSuccess,
-            userDateId: visitLogState.value!.userDateId,
-            holdId: selectedHold.id,
-          );
-
-      logger.d('비디오 업로드 완료');
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('영상이 ${isSuccess ? '성공' : '실패'}으로 저장되었습니다')),
-        );
-      }
-    } catch (e) {
-      logger.e('녹화 완료 처리 중 오류 발생: $e');
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('영상 저장에 실패했습니다')),
-        );
-      }
-    }
-  }
-
-  Future<void> _showManualSuccessDialog(XFile video) async {
-    return showCupertinoModalPopup<void>(
+  void _showManualSuccessDialog(bool isSuccess, XFile video) {
+    showCupertinoModalPopup<void>(
       context: context,
-      builder: (BuildContext context) => CupertinoActionSheet(
-        title: const Text(
-          '등반 결과',
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: Colors.black87,
-          ),
-        ),
-        message: const Text(
-          '이번 등반을 성공하셨나요?',
-          style: TextStyle(
-            fontSize: 15,
-            color: Colors.black54,
-          ),
-        ),
-        actions: <CupertinoActionSheetAction>[
-          CupertinoActionSheetAction(
-            onPressed: () {
-              Navigator.pop(context);
-              _handleRecordingComplete(video, true);
-            },
-            child: const Text(
-              '성공',
-              style: TextStyle(
-                color: Colors.blue,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-          CupertinoActionSheetAction(
-            onPressed: () {
-              Navigator.pop(context);
-              _handleRecordingComplete(video, false);
-            },
-            child: const Text(
-              '실패',
-              style: TextStyle(
-                color: Colors.red,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-        ],
-        cancelButton: CupertinoActionSheetAction(
-          onPressed: () {
-            Navigator.pop(context);
-          },
-          child: const Text(
-            '취소',
-            style: TextStyle(
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ),
-      ),
+      builder: (BuildContext context) => SuccessFailureDialog(video: video),
     );
   }
 
@@ -884,179 +599,119 @@ class _CameraScreenState extends ConsumerState<CameraScreen> {
   // ============= 색상 선택 (홀드) =============
   void _showColorPicker() {
     final visitLogState = ref.read(visitLogViewModelProvider);
-    if (visitLogState is! AsyncData || visitLogState.value == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('클라이밍장 정보를 불러오는 중입니다.')),
-      );
-      return;
-    }
-
-    final holds = visitLogState.value!.holds;
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      builder: (context) {
-        return Container(
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                margin: const EdgeInsets.symmetric(vertical: 10),
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: Colors.grey[300],
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-              const Padding(
-                padding: EdgeInsets.all(20),
-                child: Text(
-                  "색상 선택",
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
+    if (visitLogState is AsyncData && visitLogState.value != null) {
+      final holds = visitLogState.value!.holds;
+      showModalBottomSheet(
+        context: context,
+        backgroundColor: Colors.transparent,
+        builder: (context) {
+          return Container(
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  margin: const EdgeInsets.symmetric(vertical: 10),
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[300],
+                    borderRadius: BorderRadius.circular(2),
                   ),
                 ),
-              ),
-              SizedBox(
-                height: 120,
-                child: GridView.builder(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 5,
-                    mainAxisSpacing: 10,
-                    crossAxisSpacing: 10,
+                const Padding(
+                  padding: EdgeInsets.all(20),
+                  child: Text(
+                    "색상 선택",
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                  itemCount: holds.length,
-                  itemBuilder: (context, index) {
-                    final hold = holds[index];
-                    return GestureDetector(
-                      onTap: () {
-                        setState(() => selectedHold = hold);
-                        Navigator.pop(context);
-                      },
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: ColorConverter.fromString(hold.color),
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: Colors.grey[300]!,
-                            width: 2,
+                ),
+                SizedBox(
+                  height: 120,
+                  child: GridView.builder(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 5,
+                      mainAxisSpacing: 10,
+                      crossAxisSpacing: 10,
+                    ),
+                    itemCount: holds.length,
+                    itemBuilder: (context, index) {
+                      final hold = holds[index];
+                      return GestureDetector(
+                        onTap: () {
+                          ref.read(selectedHoldProvider.notifier).state = hold;
+                          setState(() {});
+                          Navigator.pop(context);
+                        },
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: ColorConverter.fromString(hold.color),
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: Colors.grey[300]!,
+                              width: 2,
+                            ),
                           ),
                         ),
-                      ),
-                    );
-                  },
+                      );
+                    },
+                  ),
                 ),
-              ),
-              const SizedBox(height: 30),
-            ],
-          ),
-        );
-      },
-    );
+                const SizedBox(height: 30),
+              ],
+            ),
+          );
+        },
+      );
+    }
   }
 
   // ============= 카메라 프레임 -> 포즈 인식 =============
   Future<void> _processFrame(CameraImage image) async {
-    if (!mounted ||
-        _controller == null ||
-        !_isAutoMode ||
-        _poseDetector == null) return;
-
     try {
+      if (_poseDetector == null) return;
+
       final poses = await _poseDetector!.processImage(
         image,
         _isFrontCamera,
         controller: _controller,
       );
 
-      if (!mounted || poses.isEmpty) return;
+      if (poses.isEmpty) {
+        _isProcessingFrame = false;
+        return;
+      }
 
       final pose = poses.first;
-      final visitLogState = ref.read(visitLogViewModelProvider);
+      final poseViewModel = ref.read(poseViewModelProvider.notifier);
 
-      if (visitLogState is AsyncData && visitLogState.value != null) {
-        final holds = visitLogState.value!.holds;
-
-        // 1. 색상 선택 모드
-        if (selectedHold == null) {
-          if (!_isSelectingColor) {
-            // 오른팔을 들어서 색상 선택 시작
-            if (ref
-                .read(poseViewModelProvider.notifier)
-                .checkColorSelectPose(pose)) {
-              _startColorSelection();
-            }
-          } else {
-            // 만세 자세로 현재 색상 선택
-            if (ref.read(poseViewModelProvider.notifier).checkStartPose(pose)) {
-              if (_currentColorIndex >= 0 &&
-                  _currentColorIndex < holds.length) {
-                _confirmColorSelection(holds[_currentColorIndex]);
-                // 색상 선택 후 바로 녹화 시작
-                await _startManualRecording();
-              }
-            }
-          }
-          return;
-        }
-
-        // 2. 녹화 중일 때 종료 포즈 체크
-        if (isRecording) {
-          if (ref.read(poseViewModelProvider.notifier).checkEndPose(pose)) {
-            await _stopRecording();
-          }
-          return;
-        }
-
-        // 3. 녹화 종료 후 O/X 포즈 체크
-        if (!isRecording && _lastRecordedVideo != null) {
-          final poseViewModel = ref.read(poseViewModelProvider.notifier);
-          if (poseViewModel.checkResultPose(pose)) {
-            final leftArmAngle = poseViewModel.getLastLeftArmAngle();
-            final rightArmAngle = poseViewModel.getLastRightArmAngle();
-
-            // O 모양 판정 (70~110도)
-            final isOShape = (leftArmAngle >= 70 && leftArmAngle <= 110) &&
-                (rightArmAngle >= 70 && rightArmAngle <= 110);
-
-            // 성공/실패 여부에 따른 처리
-            await _handleRecordingComplete(_lastRecordedVideo!, isOShape);
-            _lastRecordedVideo = null;
-
-            // 스낵바 표시
-            if (mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(isOShape ? '성공으로 기록되었습니다!' : '실패로 기록되었습니다.'),
-                ),
-              );
-            }
-          }
+      // 녹화가 끝난 후 자동 모드에서만 O/X 제스처 감지
+      if (!isRecording &&
+          _lastRecordedVideo != null &&
+          _isAutoMode &&
+          _showGestureGuide) {
+        if (poseViewModel.checkResultPose(pose)) {
+          _handleOGesture();
+          _lastRecordedVideo = null; // 처리 후 초기화
+        } else if (poseViewModel.checkResultPose(pose)) {
+          _handleXGesture();
+          _lastRecordedVideo = null; // 처리 후 초기화
         }
       }
+
+      // 기존의 다른 포즈 감지 로직...
     } catch (e) {
       logger.e('프레임 처리 중 오류 발생: $e');
     } finally {
       _isProcessingFrame = false;
-    }
-  }
-
-  void _resetColorSelection() {
-    setState(() {
-      _isSelectingColor = false;
-      _currentColorIndex = -1;
-      _colorSelectionStarted = false;
-    });
-    _colorSelectionTimer?.cancel();
-    if (_isAutoMode) {
-      flutterTts.speak('색상 선택이 초기화되었습니다.');
     }
   }
 
@@ -1127,7 +782,7 @@ class _CameraScreenState extends ConsumerState<CameraScreen> {
 
     try {
       await flutterTts.stop(); // 이전 음성 중지
-      await flutterTts.speak('색상 선택을 시작합니다. 원하시는 색상이 나오면 왼팔을 들어 선택해주세요.');
+      await flutterTts.speak(TTSMessages.selectColor);
       await _announceCurrentColor();
 
       // 타이머 시작 전 기존 타이머 취소
@@ -1180,41 +835,77 @@ class _CameraScreenState extends ConsumerState<CameraScreen> {
 
   Future<void> _stopRecording() async {
     try {
-      logger.d('녹화 종료 시작');
-      if (!isRecording) {
-        logger.d('이미 녹화가 종료된 상태입니다.');
-        return;
-      }
+      if (!isRecording || _controller == null) return;
 
-      await _controller?.stopVideoRecording().then((XFile? file) async {
-        logger.d('녹화 파일 생성 완료: ${file?.path}');
-        setState(() {
-          isRecording = false;
-          _lastRecordedVideo = file;
-        });
+      // 녹화 중지 먼저 실행
+      final XFile video = await _controller!.stopVideoRecording();
 
-        if (file != null) {
-          logger.d('녹화 파일이 존재합니다. 업로드 프로세스 시작');
-          if (_isAutoMode) {
-            logger.d('자동 모드: O/X 포즈 인식 대기');
-            // 자동 모드에서는 O/X 포즈 인식 후 업로드
-            _startPoseDetectionAfterRecording(file);
-          } else {
-            logger.d('수동 모드: 성공/실패 선택 모달 표시');
-            // 수동 모드에서는 모달로 선택
-            _showManualSuccessDialog(file);
-          }
-        } else {
-          logger.e('녹화 파일이 null입니다.');
-        }
+      // 녹화 상태 업데이트
+      setState(() {
+        isRecording = false;
       });
 
-      // 녹화 타이머 정리
+      // 타이머 정지
       _recordingTimer?.cancel();
       _recordingTimer = null;
       _recordingDuration.value = Duration.zero;
+
+      // 성공/실패 선택 다이얼로그 표시
+      _showSuccessFailureDialog(video);
+
+      // 카메라 프리뷰 재시작
+      if (_controller != null) {
+        await _controller!.resumePreview();
+      }
     } catch (e) {
-      logger.e('녹화 종료 중 오류 발생: $e');
+      logger.e("녹화 종료 중 오류 발생: $e");
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('녹화 종료 중 오류가 발생했습니다')),
+        );
+      }
+    }
+  }
+
+  void _showSuccessFailureDialog(XFile video) {
+    showCupertinoModalPopup<void>(
+      context: context,
+      builder: (BuildContext context) => SuccessFailureDialog(video: video),
+    );
+  }
+
+  // TTS 메시지 출력을 위한 헬퍼 함수
+  Future<void> _speakMessage(String message) async {
+    try {
+      if (!mounted) return;
+
+      // 이전 TTS가 실행 중이면 중지
+      await flutterTts.stop();
+
+      // 새로운 메시지 출력
+      await flutterTts.speak(message);
+      logger.d('TTS 메시지 출력: $message');
+    } catch (e) {
+      logger.e('TTS 에러: $e');
+    }
+  }
+
+  // O/X 제스처 감지 시 처리
+  void _handleOGesture() {
+    setState(() {
+      _showGestureGuide = false;
+    });
+    if (_lastRecordedVideo != null && mounted) {
+      _showManualSuccessDialog(true, _lastRecordedVideo!);
+    }
+  }
+
+  void _handleXGesture() {
+    setState(() {
+      _showGestureGuide = false;
+    });
+    if (_lastRecordedVideo != null && mounted) {
+      _showManualSuccessDialog(false, _lastRecordedVideo!);
     }
   }
 
@@ -1279,64 +970,31 @@ class _CameraScreenState extends ConsumerState<CameraScreen> {
     );
   }
 
-  Future<void> _startPoseDetectionAfterRecording(XFile video) async {
-    try {
-      logger.d('녹화 후 포즈 인식 시작');
-      await flutterTts.speak('녹화가 종료되었습니다. O 또는 X 포즈로 성공 여부를 알려주세요');
-
-      // 이미지 스트림 재시작
-      await _controller?.startImageStream((image) {
-        if (!_isProcessingFrame) {
-          _isProcessingFrame = true;
-          _processOXPoseFrame(image, video);
-        }
-      });
-    } catch (e) {
-      logger.e('포즈 인식 시작 중 오류 발생: $e');
+  Future<void> _restartCameraController() async {
+    if (_controller != null) {
+      await _controller!.dispose();
+      _controller = null;
     }
+    await _initCamera();
   }
 
-  Future<void> _processOXPoseFrame(CameraImage image, XFile video) async {
-    try {
-      if (_poseDetector == null || !mounted) {
-        _isProcessingFrame = false;
-        return;
-      }
-
-      final poses = await _poseDetector!.processImage(
-        image,
-        _isFrontCamera,
-        controller: _controller,
-      );
-
-      if (poses.isNotEmpty) {
-        final pose = poses.first;
-        if (ref.read(poseViewModelProvider.notifier).checkResultPose(pose)) {
-          // O/X 포즈가 감지되면
-          final leftArmAngle =
-              ref.read(poseViewModelProvider.notifier).getLastLeftArmAngle();
-          final rightArmAngle =
-              ref.read(poseViewModelProvider.notifier).getLastRightArmAngle();
-
-          logger.d('O/X 포즈 감지됨 - 왼팔 각도: $leftArmAngle, 오른팔 각도: $rightArmAngle');
-
-          // O 포즈 (성공)
-          bool isSuccess = leftArmAngle >= 70 &&
-              leftArmAngle <= 110 &&
-              rightArmAngle >= 70 &&
-              rightArmAngle <= 110;
-
-          // 이미지 스트림 중지
-          await _controller?.stopImageStream();
-
-          // 녹화 파일 처리
-          await _handleRecordingComplete(video, isSuccess);
-        }
-      }
-    } catch (e) {
-      logger.e('포즈 프레임 처리 중 오류 발생: $e');
-    } finally {
-      _isProcessingFrame = false;
-    }
+  Widget _buildGestureGuideIcon({
+    required IconData icon,
+    required String label,
+  }) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, color: Colors.white, size: 40),
+        const SizedBox(height: 8),
+        Text(
+          label,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 16,
+          ),
+        ),
+      ],
+    );
   }
 }
