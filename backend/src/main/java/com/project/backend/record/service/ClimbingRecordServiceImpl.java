@@ -53,8 +53,8 @@ public class ClimbingRecordServiceImpl implements ClimbingRecordService {
         newClimbingRecord.setUserDate(userDate);
         climbingRecordRepository.save(newClimbingRecord);
 
-        log.info("Climbing record saved: " + newClimbingRecord.getCreatedAt());
-        log.info(String.valueOf(ZoneId.systemDefault()));
+        log.debug("Climbing record saved: " + newClimbingRecord.getCreatedAt());
+        log.debug(String.valueOf(ZoneId.systemDefault()));
 
         String cacheKey = userId + "_monthly_" + YearMonth.from(userDate.getCreatedAt());
 
