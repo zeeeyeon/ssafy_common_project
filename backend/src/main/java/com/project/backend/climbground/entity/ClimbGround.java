@@ -51,6 +51,9 @@ public class ClimbGround extends BaseEntity {
     @Column(columnDefinition = "LONGTEXT")
     private String sns_url;
 
+    @OneToOne(mappedBy = "climbGround", cascade = CascadeType.ALL)
+    private GlbFile glbFile;
+
     @OneToMany(mappedBy = "climbGround", cascade = CascadeType.ALL)
     private List<UserClimbGround> userClimbGroundList = new ArrayList<>();
 
