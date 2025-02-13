@@ -10,29 +10,13 @@ class ProfileImageRepository {
 
   ProfileImageRepository(this._dioClient);
 
-  /// 🔹 **이미지 선택 함수**
-  Future<File?> pickImage() async {
-    final result = await FilePicker.platform.pickFiles(
-      type: FileType.image,
-      allowMultiple: false,
-    );
-
-    if (result == null || result.files.isEmpty) {
-      debugPrint("❌ 이미지 선택이 취소되었습니다.");
-      return null;
-    }
-
-    final file = File(result.files.single.path!);
-    debugPrint("✅ 선택한 이미지 파일: ${file.path}");
-
-    return file;
-  }
-
   /// 🔹 **프로필 이미지 업로드 API**
   Future<void> uploadProfileImage(File imageFile) async {
     try {
       // ✅ 사용자가 선택한 파일의 원본 이름 가져오기
       String fileName = path.basename(imageFile.path);
+      String? mimeType;
+      String? extension = path.extension(imageFile.path).toLowerCase();
 
       // ✅ 파일이 존재하는지 확인 (디버깅용)
       if (!imageFile.existsSync()) {
@@ -40,12 +24,22 @@ class ProfileImageRepository {
         return;
       }
 
-      // ✅ 파일을 MultipartFile로 변환
+      if (extension == '.jpg' || extension == '.jpeg') {
+        mimeType = 'image/jpeg';
+      } else if (extension == '.png') {
+        mimeType = 'image/png';
+      } else {
+        debugPrint('❌ 지원하지 않는 파일 형식: $extension');
+        return;
+      }
+
+      // 파일을 MultipartFile로 변환
       final fileData = await MultipartFile.fromFile(
         imageFile.path,
-        filename: fileName, // ✅ 원본 파일명 사용!
+        filename: fileName,
+        contentType:
+            DioMediaType('image', mimeType.split('/')[1]), // 동적 MIME 타입 설정
       );
-
       debugPrint("✅ MultipartFile 변환 성공");
 
       // ✅ FormData 생성 (서버 요구사항에 맞게 'file' 키 사용)
@@ -56,7 +50,6 @@ class ProfileImageRepository {
       // ✅ 디버깅용 로그 추가
       debugPrint("📤 업로드할 파일 이름: $fileName");
       debugPrint("📤 업로드할 파일 경로: ${imageFile.path}");
-      debugPrint("📤 최종 formData fields: ${formData.fields}");
       debugPrint("📤 최종 formData files: ${formData.files}");
 
       // ✅ API 요청 보내기
