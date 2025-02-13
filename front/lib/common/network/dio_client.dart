@@ -32,7 +32,7 @@ class DioClient {
         onRequest: (options, handler) async {
           // 요청 전에 토큰을 가져와서 헤더에 추가
           String? token = await Storage.getToken();
-
+          logger.d("Retrieved token: $token"); // 토큰 출력
           if (token != null) {
             options.headers['Authorization'] = token; // Bearer 토큰 추가
           }
