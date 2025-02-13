@@ -96,69 +96,64 @@ class PoseViewModel extends StateNotifier<bool> {
       final leftShoulder = pose.landmarks[PoseLandmarkType.leftShoulder];
       final leftElbow = pose.landmarks[PoseLandmarkType.leftElbow];
       final leftWrist = pose.landmarks[PoseLandmarkType.leftWrist];
+      final leftThumb = pose.landmarks[PoseLandmarkType.leftThumb];
+      final leftPinky = pose.landmarks[PoseLandmarkType.leftPinky];
       final rightShoulder = pose.landmarks[PoseLandmarkType.rightShoulder];
       final rightElbow = pose.landmarks[PoseLandmarkType.rightElbow];
       final rightWrist = pose.landmarks[PoseLandmarkType.rightWrist];
+      final rightThumb = pose.landmarks[PoseLandmarkType.rightThumb];
+      final rightPinky = pose.landmarks[PoseLandmarkType.rightPinky];
 
       if (leftShoulder == null ||
           leftElbow == null ||
           leftWrist == null ||
+          leftThumb == null ||
+          leftPinky == null ||
           rightShoulder == null ||
           rightElbow == null ||
-          rightWrist == null) {
+          rightWrist == null ||
+          rightThumb == null ||
+          rightPinky == null) {
         _consecutiveResultPoseFrames = 0;
         return false;
       }
 
-      // O 모양 또는 X 모양 포즈 체크
-      final leftArmAngle =
-          AngleCalculator.calculateAngle(leftShoulder, leftElbow, leftWrist);
-      final rightArmAngle =
-          AngleCalculator.calculateAngle(rightShoulder, rightElbow, rightWrist);
+      // 양손이 가슴 앞에 있는지 확인
+      final isHandsInFront =
+          leftWrist.y > leftShoulder.y - 50 && // 손이 어깨보다 약간 위에
+              leftWrist.y < leftShoulder.y + 150 && // 손이 허리보다 위에
+              rightWrist.y > rightShoulder.y - 50 &&
+              rightWrist.y < rightShoulder.y + 150;
 
-      // 각도 저장
-      _lastLeftArmAngle = leftArmAngle;
-      _lastRightArmAngle = rightArmAngle;
+      // 엄지와 새끼손가락의 Y좌표 차이로 엄지 방향 판단
+      final leftThumbDirection = leftPinky.y - leftThumb.y;
+      final rightThumbDirection = rightPinky.y - rightThumb.y;
 
-      // 손목과 어깨의 Y좌표 차이 계산
-      final leftWristShoulderDiff = leftShoulder.y - leftWrist.y;
-      final rightWristShoulderDiff = rightShoulder.y - rightWrist.y;
-
-      // 포즈 체크 로그
-      logger.d('포즈 체크 - 각도 정보');
+      // 디버깅 로그 추가
+      logger.d('왼쪽 엄지-새끼 차이: $leftThumbDirection');
+      logger.d('오른쪽 엄지-새끼 차이: $rightThumbDirection');
       logger.d(
-          '왼팔: ${leftArmAngle.toStringAsFixed(1)}°, 오른팔: ${rightArmAngle.toStringAsFixed(1)}°');
-      logger.d('손목-어깨 높이차 (양수=손목이 위)');
-      logger.d(
-          '왼쪽: ${leftWristShoulderDiff.toStringAsFixed(1)}, 오른쪽: ${rightWristShoulderDiff.toStringAsFixed(1)}');
+          '손 위치 - 왼쪽: ${leftWrist.y - leftShoulder.y}, 오른쪽: ${rightWrist.y - rightShoulder.y}');
 
-      // O 모양: 양팔을 둥글게 만드는 자세 (80~100도)
-      final isOShape = (leftArmAngle >= 80 && leftArmAngle <= 100) &&
-          (rightArmAngle >= 80 && rightArmAngle <= 100) &&
-          leftWristShoulderDiff > 50 && // 손목이 어깨보다 최소 50픽셀 위에 있어야 함
-          rightWristShoulderDiff > 50;
+      // 엄지가 위로 향하는 경우 (성공)
+      final isThumbsUp = leftThumbDirection > 30 && rightThumbDirection > 30;
+      // 엄지가 아래로 향하는 경우 (실패)
+      final isThumbsDown =
+          leftThumbDirection < -30 && rightThumbDirection < -30;
 
-      // X 모양: 양팔을 X자로 교차하는 자세 (35~55도)
-      final isXShape = (leftArmAngle >= 35 && leftArmAngle <= 55) &&
-          (rightArmAngle >= 35 && rightArmAngle <= 55) &&
-          leftWristShoulderDiff > 50 && // 손목이 어깨보다 최소 50픽셀 위에 있어야 함
-          rightWristShoulderDiff > 50;
-
-      if (isOShape || isXShape) {
+      if (isHandsInFront && (isThumbsUp || isThumbsDown)) {
         _consecutiveResultPoseFrames++;
         logger.d(
-            '포즈 감지: ${isOShape ? "O" : "X"} 모양 ($_consecutiveResultPoseFrames/5)');
+            '포즈 감지: ${isThumbsUp ? "성공" : "실패"} ($_consecutiveResultPoseFrames/5)');
 
         if (_consecutiveResultPoseFrames >= 5) {
-          logger.i('포즈 인식 완료: ${isOShape ? "O" : "X"} 모양');
+          _lastLeftArmAngle = isThumbsUp ? 1.0 : 0.0;
           state = false;
           return true;
         }
       } else {
         if (_consecutiveResultPoseFrames > 0) {
-          logger.d('포즈 실패 - 각도 범위 이탈');
-          logger.d('O 모양 조건: 80~100°');
-          logger.d('X 모양 조건: 35~55°');
+          logger.d('포즈 실패 - 손 위치 부적절 또는 엄지 방향 불명확');
         }
         _consecutiveResultPoseFrames = 0;
       }
@@ -335,6 +330,63 @@ class PoseViewModel extends StateNotifier<bool> {
     }
   }
 
+  bool checkClapPose(Pose pose) {
+    try {
+      final leftShoulder = pose.landmarks[PoseLandmarkType.leftShoulder];
+      final leftElbow = pose.landmarks[PoseLandmarkType.leftElbow];
+      final leftWrist = pose.landmarks[PoseLandmarkType.leftWrist];
+      final rightShoulder = pose.landmarks[PoseLandmarkType.rightShoulder];
+      final rightElbow = pose.landmarks[PoseLandmarkType.rightElbow];
+      final rightWrist = pose.landmarks[PoseLandmarkType.rightWrist];
+
+      if (leftShoulder == null ||
+          leftElbow == null ||
+          leftWrist == null ||
+          rightShoulder == null ||
+          rightElbow == null ||
+          rightWrist == null) {
+        _consecutiveConfirmFrames = 0;
+        return false;
+      }
+
+      // 양손이 가운데에서 만나는지 확인
+      final leftWristX = leftWrist.x;
+      final rightWristX = rightWrist.x;
+      final centerX = (leftShoulder.x + rightShoulder.x) / 2;
+
+      // 양손이 어깨 높이 정도에 있는지 확인
+      final shoulderY = (leftShoulder.y + rightShoulder.y) / 2;
+      final wristY = (leftWrist.y + rightWrist.y) / 2;
+
+      // 박수 포즈 조건:
+      // 1. 양손이 중앙에서 만남 (손목 X좌표가 서로 가까움)
+      // 2. 손이 어깨 높이 근처에 있음
+      final handsClose = (rightWristX - leftWristX).abs() < 50; // 50픽셀 이내
+      final handsAtShoulderHeight =
+          (wristY - shoulderY).abs() < 100; // 어깨 높이 ±100픽셀
+      final handsNearCenter =
+          ((leftWristX + rightWristX) / 2 - centerX).abs() < 100; // 중앙 ±100픽셀
+
+      final isClapPose = handsClose && handsAtShoulderHeight && handsNearCenter;
+
+      if (isClapPose) {
+        _consecutiveConfirmFrames++;
+        logger.d('연속 프레임 수 (박수): $_consecutiveConfirmFrames');
+        if (_consecutiveConfirmFrames >= 3) {
+          // 3프레임 연속 감지
+          return true;
+        }
+      } else {
+        _consecutiveConfirmFrames = 0;
+      }
+
+      return false;
+    } catch (e) {
+      logger.e('박수 포즈 체크 중 오류 발생: $e');
+      return false;
+    }
+  }
+
   // 마지막으로 감지된 왼팔 각도 반환
   double getLastLeftArmAngle() {
     return _lastLeftArmAngle;
@@ -343,6 +395,11 @@ class PoseViewModel extends StateNotifier<bool> {
   // 마지막으로 감지된 오른팔 각도 반환
   double getLastRightArmAngle() {
     return _lastRightArmAngle;
+  }
+
+  // 성공/실패 판정을 위한 헬퍼 메소드
+  bool wasSuccessfulPose() {
+    return _lastLeftArmAngle > 0.5; // 1.0이면 성공, 0.0이면 실패
   }
 
   @override

@@ -1,30 +1,4 @@
-class Hold {
-  final String level;
-  final String color;
-  final int id;
-
-  Hold({
-    required this.level,
-    required this.color,
-    required this.id,
-  });
-
-  factory Hold.fromJson(Map<String, dynamic> json) {
-    return Hold(
-      level: json["level"] as String,
-      color: json["color"] as String,
-      id: json["id"] as int,
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      "level": level,
-      "color": color,
-      "id": id,
-    };
-  }
-}
+import 'package:kkulkkulk/features/camera/data/models/hold_model.dart';
 
 class VisitLogResponse {
   final int userDateId;
