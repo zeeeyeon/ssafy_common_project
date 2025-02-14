@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:kkulkkulk/features/profile/data/models/profile_model.dart';
 import 'package:kkulkkulk/features/profile/view_models/profile_view_model.dart';
+import 'package:kkulkkulk/features/profile/view_models/arm_span_view_model.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'camera_screen.dart';
 
@@ -251,13 +252,17 @@ class _ProfileScreenEditState extends ConsumerState<ProfileScreenEdit> {
 
     try {
       // 서버 요청 (height 값과 함께 이미지 전송)
-      final newArmSpan = await ref
-          .read(profileProvider.notifier)
+      await ref
+          .read(armSpanViewModelProvider.notifier)
           .measureArmSpan(imagePath, height);
 
-      setState(() {
-        _armSpanController.text = newArmSpan.toString();
-      });
+      // ✅ 성공하면 UI 업데이트
+      final result = ref.read(armSpanViewModelProvider).value;
+      if (result != null) {
+        setState(() {
+          _armSpanController.text = result.armSpan.toString();
+        });
+      }
     } catch (e) {
       debugPrint("❌ 팔길이 측정 실패: $e");
       ScaffoldMessenger.of(context).showSnackBar(

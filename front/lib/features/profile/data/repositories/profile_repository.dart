@@ -48,35 +48,9 @@ class ProfileRepository {
     }
   }
 
-  /// ✅ 팔길이 측정 요청
-  Future<double> measureArmSpan(String imagePath, double height) async {
-    try {
-      FormData formData = FormData.fromMap({
-        "height": height,
-        "image":
-            await MultipartFile.fromFile(imagePath, filename: "arm_image.jpg"),
-      });
-
-      final response = await _dioClient.dio.post(
-        "/fastapi/user/wingspan",
-        data: formData,
-        options: Options(headers: _authHeaders),
-      );
-
-      if (response.statusCode == 200) {
-        return response.data["armSpan"] ?? 0.0; // 팔길이 반환
-      } else {
-        throw Exception("팔길이 측정 실패: ${response.data}");
-      }
-    } catch (e) {
-      debugPrint("❌ 팔길이 측정 요청 실패: $e");
-      throw Exception("팔길이 측정 실패");
-    }
-  }
-
   /// ✅ 공통 인증 헤더 (Bearer Token)
   Map<String, String> get _authHeaders => {
         'Authorization':
-            'Bearer eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0MDFAbmF2ZXIuY29tIiwiaWF0IjoxNzM4ODkyODYzLCJleHAiOjE3Mzk0OTc2NjMsImlkIjoxLCJ1c2VybmFtZSI6InNvbmdEb25nSHllb24iLCJyb2xlIjoiVVNFUiJ9.ix-8keezfIvYp9rfSTfpnViStBKxPho4C3EDHViUfU9-17F9Y2SkHRsi9lj-10auwKmCuTTp2jM4WUtfQWz6Ig',
+            'Bearer eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0MDFAbmF2ZXIuY29tIiwiaWF0IjoxNzM5NTAzNjUwLCJleHAiOjE3NDAxMDg0NTAsImlkIjoxLCJ1c2VybmFtZSI6IuyGoeuPme2YhCJ9.D-1tbAweNhstB4nq_dVFG-KJ1djbVphknYKtSyDZx3tJb5oF5BDqqM6whac_o9XuZiDhdiA_INa5mziUY5t7Dg',
       };
 }
