@@ -33,9 +33,6 @@ import java.time.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.project.backend.common.response.ResponseCode.NOT_FOUND_CLIMB_GROUND_OR_USER;
-import static com.project.backend.common.response.ResponseCode.NOT_FOUND_USER_DATE;
-
 @Service
 @RequiredArgsConstructor
 public class UserDateService {
@@ -52,11 +49,13 @@ public class UserDateService {
         LocalDateTime startOfDay = selectedDate.atStartOfDay();
         LocalDateTime endOfDay = selectedDate.atTime(LocalTime.MAX);
 
-        UserDate userDate = getUserDate(startOfDay, endOfDay, userId);
+        Optional<UserDate> optionalUserDate = getUserDate(startOfDay, endOfDay, userId);
+        if (optionalUserDate.isEmpty()) return getEmptyDailyRecordResponse();
+
+        UserDate userDate = optionalUserDate.get();
         String climbingGround = userDate.getUserClimbGround().getClimbGround().getName();
 
         int visitCount = getVisitCount(startOfDay, endOfDay, userDate);
-
         Set<ClimbingRecord> climbingRecords = userDate.getClimbingRecordList();
         long successCount = getSuccessCount(climbingRecords);
         double completionRate = calculateCompletionRate(climbingRecords, successCount);
@@ -76,32 +75,18 @@ public class UserDateService {
                 .build();
     }
 
-    // 해당 날짜 기록이 존재하는지 확인
-    private UserDate getUserDate(LocalDateTime startOfDay, LocalDateTime endOfDay, Long userId) {
-        return userDateRepository.findByDateAndUserId(startOfDay, endOfDay, userId)
-                .orElseThrow(() -> new CustomException(NOT_FOUND_USER_DATE));
+    private Optional<UserDate> getUserDate(LocalDateTime startOfDay, LocalDateTime endOfDay, Long userId) {
+        return userDateRepository.findByDateAndUserId(startOfDay, endOfDay, userId);
     }
 
-    // 해당 클라이밍장 방문 횟수
     private int getVisitCount(LocalDateTime startOfDay, LocalDateTime endOfDay, UserDate userDate) {
+        if (userDate == null) return 0;
         return userDateRepository.countVisits(startOfDay, endOfDay, userDate.getUserClimbGround().getClimbGround().getId());
     }
 
-    // 완등 횟수
-    private long getSuccessCount(Set<ClimbingRecord> climbingRecords) {
-        return climbingRecords.stream()
-                .filter(ClimbingRecord::isSuccess)
-                .count();
-    }
-
-    // 완등률
-    private double calculateCompletionRate(Set<ClimbingRecord> climbingRecords, long successCount) {
-        int totalCount = climbingRecords.size();
-        return totalCount > 0 ? (double) successCount / totalCount * 100 : 0;
-    }
-
-    // 클라이밍장 난이도 정보 매핑
     private Map<HoldColorEnum, HoldLevelEnum> getHoldColorLevel(UserDate userDate) {
+        if (userDate == null) return Collections.emptyMap();
+
         Long climbingHoldGround = userDate.getUserClimbGround().getClimbGround().getId();
         List<HoldColorLevelDto> holdColorLevelInfo = holdRepository.findHoldColorLevelByClimbGroundId(climbingHoldGround);
 
@@ -115,7 +100,19 @@ public class UserDateService {
                 ));
     }
 
-    // 색상별 시도 횟수
+
+    private long getSuccessCount(Set<ClimbingRecord> climbingRecords) {
+        return climbingRecords.stream()
+                .filter(ClimbingRecord::isSuccess)
+                .count();
+    }
+
+    private double calculateCompletionRate(Set<ClimbingRecord> climbingRecords, long successCount) {
+        int totalCount = climbingRecords.size();
+        return totalCount > 0 ? (double) successCount / totalCount * 100 : 0;
+    }
+
+
     private Map<HoldColorEnum, Long> getColorAttempts(Set<ClimbingRecord> climbingRecords) {
         return climbingRecords.stream()
                 .collect(Collectors.groupingBy(
@@ -124,7 +121,6 @@ public class UserDateService {
                 ));
     }
 
-    //색상별 성공 횟수
     private Map<HoldColorEnum, Long> getColorSuccesses(Set<ClimbingRecord> climbingRecords) {
         return climbingRecords.stream()
                 .filter(ClimbingRecord::isSuccess)
@@ -132,6 +128,18 @@ public class UserDateService {
                         record -> record.getHold().getColor(),
                         Collectors.counting()
                 ));
+    }
+
+    private DailyClimbingRecordResponse getEmptyDailyRecordResponse() {
+        return DailyClimbingRecordResponse.builder()
+                .climbGroundName("기록 없음")
+                .visitCount(0)
+                .successCount(0)
+                .completionRate(0.0)
+                .holdColorLevel(Collections.emptyMap()) // 빈 맵 반환
+                .colorAttempts(Collections.emptyMap())
+                .colorSuccesses(Collections.emptyMap())
+                .build();
     }
 
     @Cacheable(value = "monthlyRecords", key = "#userId + '_' + 'monthly_' + #selectedMonth")
@@ -150,7 +158,6 @@ public class UserDateService {
         return new MonthlyClimbingRecordResponse(year, month, dayRecords);
     }
 
-    // 날짜별 레코드 매핑
     private Map<Integer, MonthlyRecordDto> totalCountRecordPerDay(List<MonthlyRecordDto> monthlyRecords) {
         return monthlyRecords.stream()
                 .collect(Collectors.toMap(
@@ -159,7 +166,6 @@ public class UserDateService {
                 ));
     }
 
-    // 월별 기록 리스트 생성
     private List<MonthlyClimbingRecordResponse.DayRecord> dayRecords(Map<Integer, MonthlyRecordDto> recordMap, int lastDay) {
         List<MonthlyClimbingRecordResponse.DayRecord> dayRecords = new ArrayList<>();
         for (int day = 1; day <= lastDay; day++) {

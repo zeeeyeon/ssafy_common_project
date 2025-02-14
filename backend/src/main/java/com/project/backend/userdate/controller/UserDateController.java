@@ -33,8 +33,8 @@ public class UserDateController {
 
     @GetMapping("/daily")
     public ResponseEntity<?> getDailyRecord (
-            @RequestParam("date") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate selectedDate,
-            @AuthenticationPrincipal CustomUserDetails userDetails
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestParam("date") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate selectedDate
     ) {
         Long userId = userDetails.getUser().getId();
         DailyClimbingRecordResponse dailyRecord = userDateService.getDailyRecord(selectedDate, userId);
@@ -43,8 +43,8 @@ public class UserDateController {
 
     @GetMapping("/monthly")
     public ResponseEntity<?> getMonthlyRecords(
-            @RequestParam("date") @DateTimeFormat(pattern = "yyyy-MM") YearMonth selectedMonth,
-            @AuthenticationPrincipal CustomUserDetails userDetails
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestParam("date") @DateTimeFormat(pattern = "yyyy-MM") YearMonth selectedMonth
     ) {
         Long userId = userDetails.getUser().getId();
         MonthlyClimbingRecordResponse monthlyRecords = userDateService.getMonthlyRecords(selectedMonth, userId);
