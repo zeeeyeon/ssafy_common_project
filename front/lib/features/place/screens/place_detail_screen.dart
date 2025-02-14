@@ -7,6 +7,7 @@ import 'package:kkulkkulk/features/place/data/repositories/place_repository.dart
 import 'package:kkulkkulk/common/widgets/layout/custom_app_bar.dart'; // CustomAppBar 경로 수정
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter_3d_objects/flutter_3d_objects.dart' as threeDObjects;
 
 class PlaceDetailScreen extends StatefulWidget {
   final int id;
@@ -55,12 +56,45 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Image.network(
-                      place.image,
+                    // Image.network(
+                    //   place.image,
+                    //   width: double.infinity,
+                    //   height: 250,
+                    //   fit: BoxFit.fill,
+                    // ),
+                    GestureDetector(
+            onTap: () {
+              showDialog(
+                context: context,
+                builder: (context) {
+                  return Dialog(
+                    backgroundColor: Colors.transparent,
+                    child: SizedBox(
                       width: double.infinity,
                       height: 250,
-                      fit: BoxFit.fill,
+                      child: threeDObjects.Cube(
+                        onSceneCreated: (scene) {
+                          scene.world.add(
+                            threeDObjects.Object(
+                              fileName: 'assets/modeling/test1.obj',
+                              position: threeDObjects.Vector3(0, 0, 0),
+                              scale: threeDObjects.Vector3(10, 10, 10),
+                            ),
+                          );
+                        },
+                      ),
                     ),
+                  );
+                },
+              );
+            },
+            child: Image.network(
+              place.image,
+              width: double.infinity,
+              height: 250,
+              fit: BoxFit.fill,
+            ),
+          ),   
                     Padding(
                       padding: const EdgeInsets.all(16.0),
                       child: Column(
@@ -196,7 +230,23 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
                           _buildHoldsGraph(place.holds),
                           SizedBox(height: 16),
                           // Info 정보 출력
+                          // SizedBox(
+                          //   width: double.infinity, // 화면 너비를 다 채우게 설정
+                          //   height: 250, // 높이를 설정하여 3D 객체가 차지할 공간을 정의
+                          //   child: threeDObjects.Cube(
+                          //     onSceneCreated: (scene) {
+                          //       scene.world.add(
+                          //         threeDObjects.Object(
+                          //           fileName: 'assets/modeling/test1.obj',
+                          //           position: threeDObjects.Vector3(0, 0, 0),
+                          //           scale: threeDObjects.Vector3(10, 10, 10),
+                          //         ),
+                          //       );
+                          //     },
+                          //   ),
+                          // )
                         ],
+                        
                       ),
                     ),
                   ],
