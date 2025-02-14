@@ -25,11 +25,11 @@ final logger = Logger();
 
 // TTS 메시지 상수 정의
 class TTSMessages {
-  static const String selectColor = "오른손으로 색 선택을 시작하세요";
-  static const String colorSelecting = "박수를 쳐서 현재 색상을 선택하세요";
-  static const String startRecording = "만세 자세로 녹화를 시작하세요";
+  static const String autoModeStart = "오른손을 들어주세요. 색상 선택이 시작됩니다";
+  static const String colorSelecting = "박수를 쳐서 원하는 색상을 선택해주세요";
+  static const String readyToRecord = "만세 자세를 취하면 녹화가 시작됩니다";
   static const String recordingFinished = "녹화가 종료되었습니다";
-  static const String selectGesture = "엄지를 위로 올리면 성공, 아래로 내리면 실패입니다";
+  static const String selectResult = "O 모양은 성공, X 모양은 실패입니다";
 }
 
 class CameraScreen extends ConsumerStatefulWidget {
@@ -60,14 +60,14 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
   CustomPoseDetector? _poseDetector;
   bool _isProcessingFrame = false;
   bool _isAutoMode = false;
-  final bool _showGestureGuide = false;
+  bool _showGestureGuide = false;
 
   // 색상 선택 관련 변수
   bool _isSelectingColor = false;
   int _currentColorIndex = -1;
   String? _currentColor;
   Timer? _colorSelectionTimer;
-  bool _colorSelectionStarted = false;
+  final bool _colorSelectionStarted = false;
 
   // TTS 관련 변수
   late FlutterTts flutterTts;
@@ -79,6 +79,7 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    _initPoseDetector();
     _initializeCamera();
     _initTTS();
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -88,9 +89,19 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
 
   @override
   void dispose() {
+    // 이미지 스트림과 카메라 컨트롤러를 순차적으로 정리
+    Future.microtask(() async {
+      try {
+        if (_controller?.value.isStreamingImages ?? false) {
+          await _controller?.stopImageStream();
+        }
+        await _controller?.dispose();
+      } catch (e) {
+        logger.e('카메라 리소스 해제 중 오류: $e');
+      }
+    });
+
     WidgetsBinding.instance.removeObserver(this);
-    _stopRecording();
-    _controller?.dispose();
     _poseDetector?.dispose();
     _recordingTimer?.cancel();
     _colorSelectionTimer?.cancel();
@@ -149,20 +160,12 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
 
   Future<void> _initializeCamera() async {
     try {
-      // 사용 가능한 카메라 목록 가져오기
       final cameras = await availableCameras();
-      if (cameras.isEmpty) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('사용 가능한 카메라가 없습니다.')),
-          );
-        }
-        return;
-      }
-
-      // 후면 카메라를 기본으로 설정
+      // 초광각 카메라 찾기
       _cameraIndex = cameras.indexWhere(
-        (camera) => camera.lensDirection == CameraLensDirection.back,
+        (camera) =>
+            camera.lensDirection == CameraLensDirection.back &&
+            camera.sensorOrientation == 270, // 초광각 카메라는 보통 270도
       );
       if (_cameraIndex == -1) _cameraIndex = 0;
 
@@ -193,7 +196,7 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
 
     _controller = CameraController(
       camera,
-      ResolutionPreset.low,
+      ResolutionPreset.medium,
       enableAudio: true,
       imageFormatGroup: Platform.isAndroid
           ? ImageFormatGroup.nv21
@@ -248,7 +251,7 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
               children: [
                 SizedBox.expand(
                   child: FittedBox(
-                    fit: BoxFit.cover,
+                    fit: BoxFit.fill,
                     child: SizedBox(
                       width: _controller!.value.previewSize?.width ?? 0,
                       height: _controller!.value.previewSize?.height ?? 0,
@@ -263,42 +266,6 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
                     ],
                   ),
                 ),
-                if (_isRecording)
-                  Positioned(
-                    top: MediaQuery.of(context).padding.top + 16,
-                    left: 0,
-                    right: 0,
-                    child: Container(
-                      margin: const EdgeInsets.symmetric(horizontal: 16),
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: Colors.black54,
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Icon(
-                            Icons.fiber_manual_record,
-                            color: Colors.red,
-                            size: 16,
-                          ),
-                          const SizedBox(width: 4),
-                          ValueListenableBuilder<Duration>(
-                            valueListenable: _recordingDuration,
-                            builder: (context, duration, child) {
-                              return Text(
-                                '${duration.inMinutes.toString().padLeft(2, '0')}:${(duration.inSeconds % 60).toString().padLeft(2, '0')}',
-                                style: const TextStyle(color: Colors.white),
-                              );
-                            },
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
                 if (!_isRecording && (_isAutoMode || _isWaitingForResult))
                   Positioned(
                     top: MediaQuery.of(context).padding.top + 60,
@@ -334,9 +301,9 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
                           onPressed: _toggleCamera,
                         ),
                         CameraControls(
-                          isRecording: _isRecording,
-                          onRecordPressed: _startRecording,
+                          onRecordPressed: _onRecordPressed,
                           onStopPressed: _stopRecording,
+                          isRecording: _isRecording,
                         ),
                         GestureDetector(
                           onTap: _showColorPicker,
@@ -442,58 +409,50 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
     );
   }
 
-  void _speakGestureGuide() async {
-    if (_isRecording) {
-      await flutterTts.speak('엄지를 위로 올리면 성공, 아래로 내리면 실패입니다');
-    } else {
-      if (_isSelectingColor) {
-        await flutterTts.speak('양손을 들어 올려 선택을 확인하세요');
-      } else {
-        await flutterTts.speak('오른손을 들어 색상을 선택하세요');
-      }
-    }
-  }
-
   String _getGuideText() {
     if (_isWaitingForResult) {
-      return _isAutoMode ? "성공은 O 모양, 실패는 X 모양을 취해주세요" : "성공 또는 실패를 선택해주세요";
+      return "성공은 O 모양, 실패는 X 모양을 취해주세요";
     }
     if (_isAutoMode) {
-      return _isRecording ? "녹화를 종료하려면 양손을 들어주세요" : "녹화를 시작하려면 양손을 들어주세요";
+      if (_isSelectingColor) {
+        return "박수를 쳐서 색상을 선택하세요";
+      } else if (selectedHold == null) {
+        return "오른손을 들어주세요. 색상 선택이 시작됩니다";
+      }
+      if (_isRecording) {
+        return ""; // 녹화 중에는 가이드 텍스트 표시하지 않음
+      }
+      return "만세 자세로 녹화를 시작하세요";
     }
     return "화면을 터치하여 녹화를 시작/종료할 수 있습니다";
   }
 
   // ============= 수동 녹화 로직 =============
-  Future<void> _startRecording() async {
-    if (_isRecording || _isWaitingForResult) return; // 결과 선택 대기 중에는 녹화 불가
-
+  Future<bool> _canStartRecording() async {
     final selectedHold = ref.read(selectedHoldProvider);
-    if (selectedHold == null && !_isAutoMode) {
-      // 자동 모드가 아닐 때만 체크
+    logger.d(
+        '녹화 시작 전 선택된 홀드: ${selectedHold?.color}, holdId: ${selectedHold?.id}');
+    if (selectedHold == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('색상을 먼저 선택해주세요'),
+          content: Text('녹화를 시작하려면 색상을 선택해주세요'),
           duration: Duration(seconds: 2),
-          behavior: SnackBarBehavior.floating,
         ),
       );
-      // 수동 모드일 때만 색상 선택 모달 표시
-      if (!_isAutoMode) {
-        _showColorPicker();
-      }
-      return;
+      return false;
     }
+    return true;
+  }
 
-    final visitLogState = ref.read(visitLogViewModelProvider);
-    if (visitLogState is! AsyncData || visitLogState.value == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('클라이밍장 정보를 불러오는 중입니다.')),
-      );
-      return;
-    }
+  Future<void> _startRecording() async {
+    if (!await _canStartRecording()) return;
 
     try {
+      // 녹화 시작 전 이미지 스트림 중지
+      if (_controller!.value.isStreamingImages) {
+        await _controller!.stopImageStream();
+      }
+
       await _controller!.startVideoRecording();
       setState(() {
         _isRecording = true;
@@ -509,7 +468,7 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
         setState(() {
           _recordingDuration.value += const Duration(seconds: 1);
         });
-        // 설정된 시간 후 자동 종료
+        // 설정된 시간(_maxRecordingSeconds) 초가 지나면 자동 종료
         if (_recordingDuration.value.inSeconds >= _maxRecordingSeconds) {
           _stopRecording();
           timer.cancel();
@@ -521,223 +480,182 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
     } catch (e) {
       logger.e("녹화 시작 중 오류 발생: $e");
       setState(() => _isRecording = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('녹화 시작 중 오류가 발생했습니다')),
-      );
     }
   }
 
+  // 녹화 시작 버튼이 눌렸을 때 호출되는 함수
+  void _onRecordPressed() async {
+    if (selectedHold == null) {
+      // 색상이 선택되지 않았으면 녹화 시작하지 않고 안내 메시지 표시
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('녹화를 시작하려면 색상을 선택해주세요.')),
+      );
+      return;
+    }
+    await _startRecording();
+  }
+
   Future<void> _stopRecording() async {
-    if (!_isRecording) return;
+    if (!_isRecording || _controller == null) return;
 
     try {
-      final video = await _controller?.stopVideoRecording();
+      logger.d('녹화 종료 시작');
+      final XFile video = await _controller!.stopVideoRecording();
       setState(() {
         _isRecording = false;
-        _lastRecordedVideo = video;
-        _isWaitingForResult = true; // 성공/실패 선택 대기 상태로 변경
+        _recordingDuration.value = Duration.zero;
       });
+      _recordingTimer?.cancel();
+      logger.d('비디오 파일 생성됨: ${video.path}');
 
-      // 자동 모드일 때 이미지 스트림 재시작
-      if (_isAutoMode && _controller != null) {
-        await _controller!.startImageStream((image) {
-          if (!_isProcessingFrame) {
-            _isProcessingFrame = true;
-            _processFrame(image);
-          }
-        });
-      }
-
-      if (_isAutoMode) {
-        // 자동 모드일 때는 TTS로 안내
-        await flutterTts.speak("성공 또는 실패 포즈를 취해주세요");
-      } else {
-        // 수동 모드일 때는 다이얼로그 표시
+      if (!_isAutoMode) {
+        logger.d('수동 모드에서 다이얼로그 표시 시도');
         if (mounted && selectedHold != null) {
-          await showDialog(
+          await showDialog<void>(
             context: context,
-            barrierDismissible: false, // 바깥 영역 터치로 닫기 방지
+            barrierDismissible: false, // 바깥 영역 터치로 닫히지 않도록 설정
             builder: (context) => SuccessFailureDialog(
-              video: video!,
+              video: video,
               selectedHold: selectedHold!,
               onResultSelected: () {
                 setState(() {
+                  _lastRecordedVideo = null;
                   _isWaitingForResult = false;
                 });
               },
             ),
           );
+          logger.d('다이얼로그 표시 완료');
+        }
+      } else {
+        setState(() {
+          _lastRecordedVideo = video;
+          _isWaitingForResult = true;
+        });
+        await flutterTts.speak(TTSMessages.selectResult);
+        if (_isAutoMode && !_controller!.value.isStreamingImages) {
+          await _controller!.startImageStream((image) {
+            if (!_isProcessingFrame) {
+              _isProcessingFrame = true;
+              _processFrame(image);
+            }
+          });
         }
       }
     } catch (e) {
       logger.e('녹화 종료 중 오류 발생: $e');
+      setState(() => _isRecording = false);
     }
   }
 
   // ============= 자동/수동 모드 전환 =============
-  void _toggleMode() async {
-    if (_controller == null) return;
-
+  Future<void> _toggleMode() async {
     try {
-      final bool isCurrentlyStreaming = _controller!.value.isStreamingImages;
-
       setState(() {
         _isAutoMode = !_isAutoMode;
-        // 수동 모드로 전환 시 색상 선택 상태 초기화
-        if (!_isAutoMode) {
+        if (_isAutoMode) {
           _isSelectingColor = false;
-          _currentColorIndex = -1;
-          _colorSelectionStarted = false;
-          _colorSelectionTimer?.cancel();
+          selectedHold = null;
+          ref.read(selectedHoldProvider.notifier).state = null;
         }
       });
 
       if (_isAutoMode) {
-        logger.d('자동 모드로 전환');
-        if (isCurrentlyStreaming) {
-          await _controller!.stopImageStream();
+        logger.d('자동 모드 시작: 이미지 스트림 시작');
+        if (!_controller!.value.isStreamingImages) {
+          await _controller!.startImageStream((image) {
+            if (!_isProcessingFrame) {
+              _isProcessingFrame = true;
+              _processFrame(image);
+            }
+          });
+          logger.d('이미지 스트림 시작됨');
         }
-
-        // 포즈 감지기 재초기화
-        await _initPoseDetector();
-
-        await Future.delayed(const Duration(milliseconds: 100));
-        await _controller!.startImageStream((image) {
-          if (!_isProcessingFrame) {
-            _isProcessingFrame = true;
-            _processFrame(image);
-          }
-        });
-
-        // 자동 모드 시작 안내
-        await flutterTts.speak('포즈 인식 모드가 시작되었습니다');
+        await flutterTts.speak(TTSMessages.autoModeStart);
       } else {
-        logger.d('수동 모드로 전환');
-        if (isCurrentlyStreaming) {
-          logger.d('이미지 스트림 중지');
+        logger.d('수동 모드로 전환: 이미지 스트림 중지');
+        if (_controller!.value.isStreamingImages) {
           await _controller!.stopImageStream();
+          logger.d('이미지 스트림 중지됨');
         }
-        await flutterTts.speak('수동 모드로 전환되었습니다');
       }
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(_isAutoMode ? '포즈 인식 모드' : '수동 모드'),
-          duration: const Duration(seconds: 1),
-        ),
-      );
     } catch (e) {
-      logger.e("모드 전환 중 오류 발생: $e");
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('모드 전환 중 오류가 발생했습니다')),
-      );
+      logger.e('모드 전환 중 오류 발생: $e');
     }
   }
 
   // ============= 색상 선택 (홀드) =============
-  void _showColorPicker() {
+  void _showColorPicker() async {
     final visitLogState = ref.read(visitLogViewModelProvider);
-    if (visitLogState is AsyncData && visitLogState.value != null) {
-      final holds = visitLogState.value!.holds;
-      showModalBottomSheet(
-        context: context,
-        backgroundColor: Colors.transparent,
-        isScrollControlled: true,
-        builder: (context) {
-          return Padding(
-            padding: EdgeInsets.only(
-              bottom: MediaQuery.of(context).viewInsets.bottom + 20,
-            ),
-            child: Container(
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
+    if (visitLogState.value == null || visitLogState.value!.holds.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('선택 가능한 색상이 없습니다.')),
+      );
+      return;
+    }
+
+    final holds = visitLogState.value!.holds;
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        child: GridView.builder(
+          shrinkWrap: true,
+          padding: const EdgeInsets.all(20),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 3,
+            mainAxisSpacing: 10,
+            crossAxisSpacing: 10,
+          ),
+          itemCount: holds.length,
+          itemBuilder: (context, index) {
+            final hold = holds[index];
+            return GestureDetector(
+              onTap: () {
+                _updateSelectedColor(hold);
+                Navigator.pop(context);
+              },
+              child: Stack(
                 children: [
                   Container(
-                    margin: const EdgeInsets.symmetric(vertical: 10),
-                    width: 40,
-                    height: 4,
                     decoration: BoxDecoration(
-                      color: Colors.grey[300],
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
-                  const Padding(
-                    padding: EdgeInsets.all(20),
-                    child: Text(
-                      "색상 선택",
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
+                      color: ColorConverter.fromString(hold.color),
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: Colors.grey[300]!,
+                        width: 2,
                       ),
                     ),
                   ),
-                  SizedBox(
-                    height: 120,
-                    child: GridView.builder(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 5,
-                        mainAxisSpacing: 10,
-                        crossAxisSpacing: 10,
+                  if (ref.watch(selectedHoldProvider)?.id == hold.id)
+                    const Positioned.fill(
+                      child: Icon(
+                        Icons.check_circle,
+                        color: Colors.white,
                       ),
-                      itemCount: holds.length,
-                      itemBuilder: (context, index) {
-                        final hold = holds[index];
-                        return GestureDetector(
-                          onTap: () {
-                            ref.read(selectedHoldProvider.notifier).state =
-                                hold;
-                            Navigator.pop(context);
-                          },
-                          child: Stack(
-                            children: [
-                              Container(
-                                decoration: BoxDecoration(
-                                  color: ColorConverter.fromString(hold.color),
-                                  shape: BoxShape.circle,
-                                  border: Border.all(
-                                    color: Colors.grey[300]!,
-                                    width: 2,
-                                  ),
-                                ),
-                              ),
-                              if (ref.watch(selectedHoldProvider)?.id ==
-                                  hold.id)
-                                const Positioned.fill(
-                                  child: Icon(
-                                    Icons.check_circle,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                            ],
-                          ),
-                        );
-                      },
                     ),
-                  ),
-                  const SizedBox(height: 30),
                 ],
               ),
-            ),
-          );
-        },
-      );
-    }
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  // 색상 선택 상태 업데이트를 위한 헬퍼 메서드
+  void _updateSelectedColor(Hold hold) {
+    ref.read(selectedHoldProvider.notifier).state = hold;
+    setState(() {
+      selectedHold = hold;
+      _currentColor = hold.color;
+    });
+    logger.d(
+        '색상 선택 완료: color=${hold.color}, holdId=${hold.id}, level=${hold.level}');
   }
 
   // ============= 카메라 프레임 -> 포즈 인식 =============
   Future<void> _processFrame(CameraImage image) async {
-    if (!mounted ||
-        _controller == null ||
-        !_isAutoMode ||
-        _poseDetector == null) {
-      return;
-    }
+    if (!mounted || _poseDetector == null) return;
 
     try {
       final poses = await _poseDetector!.processImage(
@@ -746,63 +664,68 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
         controller: _controller,
       );
 
-      if (!mounted || poses.isEmpty) return;
+      if (poses.isEmpty) {
+        _isProcessingFrame = false;
+        return;
+      }
 
-      final pose = poses.first;
       final poseViewModel = ref.read(poseViewModelProvider.notifier);
-      final visitLogState = ref.read(visitLogViewModelProvider);
+      final pose = poses.first;
 
-      if (visitLogState is AsyncData && visitLogState.value != null) {
-        final holds = visitLogState.value!.holds;
+      // 녹화 종료 후 O/X 선택 대기 중일 때는 다른 포즈 감지 중지
+      if (_isWaitingForResult) {
+        logger.d('O/X 포즈 감지 시도 중...');
+        final isOXPose = poseViewModel.checkOXPose(pose);
+        logger.d('O/X 포즈 감지 여부: $isOXPose');
 
-        // 1. 색상 선택 모드
-        if (selectedHold == null) {
-          if (!_isSelectingColor) {
-            // 오른팔을 들어서 색상 선택 시작
-            if (poseViewModel.checkColorSelectPose(pose)) {
-              _startColorSelection();
-            }
-          } else {
-            // 박수 포즈로 현재 색상 선택
-            if (poseViewModel.checkClapPose(pose)) {
-              if (_currentColorIndex >= 0 &&
-                  _currentColorIndex < holds.length) {
-                _confirmColorSelection(holds[_currentColorIndex]);
-              }
-            }
+        if (isOXPose) {
+          logger.d('O/X 포즈 감지됨!');
+          final result = poseViewModel.getLastDetectedResult();
+          logger.d('감지된 포즈 결과: $result');
+
+          if (result != null && _lastRecordedVideo != null) {
+            await _handleRecordingComplete(_lastRecordedVideo!, result);
+            setState(() {
+              _isWaitingForResult = false;
+              _lastRecordedVideo = null;
+            });
           }
-          return;
         }
+        _isProcessingFrame = false;
+        return;
+      }
 
-        // 2. 녹화 시작/종료 포즈 체크 (만세 자세)
+      // 색상 선택 중일 때 박수 감지
+      if (_isAutoMode && _isSelectingColor) {
+        logger.d('박수 감지 시도 중...');
+        if (poseViewModel.checkClapPose(pose)) {
+          logger.d('박수 감지됨: 색상 선택 시도');
+          _handleColorConfirm();
+        }
+        _isProcessingFrame = false;
+        return;
+      }
+
+      // 색상 선택 시작을 위한 오른손 들기 감지
+      if (_isAutoMode &&
+          !_isSelectingColor &&
+          selectedHold == null &&
+          poseViewModel.checkColorSelectPose(pose)) {
+        logger.d('오른손 들기 감지: 색상 선택 시작');
+        _startColorSelection();
+        _isProcessingFrame = false;
+        return;
+      }
+
+      // 녹화 시작을 위한 만세 포즈 감지 (색상이 선택된 후에만)
+      if (!_isSelectingColor &&
+          !_isWaitingForResult &&
+          selectedHold != null &&
+          poseViewModel.checkRaisedHandsPose(pose)) {
         if (!_isRecording) {
-          if (poseViewModel.checkStartPose(pose)) {
-            await _startRecording();
-          }
+          _startRecording();
         }
-
-        // 3. 녹화 종료 후 O/X 포즈 체크
-        if (!_isRecording && _lastRecordedVideo != null) {
-          if (poseViewModel.checkResultPose(pose)) {
-            final leftArmAngle = poseViewModel.getLastLeftArmAngle();
-            final rightArmAngle = poseViewModel.getLastRightArmAngle();
-
-            // O 모양 판정 (70~110도)
-            final isOShape = (leftArmAngle >= 70 && leftArmAngle <= 110) &&
-                (rightArmAngle >= 70 && rightArmAngle <= 110);
-
-            await _handleRecordingComplete(_lastRecordedVideo!, isOShape);
-            _lastRecordedVideo = null;
-
-            if (mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(isOShape ? '성공으로 기록되었습니다!' : '실패로 기록되었습니다.'),
-                ),
-              );
-            }
-          }
-        }
+        return;
       }
     } catch (e) {
       logger.e('프레임 처리 중 오류 발생: $e');
@@ -812,53 +735,19 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
   }
 
   Future<void> _announceCurrentColor() async {
-    try {
-      final visitLogState = ref.read(visitLogViewModelProvider);
+    final visitLogState = ref.read(visitLogViewModelProvider);
+    if (visitLogState.value == null || visitLogState.value!.holds.isEmpty)
+      return;
 
-      if (visitLogState is AsyncLoading) {
-        logger.d('방문 기록 로딩 중...');
-        return;
-      }
+    final currentHold = visitLogState.value!.holds[_currentColorIndex];
+    setState(() {
+      _currentColor = currentHold.color;
+      ref.read(selectedHoldProvider.notifier).state = currentHold;
+      selectedHold = currentHold; // 로컬 상태도 업데이트
+    });
 
-      if (visitLogState is AsyncError) {
-        logger.e('방문 기록 에러: ${visitLogState.error}');
-        return;
-      }
-
-      if (visitLogState.value == null || visitLogState.value!.holds.isEmpty) {
-        logger.d('사용 가능한 홀드가 없습니다.');
-        return;
-      }
-
-      if (_currentColorIndex < 0) {
-        _currentColorIndex = 0;
-      } else if (_currentColorIndex >= visitLogState.value!.holds.length) {
-        _currentColorIndex = visitLogState.value!.holds.length - 1;
-      }
-
-      final currentHold = visitLogState.value!.holds[_currentColorIndex];
-
-      // 현재 색상 상태 업데이트
-      setState(() {
-        _currentColor = currentHold.color;
-      });
-
-      // TTS 실행 전 이전 음성 중지
-      await flutterTts.stop();
-
-      // 색상과 레벨 안내
-      await flutterTts.speak('${currentHold.color} ${currentHold.level}');
-      logger.d('현재 색상 안내: ${currentHold.color} ${currentHold.level}');
-    } catch (e) {
-      logger.e('음성 안내 중 오류 발생: $e');
-      setState(() {
-        _isSelectingColor = false;
-        _currentColorIndex = -1;
-        _colorSelectionStarted = false;
-        _currentColor = null;
-      });
-      _colorSelectionTimer?.cancel();
-    }
+    await flutterTts.speak('${currentHold.color} ${currentHold.level}');
+    logger.d('선택된 홀드: ${currentHold.color}, holdId: ${currentHold.id}');
   }
 
   void _startColorSelection() async {
@@ -875,90 +764,79 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
     setState(() {
       _isSelectingColor = true;
       _currentColorIndex = 0;
-      _colorSelectionStarted = true;
+      _currentColor = visitLogState.value!.holds[0].color;
     });
 
-    try {
-      await flutterTts.stop(); // 이전 음성 중지
-      await flutterTts.speak(TTSMessages.colorSelecting);
-      await _announceCurrentColor();
+    logger.d('색상 선택 모드 시작: _isSelectingColor=$_isSelectingColor');
+    await _announceCurrentColor();
+    await flutterTts.speak(TTSMessages.colorSelecting);
 
-      // 타이머 시작 전 기존 타이머 취소
-      _colorSelectionTimer?.cancel();
-
-      // 2초마다 다음 색상으로 순환
-      _colorSelectionTimer =
-          Timer.periodic(const Duration(seconds: 2), (timer) {
-        if (!mounted) {
-          timer.cancel();
-          return;
-        }
-
-        final visitLogState = ref.read(visitLogViewModelProvider);
-        if (visitLogState.value == null ||
-            !_isSelectingColor ||
-            visitLogState.value!.holds.isEmpty) {
-          timer.cancel();
-          return;
-        }
-
-        setState(() {
-          _currentColorIndex =
-              (_currentColorIndex + 1) % visitLogState.value!.holds.length;
-        });
-
-        _announceCurrentColor();
-      });
-    } catch (e) {
-      logger.e('색상 선택 시작 중 오류 발생: $e');
-      setState(() {
-        _isSelectingColor = false;
-        _currentColorIndex = -1;
-        _colorSelectionStarted = false;
-      });
-    }
-  }
-
-  void _confirmColorSelection(Hold selectedColor) async {
+    // 타이머 시작 전 기존 타이머 취소
     _colorSelectionTimer?.cancel();
-    setState(() {
-      selectedHold = selectedColor;
-      _isSelectingColor = false;
-      _colorSelectionStarted = false;
-      _currentColor = selectedColor.color;
+
+    // 색상 순환 타이머 시작
+    _colorSelectionTimer =
+        Timer.periodic(const Duration(seconds: 2), (timer) async {
+      if (!mounted || !_isSelectingColor) {
+        timer.cancel();
+        return;
+      }
+
+      final visitLogState = ref.read(visitLogViewModelProvider);
+      if (visitLogState.value == null || visitLogState.value!.holds.isEmpty) {
+        timer.cancel();
+        return;
+      }
+
+      setState(() {
+        _currentColorIndex =
+            (_currentColorIndex + 1) % visitLogState.value!.holds.length;
+        _currentColor = visitLogState.value!.holds[_currentColorIndex].color;
+      });
+
+      logger.d('색상 변경: $_currentColor, 인덱스: $_currentColorIndex');
+      await _announceCurrentColor();
     });
-    ref.read(selectedHoldProvider.notifier).state = selectedColor;
-    await flutterTts.speak(
-        '${selectedColor.color} ${selectedColor.level} 선택되었습니다. 녹화를 시작하려면 양팔을 들어주세요.');
-    logger.d('색상 선택 완료: ${selectedColor.color} ${selectedColor.level}');
   }
 
   Future<void> _handleRecordingComplete(XFile video, bool isSuccess) async {
+    logger.d('비디오 업로드 시작: isSuccess=$isSuccess');
     final visitLogState = ref.read(visitLogViewModelProvider);
     final selectedHold = ref.read(selectedHoldProvider);
 
-    if (visitLogState is AsyncData &&
-        visitLogState.value != null &&
-        selectedHold != null) {
-      try {
-        await ref.read(videoViewModelProvider.notifier).uploadVideo(
-              videoFile: File(video.path),
-              color: selectedHold.color,
-              isSuccess: isSuccess,
-              userDateId: visitLogState.value!.userDateId,
-              holdId: selectedHold.id,
-            );
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('영상이 업로드되었습니다')),
+    if (visitLogState is! AsyncData || visitLogState.value == null) {
+      logger.e('방문 기록 상태가 유효하지 않음');
+      return;
+    }
+
+    if (selectedHold == null) {
+      logger.e('선택된 홀드가 없음');
+      return;
+    }
+
+    try {
+      logger.d(
+          '비디오 업로드 시도: color=${selectedHold.color}, holdId=${selectedHold.id}');
+      await ref.read(videoViewModelProvider.notifier).uploadVideo(
+            videoFile: File(video.path),
+            color: selectedHold.color,
+            isSuccess: isSuccess,
+            userDateId: visitLogState.value!.userDateId,
+            holdId: selectedHold.id,
           );
-        }
-      } catch (e) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('영상 업로드 실패: $e')),
-          );
-        }
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content: Text(isSuccess ? '성공 영상이 업로드되었습니다' : '실패 영상이 업로드되었습니다')),
+        );
+      }
+      logger.d('비디오 업로드 성공');
+    } catch (e) {
+      logger.e('비디오 업로드 실패: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('영상 업로드 실패: $e')),
+        );
       }
     }
   }
@@ -1090,27 +968,46 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
   }
 
   Future<void> _toggleCamera() async {
-    if (!_isInitialized) return;
-
     try {
+      // 현재 녹화 중이면 중지
+      if (_isRecording) {
+        await _stopRecording();
+      }
+
       // 현재 이미지 스트림 중지
-      if (_controller?.value.isStreamingImages ?? false) {
+      final isStreaming = _controller?.value.isStreamingImages ?? false;
+      if (isStreaming) {
         await _controller?.stopImageStream();
+      }
+
+      // 현재 카메라 세션 완전히 종료
+      if (_controller != null) {
+        await _controller?.dispose();
       }
 
       final cameras = await availableCameras();
       if (cameras.length < 2) return;
-
-      // 현재 카메라 dispose
-      await _controller?.dispose();
 
       setState(() {
         _cameraIndex = (_cameraIndex + 1) % cameras.length;
         _controller = null; // 컨트롤러 초기화
       });
 
+      // 새로운 카메라 초기화 전 약간의 딜레이
+      await Future.delayed(const Duration(milliseconds: 500));
+
       // 새로운 카메라로 초기화
       await _initializeCameraController(cameras[_cameraIndex]);
+
+      // 자동 모드일 경우 이미지 스트림 재시작
+      if (_isAutoMode && mounted && _controller != null) {
+        await _controller?.startImageStream((image) {
+          if (!_isProcessingFrame) {
+            _isProcessingFrame = true;
+            _processFrame(image);
+          }
+        });
+      }
 
       if (mounted) {
         setState(() {});
@@ -1205,5 +1102,46 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
         ],
       ),
     );
+  }
+
+  void _handleOGesture() {
+    setState(() {
+      _showGestureGuide = false;
+    });
+    if (_lastRecordedVideo != null && selectedHold != null) {
+      _handleRecordingComplete(_lastRecordedVideo!, true);
+    }
+  }
+
+  void _handleXGesture() {
+    setState(() {
+      _showGestureGuide = false;
+    });
+    if (_lastRecordedVideo != null && selectedHold != null) {
+      _handleRecordingComplete(_lastRecordedVideo!, false);
+    }
+  }
+
+  void _handleColorConfirm() async {
+    if (_currentColorIndex >= 0) {
+      final visitLogState = ref.read(visitLogViewModelProvider);
+      if (visitLogState.value != null &&
+          visitLogState.value!.holds.isNotEmpty) {
+        final currentHold = visitLogState.value!.holds[_currentColorIndex];
+        logger.d('색상 선택 시도: ${currentHold.color}');
+
+        setState(() {
+          selectedHold = currentHold;
+          _isSelectingColor = false;
+          _colorSelectionTimer?.cancel();
+        });
+
+        // 상태 업데이트 후 Provider 업데이트
+        ref.read(selectedHoldProvider.notifier).state = currentHold;
+
+        logger.d('색상 선택 완료: ${currentHold.color}, holdId: ${currentHold.id}');
+        await flutterTts.speak(TTSMessages.readyToRecord);
+      }
+    }
   }
 }

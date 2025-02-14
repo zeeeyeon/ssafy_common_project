@@ -192,7 +192,7 @@ class CalendarScreenState extends ConsumerState<CalendarScreen> {
         padding: const EdgeInsets.symmetric(vertical: 4.0),
         decoration: BoxDecoration(
           color: hasRecord
-              ? const Color.fromRGBO(33, 150, 243, 0.1)
+              ? const Color.fromARGB(255, 255, 255, 255)
               : null, // ✅ 배경색 변경
           border: isToday
               ? Border.all(color: Colors.blue, width: 2)
@@ -211,20 +211,17 @@ class CalendarScreenState extends ConsumerState<CalendarScreen> {
                 ),
               ),
             ),
-            if (hasRecord)
+            if (hasRecord &&
+                _getImagePathFromAttempts(dailyAttempts).isNotEmpty)
               Expanded(
-                  child: Container(
-                margin:
-                    const EdgeInsets.only(left: 6, right: 6, bottom: 2, top: 2),
-                decoration: BoxDecoration(
-                  color: hasRecord
-                      ? Color.fromRGBO(
-                          33, 150, 245, _getOpacityFromAttempts(dailyAttempts))
-                      : null,
-                  borderRadius:
-                      const BorderRadius.vertical(bottom: Radius.circular(6)),
+                child: Container(
+                  margin: const EdgeInsets.only(left: 6, right: 6, bottom: 2),
+                  child: Image.asset(
+                    _getImagePathFromAttempts(dailyAttempts),
+                    fit: BoxFit.cover,
+                  ), // 캐릭터 이미지 표시
                 ),
-              ))
+              ),
           ],
         ),
       ),
@@ -262,11 +259,15 @@ class CalendarScreenState extends ConsumerState<CalendarScreen> {
     return (weekday % 7);
   }
 
-  double _getOpacityFromAttempts(int attempts) {
-    if (attempts >= 20) return 1.0;
-    if (attempts >= 10) return 0.6;
-    if (attempts > 0) return 0.2;
-    return 0.0;
+  String _getImagePathFromAttempts(int attempts) {
+    if (attempts >= 20) {
+      return 'assets/character/stone3.png'; // 3단계
+    } else if (attempts >= 10) {
+      return 'assets/character/stone2.png'; // 2단계
+    } else if (attempts > 0) {
+      return 'assets/character/stone1.png'; // 1단계
+    }
+    return ''; // 기록이 없을 경우 빈 값
   }
 
   int _getDailyAttemptCount(DateTime date, List<CalendarModel>? calendarData) {
@@ -292,7 +293,7 @@ class CalendarScreenState extends ConsumerState<CalendarScreen> {
   void _showCustomDialog(BuildContext context) {
     showModalBottomSheet(
       context: context,
-      backgroundColor: Colors.transparent,
+      backgroundColor: const Color.fromARGB(0, 255, 255, 255),
       builder: (BuildContext context) {
         return Container(
           width: 300,
