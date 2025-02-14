@@ -175,7 +175,7 @@ public class UserDateService {
 
     public ChallUnlockResponseDTO ChallUserDateCheckAndAdd(Long userId,UserDateCheckAndAddRequestDTO requestDTO) {
         ClimbGroundWithDistance climbGround = climbGroundRepository.findClimbGroundByIDAndDistance(requestDTO.getClimbGroundId(),requestDTO.getLatitude(), requestDTO.getLongitude());
-        if (climbGround.getDistance() > 0.5){ // 500 미터 이상이면
+        if (climbGround.getDistance() > 500){ // 500 미터 이상이면
             throw new CustomException(ResponseCode.NOT_FOUND_NEAR_CLIMB);
         }
         //  클라이밍장이 해금 되어 있는지 부터 체크
@@ -196,7 +196,7 @@ public class UserDateService {
 
     public UserDateCheckAndAddResponseDTO UserDateCheckAndAdd(Long userId,UserDateCheckAndAddLocationRequestDTO requestDTO) {
         ClimbGroundWithDistance nearClimbGround = climbGroundRepository.findClimbGroundByDistance(requestDTO.getLatitude(), requestDTO.getLongitude());
-        if (nearClimbGround.getDistance() > 0.5){ // 500 미터 이상이면
+        if (nearClimbGround.getDistance() > 500){ // 500 미터 이상이면
             throw new CustomException(ResponseCode.NOT_FOUND_NEAR_CLIMB);
         }
         //  클라이밍장이 해금 되어 있는지 부터 체크
