@@ -27,62 +27,48 @@ class VideoViewModel extends StateNotifier<AsyncValue<VideoResponse?>> {
     state = const AsyncValue.loading();
 
     try {
-      logger.d("비디오 업로드 시작: ${videoFile.path}");
+      logger.d('비디오 업로드 시작: $color, $isSuccess, $userDateId, $holdId');
 
-      // 원본 파일 크기 확인
-      final fileSize = await videoFile.length();
-      logger.d("원본 파일 크기: ${fileSize ~/ 1024}KB");
+      // 파일 처리 로직
+      File processedVideo = await _processVideo(videoFile);
 
-      File fileToUpload;
-      if (fileSize > 10 * 1024 * 1024) {
-        // 10MB 이상인 경우에만 압축
-        logger.d("비디오 압축 시작");
-        try {
-          final MediaInfo? mediaInfo = await VideoCompress.compressVideo(
-            videoFile.path,
-            quality: VideoQuality.MediumQuality,
-            deleteOrigin: false,
-            includeAudio: true,
-          );
-
-          if (mediaInfo?.file == null) {
-            throw Exception('비디오 압축 실패');
-          }
-          fileToUpload = mediaInfo!.file!;
-          logger.d("압축 후 파일 크기: ${await fileToUpload.length() ~/ 1024}KB");
-        } catch (e) {
-          logger.e("비디오 압축 중 오류 발생: $e");
-          // 압축 실패 시 원본 파일 사용
-          fileToUpload = videoFile;
-        }
-      } else {
-        fileToUpload = videoFile;
-      }
-
+      // 실제 업로드 수행
       final response = await _repository.uploadVideo(
-        videoFile: fileToUpload,
+        videoFile: processedVideo,
+        isSuccess: isSuccess,
         userDateId: userDateId,
         holdId: holdId,
-        isSuccess: isSuccess,
       );
 
-      // 압축된 임시 파일 삭제
-      if (fileToUpload.path != videoFile.path) {
-        try {
-          await fileToUpload.delete();
-        } catch (e) {
-          logger.e("임시 파일 삭제 중 오류: $e");
-        }
-      }
-
       state = AsyncValue.data(response);
-      logger.d("비디오 업로드 완료");
+      logger.d('비디오 업로드 완료');
     } catch (e, stack) {
-      logger.e("비디오 업로드 실패: $e");
+      logger.e('비디오 업로드 실패: $e');
       state = AsyncValue.error(e, stack);
       rethrow;
-    } finally {
-      await VideoCompress.cancelCompression();
+    }
+  }
+
+  Future<File> _processVideo(File videoFile) async {
+    final fileSize = await videoFile.length();
+    if (fileSize <= 10 * 1024 * 1024) return videoFile;
+
+    try {
+      final MediaInfo? mediaInfo = await VideoCompress.compressVideo(
+        videoFile.path,
+        quality: VideoQuality.MediumQuality,
+        deleteOrigin: false,
+        includeAudio: true,
+      );
+
+      if (mediaInfo?.file == null) {
+        throw Exception('비디오 압축 실패');
+      }
+
+      return mediaInfo!.file!;
+    } catch (e) {
+      logger.e('비디오 압축 중 오류 발생: $e');
+      return videoFile;
     }
   }
 }

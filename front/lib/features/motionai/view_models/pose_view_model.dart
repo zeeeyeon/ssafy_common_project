@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_mlkit_pose_detection/google_mlkit_pose_detection.dart';
 import 'package:logger/logger.dart';
 import '../utils/angle_calculator.dart';
+import 'dart:math' as math;
 
 final logger = Logger();
 
@@ -25,15 +26,12 @@ final poseViewModelProvider = StateNotifierProvider<PoseViewModel, bool>((ref) {
 class PoseViewModel extends StateNotifier<bool> {
   PoseViewModel() : super(false);
   int _consecutiveStartPoseFrames = 0;
-  int _consecutiveResultPoseFrames = 0;
+  int _consecutiveOXPoseFrames = 0;
   int _consecutiveColorSelectFrames = 0;
-  int _consecutiveResetFrames = 0;
   int _consecutiveConfirmFrames = 0;
+  bool? _lastDetectedResult; // true: O(성공), false: X(실패)
   static const int requiredConsecutiveFrames = 10;
-
-  // 마지막으로 감지된 O/X 포즈의 각도를 저장
-  double _lastLeftArmAngle = 0;
-  double _lastRightArmAngle = 0;
+  static int consecutiveClapFrames = 0; // 연속 박수 프레임 카운트
 
   bool checkStartPose(Pose pose) {
     try {
@@ -87,127 +85,6 @@ class PoseViewModel extends StateNotifier<bool> {
       return false;
     } catch (e) {
       logger.e('시작 포즈 체크 중 오류 발생: $e');
-      return false;
-    }
-  }
-
-  bool checkResultPose(Pose pose) {
-    try {
-      final leftShoulder = pose.landmarks[PoseLandmarkType.leftShoulder];
-      final leftElbow = pose.landmarks[PoseLandmarkType.leftElbow];
-      final leftWrist = pose.landmarks[PoseLandmarkType.leftWrist];
-      final leftThumb = pose.landmarks[PoseLandmarkType.leftThumb];
-      final leftPinky = pose.landmarks[PoseLandmarkType.leftPinky];
-      final rightShoulder = pose.landmarks[PoseLandmarkType.rightShoulder];
-      final rightElbow = pose.landmarks[PoseLandmarkType.rightElbow];
-      final rightWrist = pose.landmarks[PoseLandmarkType.rightWrist];
-      final rightThumb = pose.landmarks[PoseLandmarkType.rightThumb];
-      final rightPinky = pose.landmarks[PoseLandmarkType.rightPinky];
-
-      if (leftShoulder == null ||
-          leftElbow == null ||
-          leftWrist == null ||
-          leftThumb == null ||
-          leftPinky == null ||
-          rightShoulder == null ||
-          rightElbow == null ||
-          rightWrist == null ||
-          rightThumb == null ||
-          rightPinky == null) {
-        _consecutiveResultPoseFrames = 0;
-        return false;
-      }
-
-      // 양손이 가슴 앞에 있는지 확인
-      final isHandsInFront =
-          leftWrist.y > leftShoulder.y - 50 && // 손이 어깨보다 약간 위에
-              leftWrist.y < leftShoulder.y + 150 && // 손이 허리보다 위에
-              rightWrist.y > rightShoulder.y - 50 &&
-              rightWrist.y < rightShoulder.y + 150;
-
-      // 엄지와 새끼손가락의 Y좌표 차이로 엄지 방향 판단
-      final leftThumbDirection = leftPinky.y - leftThumb.y;
-      final rightThumbDirection = rightPinky.y - rightThumb.y;
-
-      // 디버깅 로그 추가
-      logger.d('왼쪽 엄지-새끼 차이: $leftThumbDirection');
-      logger.d('오른쪽 엄지-새끼 차이: $rightThumbDirection');
-      logger.d(
-          '손 위치 - 왼쪽: ${leftWrist.y - leftShoulder.y}, 오른쪽: ${rightWrist.y - rightShoulder.y}');
-
-      // 엄지가 위로 향하는 경우 (성공)
-      final isThumbsUp = leftThumbDirection > 30 && rightThumbDirection > 30;
-      // 엄지가 아래로 향하는 경우 (실패)
-      final isThumbsDown =
-          leftThumbDirection < -30 && rightThumbDirection < -30;
-
-      if (isHandsInFront && (isThumbsUp || isThumbsDown)) {
-        _consecutiveResultPoseFrames++;
-        logger.d(
-            '포즈 감지: ${isThumbsUp ? "성공" : "실패"} ($_consecutiveResultPoseFrames/5)');
-
-        if (_consecutiveResultPoseFrames >= 5) {
-          _lastLeftArmAngle = isThumbsUp ? 1.0 : 0.0;
-          state = false;
-          return true;
-        }
-      } else {
-        if (_consecutiveResultPoseFrames > 0) {
-          logger.d('포즈 실패 - 손 위치 부적절 또는 엄지 방향 불명확');
-        }
-        _consecutiveResultPoseFrames = 0;
-      }
-
-      return false;
-    } catch (e) {
-      logger.e('결과 포즈 체크 중 오류 발생: $e');
-      return false;
-    }
-  }
-
-  bool checkEndPose(Pose pose) {
-    try {
-      final leftShoulder = pose.landmarks[PoseLandmarkType.leftShoulder];
-      final leftElbow = pose.landmarks[PoseLandmarkType.leftElbow];
-      final leftWrist = pose.landmarks[PoseLandmarkType.leftWrist];
-      final rightShoulder = pose.landmarks[PoseLandmarkType.rightShoulder];
-      final rightElbow = pose.landmarks[PoseLandmarkType.rightElbow];
-      final rightWrist = pose.landmarks[PoseLandmarkType.rightWrist];
-
-      if (leftShoulder == null ||
-          leftElbow == null ||
-          leftWrist == null ||
-          rightShoulder == null ||
-          rightElbow == null ||
-          rightWrist == null) {
-        _consecutiveResultPoseFrames = 0;
-        return false;
-      }
-
-      // 양손을 들어올리는 포즈 체크 (녹화 종료)
-      final leftArmAngle =
-          AngleCalculator.calculateAngle(leftShoulder, leftElbow, leftWrist);
-      final rightArmAngle =
-          AngleCalculator.calculateAngle(rightShoulder, rightElbow, rightWrist);
-
-      final isEndPose = leftArmAngle >= 150 &&
-          rightArmAngle >= 150 &&
-          leftWrist.y < leftShoulder.y &&
-          rightWrist.y < rightShoulder.y;
-
-      if (isEndPose) {
-        _consecutiveResultPoseFrames++;
-        if (_consecutiveResultPoseFrames >= requiredConsecutiveFrames) {
-          state = false;
-          return true;
-        }
-      } else {
-        _consecutiveResultPoseFrames = 0;
-      }
-
-      return false;
-    } catch (e) {
-      logger.e('종료 포즈 체크 중 오류 발생: $e');
       return false;
     }
   }
@@ -291,45 +168,6 @@ class PoseViewModel extends StateNotifier<bool> {
     }
   }
 
-  bool checkResetPose(Pose pose) {
-    try {
-      final leftShoulder = pose.landmarks[PoseLandmarkType.leftShoulder];
-      final leftElbow = pose.landmarks[PoseLandmarkType.leftElbow];
-      final leftWrist = pose.landmarks[PoseLandmarkType.leftWrist];
-
-      if (leftShoulder == null || leftElbow == null || leftWrist == null) {
-        _consecutiveResetFrames = 0;
-        return false;
-      }
-
-      // 왼팔을 들어올리는 포즈 체크 (색상 선택 초기화)
-      final leftArmAngle =
-          AngleCalculator.calculateAngle(leftShoulder, leftElbow, leftWrist);
-
-      // 디버깅을 위한 로그 추가
-      logger.d('왼쪽 팔 각도: $leftArmAngle');
-      logger.d('왼쪽 손목 Y: ${leftWrist.y}, 왼쪽 어깨 Y: ${leftShoulder.y}');
-
-      // 왼팔을 130도 이상 들어올린 자세
-      final isResetPose = leftArmAngle >= 130 && leftWrist.y < leftShoulder.y;
-
-      if (isResetPose) {
-        _consecutiveResetFrames++;
-        logger.d('연속 프레임 수 (초기화): $_consecutiveResetFrames');
-        if (_consecutiveResetFrames >= 5) {
-          return true;
-        }
-      } else {
-        _consecutiveResetFrames = 0;
-      }
-
-      return false;
-    } catch (e) {
-      logger.e('초기화 포즈 체크 중 오류 발생: $e');
-      return false;
-    }
-  }
-
   bool checkClapPose(Pose pose) {
     try {
       final leftShoulder = pose.landmarks[PoseLandmarkType.leftShoulder];
@@ -387,30 +225,117 @@ class PoseViewModel extends StateNotifier<bool> {
     }
   }
 
-  // 마지막으로 감지된 왼팔 각도 반환
-  double getLastLeftArmAngle() {
-    return _lastLeftArmAngle;
+  bool checkRaisedHandsPose(Pose pose) {
+    try {
+      final leftWrist = pose.landmarks[PoseLandmarkType.leftWrist];
+      final rightWrist = pose.landmarks[PoseLandmarkType.rightWrist];
+      final leftShoulder = pose.landmarks[PoseLandmarkType.leftShoulder];
+      final rightShoulder = pose.landmarks[PoseLandmarkType.rightShoulder];
+      final leftElbow = pose.landmarks[PoseLandmarkType.leftElbow];
+      final rightElbow = pose.landmarks[PoseLandmarkType.rightElbow];
+
+      if ([
+        leftWrist,
+        rightWrist,
+        leftShoulder,
+        rightShoulder,
+        leftElbow,
+        rightElbow
+      ].any((point) => point == null)) {
+        return false;
+      }
+
+      // 양팔이 위로 올라가 있는지 확인 (만세 자세)
+      final leftArmAngle =
+          AngleCalculator.calculateAngle(leftShoulder!, leftElbow!, leftWrist!);
+      final rightArmAngle = AngleCalculator.calculateAngle(
+          rightShoulder!, rightElbow!, rightWrist!);
+
+      // 양손이 어깨보다 충분히 위에 있고, 팔이 펴져있는지 확인
+      final handsAboveShoulders =
+          leftWrist.y < leftShoulder.y - 0.2 && // 어깨보다 20% 이상 위에
+              rightWrist.y < rightShoulder.y - 0.2;
+      final armsExtended =
+          leftArmAngle > 150 && rightArmAngle > 150; // 팔이 거의 펴져있음
+
+      logger.d('만세 포즈 체크 - 왼팔각도: $leftArmAngle, 오른팔각도: $rightArmAngle');
+      logger.d('손 위치 - 왼손: ${leftWrist.y}, 오른손: ${rightWrist.y}');
+
+      return handsAboveShoulders && armsExtended;
+    } catch (e) {
+      logger.e('만세 포즈 체크 중 오류: $e');
+      return false;
+    }
   }
 
-  // 마지막으로 감지된 오른팔 각도 반환
-  double getLastRightArmAngle() {
-    return _lastRightArmAngle;
+  bool checkOXPose(Pose pose) {
+    try {
+      final leftWrist = pose.landmarks[PoseLandmarkType.leftWrist];
+      final leftElbow = pose.landmarks[PoseLandmarkType.leftElbow];
+      final rightWrist = pose.landmarks[PoseLandmarkType.rightWrist];
+      final rightElbow = pose.landmarks[PoseLandmarkType.rightElbow];
+      final head = pose.landmarks[PoseLandmarkType.nose]; // 머리 위치 추가
+      final leftShoulder = pose.landmarks[PoseLandmarkType.leftShoulder];
+      final rightShoulder = pose.landmarks[PoseLandmarkType.rightShoulder];
+
+      if ([
+        leftWrist,
+        leftElbow,
+        rightWrist,
+        rightElbow,
+        head,
+        leftShoulder,
+        rightShoulder
+      ].any((point) => point == null)) {
+        return false;
+      }
+
+      // O 포즈: 손이 머리 위에서 동그라미를 만듦
+      bool isOPose = leftWrist!.y < head!.y &&
+          rightWrist!.y < head.y &&
+          leftElbow!.y < leftShoulder!.y &&
+          rightElbow!.y < rightShoulder!.y &&
+          (leftWrist.x - rightWrist.x).abs() < 200; // x 허용 오차 증가
+
+      // X 포즈: 양팔이 교차
+      double leftSlope =
+          (leftWrist.y - leftElbow!.y) / (leftWrist.x - leftElbow.x);
+      double rightSlope =
+          (rightWrist!.y - rightElbow!.y) / (rightWrist.x - rightElbow.x);
+      bool isXPose = leftSlope * rightSlope < -0.5 && // 기울기가 반대 방향
+          (leftWrist.x - rightWrist.x).abs() < 200 && // x 허용 오차 증가
+          (leftWrist.y - rightWrist.y).abs() < 200; // y 허용 오차 증가
+
+      if (isOPose) {
+        _consecutiveOXPoseFrames++;
+        _lastDetectedResult = true;
+      } else if (isXPose) {
+        _consecutiveOXPoseFrames++;
+        _lastDetectedResult = false;
+      } else {
+        _consecutiveOXPoseFrames = 0;
+        _lastDetectedResult = null;
+      }
+
+      return _consecutiveOXPoseFrames >= 5; // 5프레임 연속 감지되면 인식
+    } catch (e) {
+      logger.e('O/X 포즈 체크 중 오류 발생: $e');
+      return false;
+    }
   }
 
-  // 성공/실패 판정을 위한 헬퍼 메소드
-  bool wasSuccessfulPose() {
-    return _lastLeftArmAngle > 0.5; // 1.0이면 성공, 0.0이면 실패
+  // 마지막으로 감지된 O/X 결과 반환
+  bool? getLastDetectedResult() {
+    return _lastDetectedResult;
   }
 
   @override
   void resetState() {
     state = false;
     _consecutiveStartPoseFrames = 0;
-    _consecutiveResultPoseFrames = 0;
+    _consecutiveOXPoseFrames = 0;
     _consecutiveColorSelectFrames = 0;
-    _consecutiveResetFrames = 0;
     _consecutiveConfirmFrames = 0;
-    _lastLeftArmAngle = 0;
-    _lastRightArmAngle = 0;
+    _lastDetectedResult = null;
   }
 }
