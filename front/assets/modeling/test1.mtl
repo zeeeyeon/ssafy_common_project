@@ -1,0 +1,12 @@
+# Blender 4.3.2 MTL File: 'None'
+# www.blender.org
+
+newmtl Material.001
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd C:/Users/SSAFY/Downloads/2b5cc0c4-7912-4812-b393-4d39380fa7c4/Pbr/texture_diffuse.png
+map_Ns C:/Users/SSAFY/Downloads/2b5cc0c4-7912-4812-b393-4d39380fa7c4/Pbr/texture_roughness.png
