@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kkulkkulk/common/gps/gps.dart';
+import 'package:kkulkkulk/common/notification/notification.dart';
 import 'package:kkulkkulk/features/challenge/data/models/challenge_all_model.dart';
 import 'package:kkulkkulk/features/challenge/data/models/challenge_response_model.dart';
 import 'package:kkulkkulk/features/challenge/data/models/near_challenge_model.dart';
@@ -49,6 +50,11 @@ class _ChallengeFormState extends State<ChallengeForm> {
         nearPlace = nearByPlace;
         isLoading = false;
       });
+
+      print('API 응답: $nearByPlace');
+      NotificationService()
+          .showPushAlarm('끌락끌락 챌린지 감지!!!', '끌락끌락 챌린지 해당 클라이밍장이 주변에 있습니다.');
+      print('showPushAlarm 호출됨!');
     } catch (e) {
       setState(() {
         isLoading = false;

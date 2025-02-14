@@ -7,7 +7,7 @@ import 'package:kkulkkulk/features/auth/components/text_form.dart';
 import 'package:kkulkkulk/features/auth/view_models/log_in_view_model.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 
-class LoginForm extends ConsumerWidget{
+class LoginForm extends ConsumerWidget {
   final _formKey = GlobalKey<FormState>();
   // final AuthRepository _authRepository = AuthRepository();
 
@@ -19,7 +19,7 @@ class LoginForm extends ConsumerWidget{
   // Future<void> kakaoLogin() async {
   //   print('시작');
   //   final kakaoLoginUrl = Uri.parse('https://kauth.kakao.com/oauth/authorize?client_id=클라이언트아이디&redirect_uri=리다이렉트&response_type=code');
-    
+
   //   if (await canLaunchUrl(kakaoLoginUrl)) {
   //     await launchUrl(kakaoLoginUrl);
   //   } else {
@@ -35,7 +35,7 @@ class LoginForm extends ConsumerWidget{
       print('로그인 시작');
       try {
         bool flag = await logInViewModel.login(context, ref);
-        if(flag) {
+        if (flag) {
           final token = ref.watch(jwtTokenProvider);
 
           String? username = '';
@@ -55,15 +55,14 @@ class LoginForm extends ConsumerWidget{
             SnackBar(content: Text('환영합니다 $username 님')),
           );
           context.go('/calendar');
-        }else if(!flag) {
+        } else if (!flag) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('로그인 실패')),
           );
         }
-        
-      } catch(e) {
+      } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('로그인 에러 발생')),
+          SnackBar(content: Text('로그인 에러 발생')),
         );
       }
     }
@@ -73,6 +72,7 @@ class LoginForm extends ConsumerWidget{
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          Image.asset('assets/rock/rockrock.gif'),
           TextForm(
             'Email',
             logInViewModel.emailController,
@@ -107,7 +107,7 @@ class LoginForm extends ConsumerWidget{
               onPressed: () {
                 print("kakao");
                 // kakaoLogin();
-              }, 
+              },
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
@@ -135,7 +135,6 @@ class LoginForm extends ConsumerWidget{
               ),
             ),
           ),
-
         ],
       ),
     );
