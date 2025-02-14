@@ -78,7 +78,9 @@ public enum ResponseCode {
     NO_CONTENT_ALBUM(204, HttpStatus.OK, "해당 날짜에 클라이밍 영상을 찾을 수 없습니다."),
     NOT_FOUND_NEAR_CLIMB(404,HttpStatus.NOT_FOUND, "현재 위치에서 오차범위 안에 있는 클라이밍장을 찾을 수 없습니다."),
     NOT_UNLOCK_CLIMB(400,HttpStatus.BAD_REQUEST,"해금되지 않은 클라이밍장 입니다."),
-    NO_EXISTED_GLB_FILE(400, HttpStatus.BAD_REQUEST, "GLB 파일이 없습니다.");
+    NO_EXISTED_GLB_FILE(400, HttpStatus.BAD_REQUEST, "GLB 파일이 없습니다."),
+    ALEADY_USER_DATE_TODAY(208, HttpStatus.ALREADY_REPORTED,"이미 오늘 다른 클라이밍장에서 활동을 하셨습니다.");
+
 
     private int code;
     private HttpStatus httpStatus;

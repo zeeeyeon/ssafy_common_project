@@ -56,6 +56,10 @@ public class UserDateController {
     public ResponseEntity<?> startRecord (@AuthenticationPrincipal CustomUserDetails userDetails , @RequestBody UserDateCheckAndAddRequestDTO requestDTO) {
         Long userId = userDetails.getUser().getId();
         ChallUnlockResponseDTO responseDTO = userDateService.ChallUserDateCheckAndAdd(userId,requestDTO);
+        if (responseDTO.getUserDate() == null) { // userDate가 null이면 오늘 이미 다른 한곳에서 한것
+            return new ResponseEntity<>(Response.create(ALEADY_USER_DATE_TODAY,responseDTO), ALEADY_USER_DATE_TODAY.getHttpStatus());
+        }
+
         if (responseDTO != null) {
             if (responseDTO.getUserDate().isNewlyCreated()){ //새로 생성 한것 이면
                 return new ResponseEntity<>(Response.create(POST_USER_DATE, responseDTO), POST_USER_DATE.getHttpStatus());
@@ -70,6 +74,7 @@ public class UserDateController {
     public ResponseEntity<?> startNearLocationRecord (@AuthenticationPrincipal CustomUserDetails userDetails,@RequestBody UserDateCheckAndAddLocationRequestDTO requestDTO) {
         Long userId = userDetails.getUser().getId();
         UserDateCheckAndAddResponseDTO responseDTO = userDateService.UserDateCheckAndAdd(userId,requestDTO);
+
         if (responseDTO != null) {
             if (responseDTO.isNewlyCreated()){ //새로 생성 한것 이면
                 return new ResponseEntity<>(Response.create(POST_USER_DATE, responseDTO), POST_USER_DATE.getHttpStatus());
@@ -77,6 +82,7 @@ public class UserDateController {
             // 이미 전에 생성된적 있으면
             return new ResponseEntity<>(Response.create(ALEADY_USER_DATE, responseDTO), ALEADY_USER_DATE.getHttpStatus());
         }
-        throw new CustomException(ResponseCode.BAD_REQUEST);
+        return new ResponseEntity<>(Response.create(ALEADY_USER_DATE_TODAY,responseDTO), ALEADY_USER_DATE_TODAY.getHttpStatus());
+//        throw new CustomException(ResponseCode.BAD_REQUEST);
     }
 }
