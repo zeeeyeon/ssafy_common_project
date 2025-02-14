@@ -55,15 +55,15 @@ class UserProfile {
   String get tierImage {
     switch (userTier.toUpperCase()) {
       case "DIAMOND":
-        return "assets/images/tier/diamond.webp";
+        return "assets/images/tier/Diamond.webp";
       case "PLATINUM":
-        return "assets/images/tier/platinum.webp";
+        return "assets/images/tier/Platinum.webp";
       case "GOLD":
-        return "assets/images/tier/gold.webp";
+        return "assets/images/tier/Gold.webp";
       case "SILVER":
         return "assets/images/tier/silver.webp";
       case "BRONZE":
-        return "assets/images/tier/bronze.webp";
+        return "assets/images/tier/Bronze.webp";
       default:
         return "assets/images/tier/unranked.webp";
     }
