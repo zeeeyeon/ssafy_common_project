@@ -45,6 +45,13 @@ public interface UserDateRepository extends JpaRepository<UserDate, Long> {
     Optional<UserDate> findUserDateByUserAndClimbgroundAndDate(
         Long userId, Long climbGroundId, LocalDateTime startOfDay, LocalDateTime endOfDay
     );
+        @Query("SELECT ud FROM UserDate ud " +
+            "JOIN ud.userClimbGround uc " +
+            "WHERE uc.user.id = :userId " +
+            "AND ud.createdAt >= :startOfDay AND ud.createdAt < :endOfDay ")
+    Optional<UserDate> findUserDateByUserAndDate(
+        Long userId, LocalDateTime startOfDay, LocalDateTime endOfDay
+    );
 
 
     //앨범 조회

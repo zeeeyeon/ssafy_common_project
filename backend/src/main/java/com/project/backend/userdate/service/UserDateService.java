@@ -234,10 +234,16 @@ public class UserDateService {
         LocalDateTime startOfDay = date.atStartOfDay(koreaZone).toLocalDateTime();
         LocalDateTime endOfDay = date.atTime(LocalTime.MAX).atZone(koreaZone).toLocalDateTime();
 
-        Optional<UserDate> userDate =userDateRepository.findUserDateByUserAndClimbgroundAndDate(userId, userClimbGround.getClimbGround().getId(), startOfDay, endOfDay);
+        Optional<UserDate> userDate =userDateRepository.findUserDateByUserAndDate(
+                userId, startOfDay, endOfDay
+        );
 
         UserDateCheckAndAddResponseDTO responseDTO = new UserDateCheckAndAddResponseDTO();
         if (userDate.isPresent()) { // 데이터가 있으면
+            if (userDate.get().getUserClimbGround().getClimbGround().getId() != userClimbGround.getClimbGround().getId()) {
+                return null;
+            } // 이미 오늘 다른 클라이밍장에서 활동을 했을시
+
             responseDTO.setUserDateId(userDate.get().getId());
             responseDTO.setName(userDate.get().getUserClimbGround().getClimbGround().getName());
             List<HoldResponseDTO> holds = userDate.get().getUserClimbGround().getClimbGround().getHoldList().stream()
