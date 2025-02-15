@@ -146,7 +146,10 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
   }
 
   Future<void> _speak(String text) async {
-    await flutterTts.speak(text);
+    if (mounted) {
+      await flutterTts.speak(text);
+      await flutterTts.awaitSpeakCompletion(true); // TTS 완료 대기
+    }
   }
 
   @override
@@ -167,19 +170,25 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
   Future<void> _initializeCamera() async {
     try {
       final cameras = await availableCameras();
-      // 초광각 카메라 찾기
-      _cameraIndex = cameras.indexWhere(
-        (camera) =>
-            camera.lensDirection == CameraLensDirection.back &&
-            camera.sensorOrientation == 270, // 초광각 카메라는 보통 270도
-      );
-      if (_cameraIndex == -1) _cameraIndex = 0;
+      // _isFrontCamera 플래그 기준으로 카메라 선택
+      if (_isFrontCamera) {
+        _cameraIndex = cameras.indexWhere(
+            (camera) => camera.lensDirection == CameraLensDirection.front);
+        if (_cameraIndex == -1) _cameraIndex = 0;
+      } else {
+        _cameraIndex = cameras.indexWhere((camera) =>
+                camera.lensDirection == CameraLensDirection.back &&
+                camera.sensorOrientation == 270 // 후면 카메라 조건 (필요에 따라 수정)
+            );
+        if (_cameraIndex == -1) {
+          _cameraIndex = cameras.indexWhere(
+              (camera) => camera.lensDirection == CameraLensDirection.back);
+        }
+      }
 
-      // 카메라 컨트롤러 초기화
+      // 선택한 카메라로 컨트롤러 초기화 진행
       await _initializeCameraController(cameras[_cameraIndex]);
-
-      // 포즈 감지기 초기화
-      _poseDetector = await CustomPoseDetector.create();
+      logger.d('카메라 초기화 완료 (모드: ${_isFrontCamera ? "전면" : "후면"})');
 
       if (mounted) {
         setState(() {
@@ -187,17 +196,18 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
         });
       }
     } catch (e) {
+      logger.e('카메라 컨트롤러 초기화 실패: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('카메라 초기화 실패: $e')),
+          SnackBar(content: Text('카메라 컨트롤러 초기화 실패: $e')),
         );
       }
+      rethrow;
     }
   }
 
   Future<void> _initializeCameraController(CameraDescription camera) async {
     try {
-      // 기존 컨트롤러 정리
       if (_controller != null) {
         final wasStreaming = _controller!.value.isStreamingImages;
         if (wasStreaming) {
@@ -207,7 +217,6 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
         _controller = null;
       }
 
-      // 새 컨트롤러 생성 전 약간의 딜레이
       await Future.delayed(const Duration(milliseconds: 300));
 
       _controller = CameraController(
@@ -217,22 +226,20 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
         imageFormatGroup: ImageFormatGroup.nv21,
       );
 
-      // 컨트롤러 초기화
       await _controller!.initialize();
       logger.d('카메라 초기화 완료');
 
-      // 기본 카메라 설정
       await Future.wait([
         _controller!.setFocusMode(FocusMode.auto),
         _controller!.setExposureMode(ExposureMode.auto),
         _controller!.setFlashMode(FlashMode.off),
       ]);
 
-      // 자동 모드일 때만 이미지 스트림 시작
+      // 자동모드라면 이미지 스트림 시작
       if (_isAutoMode && mounted) {
-        // 이미지 스트림 시작 전 추가 딜레이
         await Future.delayed(const Duration(milliseconds: 500));
-
+        logger.d(
+            '자동모드 점검 - isAutoMode: $_isAutoMode, isStreaming: ${_controller!.value.isStreamingImages}');
         if (!_controller!.value.isStreamingImages) {
           logger.d('이미지 스트림 시작');
           await _controller!.startImageStream((image) {
@@ -250,6 +257,8 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
               });
             }
           });
+        } else {
+          logger.d('이미지 스트림 이미 진행중');
         }
       }
 
@@ -830,6 +839,8 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
               });
               _resetCaptureState();
             }
+            logger.d('녹화 재시작');
+            _initializeCamera();
           }
         }
         return; // O/X 인식 중에는 다른 포즈 인식하지 않음
@@ -1174,7 +1185,7 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
             ),
             const SizedBox(height: 16),
             _buildPoseGuideItem(
-              '녹화 시작/종료',
+              '녹화 시작',
               '양손을 어깨 위로 들어올리세요',
               Icons.front_hand,
             ),
@@ -1233,5 +1244,22 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
         ],
       ),
     );
+  }
+
+  Future<void> _onVideoUploadCompleted() async {
+    setState(() {
+      _isRecording = false;
+      _isAutoMode = true;
+    });
+
+    // 5초 딜레이: 업로드 완료 후 5초 동안 대기합니다.
+    await Future.delayed(const Duration(seconds: 5));
+
+    // 5초 이후에 카메라 컨트롤러를 재초기화하여 이미지 스트림을 재시작합니다.
+    _initializeCamera().then((_) {
+      logger.d('비디오 업로드 후 5초 뒤 카메라 재초기화 및 이미지 스트림 재시작 완료');
+    }).catchError((e) {
+      logger.e('비디오 업로드 후 카메라 재초기화 오류: $e');
+    });
   }
 }
