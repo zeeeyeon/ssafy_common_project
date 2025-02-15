@@ -5,7 +5,6 @@ import 'package:camera/camera.dart';
 import 'package:kkulkkulk/features/camera/view_models/video_view_model.dart';
 import 'package:kkulkkulk/features/camera/view_models/visit_log_view_model.dart';
 import 'package:kkulkkulk/features/camera/data/models/hold_model.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:kkulkkulk/features/camera/providers/camera_providers.dart';
 import 'package:logger/logger.dart';
 
@@ -14,45 +13,117 @@ final logger = Logger();
 class SuccessFailureDialog extends ConsumerWidget {
   final XFile video;
   final Hold selectedHold;
-  final VoidCallback? onResultSelected;
+  final Future<void> Function(bool isSuccess) onResultSelected;
 
   const SuccessFailureDialog({
     Key? key,
     required this.video,
     required this.selectedHold,
-    this.onResultSelected,
+    required this.onResultSelected,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return CupertinoActionSheet(
-      title: const Text(
-        '등반 결과',
-        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+    return Dialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
       ),
-      message: const Text(
-        '이번 등반을 성공하셨나요?',
-        style: TextStyle(fontSize: 15, color: Colors.grey),
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(
+              Icons.emoji_events_rounded,
+              size: 60,
+              color: Colors.amber,
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              '등반 결과',
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              '이번 등반을 성공하셨나요?',
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.grey,
+              ),
+            ),
+            const SizedBox(height: 24),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                _buildButton(
+                  context: context,
+                  ref: ref,
+                  isSuccess: true,
+                  icon: Icons.check_circle_outline,
+                  label: '성공',
+                  color: Colors.green,
+                ),
+                _buildButton(
+                  context: context,
+                  ref: ref,
+                  isSuccess: false,
+                  icon: Icons.cancel_outlined,
+                  label: '실패',
+                  color: Colors.red,
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text(
+                '취소',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.grey,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
-      actions: [
-        CupertinoActionSheetAction(
-          onPressed: () async {
-            await _handleResult(context, ref, true);
-            onResultSelected?.call();
-          },
-          child: const Text('성공', style: TextStyle(color: Colors.blue)),
+    );
+  }
+
+  Widget _buildButton({
+    required BuildContext context,
+    required WidgetRef ref,
+    required bool isSuccess,
+    required IconData icon,
+    required String label,
+    required Color color,
+  }) {
+    return ElevatedButton(
+      onPressed: () async {
+        await _handleResult(context, ref, isSuccess);
+      },
+      style: ElevatedButton.styleFrom(
+        backgroundColor: color.withOpacity(0.1),
+        foregroundColor: color,
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(15),
+          side: BorderSide(color: color),
         ),
-        CupertinoActionSheetAction(
-          onPressed: () async {
-            await _handleResult(context, ref, false);
-            onResultSelected?.call();
-          },
-          child: const Text('실패', style: TextStyle(color: Colors.red)),
-        ),
-      ],
-      cancelButton: CupertinoActionSheetAction(
-        onPressed: () => Navigator.pop(context),
-        child: const Text('취소'),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 28),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            style: const TextStyle(fontSize: 16),
+          ),
+        ],
       ),
     );
   }

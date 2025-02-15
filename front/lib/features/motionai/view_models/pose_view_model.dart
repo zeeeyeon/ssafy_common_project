@@ -1,3 +1,4 @@
+import 'package:camera/camera.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_mlkit_pose_detection/google_mlkit_pose_detection.dart';
 import 'package:logger/logger.dart';
@@ -170,52 +171,33 @@ class PoseViewModel extends StateNotifier<bool> {
 
   bool checkClapPose(Pose pose) {
     try {
-      final leftShoulder = pose.landmarks[PoseLandmarkType.leftShoulder];
-      final leftElbow = pose.landmarks[PoseLandmarkType.leftElbow];
       final leftWrist = pose.landmarks[PoseLandmarkType.leftWrist];
-      final rightShoulder = pose.landmarks[PoseLandmarkType.rightShoulder];
-      final rightElbow = pose.landmarks[PoseLandmarkType.rightElbow];
       final rightWrist = pose.landmarks[PoseLandmarkType.rightWrist];
 
-      if (leftShoulder == null ||
-          leftElbow == null ||
-          leftWrist == null ||
-          rightShoulder == null ||
-          rightElbow == null ||
-          rightWrist == null) {
-        _consecutiveConfirmFrames = 0;
+      if (leftWrist == null || rightWrist == null) {
+        logger.d('손목 랜드마크 누락');
+        consecutiveClapFrames = 0;
         return false;
       }
 
-      // 양손이 가운데에서 만나는지 확인
-      final leftWristX = leftWrist.x;
-      final rightWristX = rightWrist.x;
-      final centerX = (leftShoulder.x + rightShoulder.x) / 2;
+      // 양손이 서로 가까이 있는지 확인 (정규화된 좌표 기준 15% 이내)
+      final handsClose = (rightWrist.x - leftWrist.x).abs() < 0.15 && // 15% 이내
+          (rightWrist.y - leftWrist.y).abs() < 0.15; // 15% 이내
 
-      // 양손이 어깨 높이 정도에 있는지 확인
-      final shoulderY = (leftShoulder.y + rightShoulder.y) / 2;
-      final wristY = (leftWrist.y + rightWrist.y) / 2;
+      logger.d(
+          '손 간격 (정규화된 값) - X: ${(rightWrist.x - leftWrist.x).abs()}, Y: ${(rightWrist.y - leftWrist.y).abs()}');
 
-      // 박수 포즈 조건:
-      // 1. 양손이 중앙에서 만남 (손목 X좌표가 서로 가까움)
-      // 2. 손이 어깨 높이 근처에 있음
-      final handsClose = (rightWristX - leftWristX).abs() < 50; // 50픽셀 이내
-      final handsAtShoulderHeight =
-          (wristY - shoulderY).abs() < 100; // 어깨 높이 ±100픽셀
-      final handsNearCenter =
-          ((leftWristX + rightWristX) / 2 - centerX).abs() < 100; // 중앙 ±100픽셀
-
-      final isClapPose = handsClose && handsAtShoulderHeight && handsNearCenter;
-
-      if (isClapPose) {
-        _consecutiveConfirmFrames++;
-        logger.d('연속 프레임 수 (박수): $_consecutiveConfirmFrames');
-        if (_consecutiveConfirmFrames >= 3) {
-          // 3프레임 연속 감지
+      if (handsClose) {
+        consecutiveClapFrames++;
+        logger.d('박수 포즈 감지! 연속 프레임: $consecutiveClapFrames');
+        if (consecutiveClapFrames >= 1) {
+          // 1프레임으로 유지 (즉각 반응)
+          logger.d('박수 인식 성공!');
+          consecutiveClapFrames = 0;
           return true;
         }
       } else {
-        _consecutiveConfirmFrames = 0;
+        consecutiveClapFrames = 0;
       }
 
       return false;
