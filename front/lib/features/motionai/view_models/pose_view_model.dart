@@ -256,7 +256,7 @@ class PoseViewModel extends StateNotifier<bool> {
       final leftElbow = pose.landmarks[PoseLandmarkType.leftElbow];
       final rightWrist = pose.landmarks[PoseLandmarkType.rightWrist];
       final rightElbow = pose.landmarks[PoseLandmarkType.rightElbow];
-      final head = pose.landmarks[PoseLandmarkType.nose]; // 머리 위치 추가
+      final head = pose.landmarks[PoseLandmarkType.nose];
       final leftShoulder = pose.landmarks[PoseLandmarkType.leftShoulder];
       final rightShoulder = pose.landmarks[PoseLandmarkType.rightShoulder];
 
@@ -269,37 +269,53 @@ class PoseViewModel extends StateNotifier<bool> {
         leftShoulder,
         rightShoulder
       ].any((point) => point == null)) {
+        logger.d('필요한 랜드마크가 누락되었습니다.');
         return false;
       }
 
-      // O 포즈: 손이 머리 위에서 동그라미를 만듦
-      bool isOPose = leftWrist!.y < head!.y &&
-          rightWrist!.y < head.y &&
-          leftElbow!.y < leftShoulder!.y &&
-          rightElbow!.y < rightShoulder!.y &&
-          (leftWrist.x - rightWrist.x).abs() < 200; // x 허용 오차 증가
+      // O 포즈 조건
+      final handsAboveHead =
+          leftWrist!.y < head!.y - 0.1 && rightWrist!.y < head.y - 0.1;
+      final handsClose = (leftWrist.x - rightWrist!.x).abs() < 0.25 &&
+          (leftWrist.y - rightWrist.y).abs() < 0.25;
+      final isOPose = handsAboveHead && handsClose;
 
-      // X 포즈: 양팔이 교차
-      double leftSlope =
-          (leftWrist.y - leftElbow!.y) / (leftWrist.x - leftElbow.x);
-      double rightSlope =
-          (rightWrist!.y - rightElbow!.y) / (rightWrist.x - rightElbow.x);
-      bool isXPose = leftSlope * rightSlope < -0.5 && // 기울기가 반대 방향
-          (leftWrist.x - rightWrist.x).abs() < 200 && // x 허용 오차 증가
-          (leftWrist.y - rightWrist.y).abs() < 200; // y 허용 오차 증가
+      // X 포즈 조건
+      final leftArmVector = {
+        'x': leftWrist.x - leftElbow!.x,
+        'y': leftWrist.y - leftElbow.y
+      };
+      final rightArmVector = {
+        'x': rightWrist.x - rightElbow!.x,
+        'y': rightWrist.y - rightElbow.y
+      };
+      final dotProduct = leftArmVector['x']! * rightArmVector['x']! +
+          leftArmVector['y']! * rightArmVector['y']!;
+      final leftMagnitude = math.sqrt(
+          math.pow(leftArmVector['x']!, 2) + math.pow(leftArmVector['y']!, 2));
+      final rightMagnitude = math.sqrt(math.pow(rightArmVector['x']!, 2) +
+          math.pow(rightArmVector['y']!, 2));
+      final angle = math.acos(dotProduct / (leftMagnitude * rightMagnitude));
+      final armsCrossing = (leftWrist.x - rightWrist.x).abs() < 0.2 &&
+          (leftWrist.y - rightWrist.y).abs() < 0.2;
+      const xPoseAngleThreshold = 0.3;
+      final isXPose =
+          (angle - 1.57).abs() < xPoseAngleThreshold && armsCrossing;
 
       if (isOPose) {
         _consecutiveOXPoseFrames++;
         _lastDetectedResult = true;
+        logger.d('O 포즈 감지 - 연속 프레임: $_consecutiveOXPoseFrames');
       } else if (isXPose) {
         _consecutiveOXPoseFrames++;
         _lastDetectedResult = false;
+        logger.d('X 포즈 감지 - 연속 프레임: $_consecutiveOXPoseFrames');
       } else {
         _consecutiveOXPoseFrames = 0;
         _lastDetectedResult = null;
       }
 
-      return _consecutiveOXPoseFrames >= 5; // 5프레임 연속 감지되면 인식
+      return _consecutiveOXPoseFrames >= 5;
     } catch (e) {
       logger.e('O/X 포즈 체크 중 오류 발생: $e');
       return false;
