@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:camera/camera.dart';
@@ -17,9 +18,19 @@ class CameraPreviewWidget extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // 만약 front 카메라라면 미러링 적용
+    Widget preview = CameraPreview(controller);
+    if (controller.description.lensDirection == CameraLensDirection.front) {
+      preview = Transform(
+        alignment: Alignment.center,
+        transform: Matrix4.rotationY(pi).scaled(-1.0, 1.0, 1.0),
+        child: preview,
+      );
+    }
+
     return Stack(
       children: [
-        CameraPreview(controller),
+        preview,
         if (isRecording)
           Positioned(
             top: 16,
@@ -29,4 +40,4 @@ class CameraPreviewWidget extends ConsumerWidget {
       ],
     );
   }
-} 
+}

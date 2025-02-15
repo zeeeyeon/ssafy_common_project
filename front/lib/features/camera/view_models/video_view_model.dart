@@ -14,25 +14,31 @@ final videoViewModelProvider =
 
 class VideoViewModel extends StateNotifier<AsyncValue<VideoResponse?>> {
   final VideoRepository _repository;
+  bool _isUploading = false;
 
   VideoViewModel(this._repository) : super(const AsyncValue.data(null));
 
-  Future<void> uploadVideo({
+  Future<bool> uploadVideo({
     required File videoFile,
     required String color,
     required bool isSuccess,
     required int userDateId,
     required int holdId,
   }) async {
+    if (_isUploading) {
+      logger.w('이미 업로드가 진행 중입니다.');
+      return false;
+    }
+
+    _isUploading = true;
     state = const AsyncValue.loading();
 
     try {
       logger.d('비디오 업로드 시작: $color, $isSuccess, $userDateId, $holdId');
 
-      // 파일 처리 로직
       File processedVideo = await _processVideo(videoFile);
+      logger.d('비디오 전처리 완료: ${processedVideo.path}');
 
-      // 실제 업로드 수행
       final response = await _repository.uploadVideo(
         videoFile: processedVideo,
         isSuccess: isSuccess,
@@ -41,11 +47,14 @@ class VideoViewModel extends StateNotifier<AsyncValue<VideoResponse?>> {
       );
 
       state = AsyncValue.data(response);
-      logger.d('비디오 업로드 완료');
+      logger.d('비디오 업로드 완료: ${response.url}');
+      return true;
     } catch (e, stack) {
-      logger.e('비디오 업로드 실패: $e');
+      logger.e('비디오 업로드 실패: $e\n$stack');
       state = AsyncValue.error(e, stack);
-      rethrow;
+      return false;
+    } finally {
+      _isUploading = false;
     }
   }
 
@@ -70,5 +79,10 @@ class VideoViewModel extends StateNotifier<AsyncValue<VideoResponse?>> {
       logger.e('비디오 압축 중 오류 발생: $e');
       return videoFile;
     }
+  }
+
+  void resetState() {
+    state = const AsyncValue.data(null);
+    _isUploading = false;
   }
 }
