@@ -536,6 +536,7 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
         _lastRecordedVideo = video;
         _isWaitingForResult = true;
         _isSelectingColor = false;
+        _isProcessingFrame = false;
       });
 
       // 녹화 타이머 정리
@@ -557,10 +558,27 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
             _controller!.value.isInitialized &&
             !_controller!.value.isRecordingVideo) {
           logger.d('O/X 포즈 인식을 위한 이미지 스트림 시작');
+
+          // 기존 스트림 중지 후 새로 시작
+          if (_controller!.value.isStreamingImages) {
+            await _controller!.stopImageStream();
+          }
+
+          await Future.delayed(const Duration(milliseconds: 500));
+
           await _controller!.startImageStream((CameraImage image) {
-            if (!_isProcessingFrame && _isWaitingForResult) {
+            if (!_isProcessingFrame && mounted && _isWaitingForResult) {
               _isProcessingFrame = true;
-              _processFrame(image);
+              _processFrame(image).then((_) {
+                if (mounted) {
+                  setState(() {
+                    _isProcessingFrame = false;
+                  });
+                }
+              }).catchError((error) {
+                logger.e('O/X 포즈 프레임 처리 중 오류: $error');
+                _isProcessingFrame = false;
+              });
             }
           });
         }
@@ -594,7 +612,6 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
       }
     } finally {
       _isStoppingRecording = false;
-      _isProcessingFrame = false;
     }
   }
 
@@ -792,16 +809,26 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
       if (_isWaitingForResult && _lastRecordedVideo != null) {
         final isOXPose = poseViewModel.checkOXPose(pose);
         logger.d('O/X 포즈 감지 시도 - 결과: $isOXPose');
+        logger.d('현재 포즈 상태: ${pose.landmarks}'); // 포즈 데이터 로깅 추가
 
         if (isOXPose) {
           final result = poseViewModel.getLastDetectedResult();
+          logger.d('감지된 O/X 결과: $result'); // 결과 로깅 추가
+
           if (result != null) {
+            // 이미지 스트림 중지
+            if (_controller?.value.isStreamingImages ?? false) {
+              await _controller?.stopImageStream();
+            }
+
             await _handleRecordingComplete(_lastRecordedVideo!, result);
             if (mounted) {
               setState(() {
                 _isWaitingForResult = false;
                 _lastRecordedVideo = null;
+                _isProcessingFrame = false;
               });
+              _resetCaptureState();
             }
           }
         }
