@@ -62,9 +62,7 @@ class ArmSpanRepository {
       final response = await _dioClient.dio.post(
         "/fastapi/user/wingspan",
         data: formData,
-        options: Options(
-          contentType: "multipart/form-data",
-        ),
+        options: Options(contentType: "multipart/form-data"),
       );
 
       if (response.statusCode == 200) {

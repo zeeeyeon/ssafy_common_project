@@ -5,6 +5,7 @@ import 'package:kkulkkulk/features/profile/view_models/profile_view_model.dart';
 import 'package:kkulkkulk/features/profile/view_models/arm_span_view_model.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'camera_screen.dart';
+import 'package:kkulkkulk/features/profile/data/models/arm_span_model.dart'; // ✅ 추가
 
 class ProfileScreenEdit extends ConsumerStatefulWidget {
   const ProfileScreenEdit({super.key});
@@ -23,6 +24,7 @@ class _ProfileScreenEditState extends ConsumerState<ProfileScreenEdit> {
   @override
   void initState() {
     super.initState();
+
     final userProfile = ref.read(profileProvider).value;
     if (userProfile != null) {
       _nicknameController.text = userProfile.nickname;
@@ -67,6 +69,21 @@ class _ProfileScreenEditState extends ConsumerState<ProfileScreenEdit> {
 
   @override
   Widget build(BuildContext context) {
+    ref.listen(armSpanViewModelProvider, (previous, next) {
+      debugPrint("📌 [DEBUG] ref.listen() 감지됨: 이전 상태=$previous, 새로운 상태=$next");
+
+      if (next.hasValue && next.value != null) {
+        final armSpan = next.value!.armSpan;
+        debugPrint("📌 [DEBUG] UI 업데이트 실행됨: 새 팔길이 값=$armSpan");
+
+        setState(() {
+          _armSpanController.text = armSpan.toString();
+        });
+
+        debugPrint("📌 [DEBUG] UI 업데이트 후 입력 필드 값: ${_armSpanController.text}");
+      }
+    });
+
     return Scaffold(
       appBar: AppBar(title: const Text('프로필 수정'), centerTitle: true),
       body: SingleChildScrollView(
@@ -78,7 +95,7 @@ class _ProfileScreenEditState extends ConsumerState<ProfileScreenEdit> {
             const SizedBox(height: 24),
             _buildStartDateSelector(),
             const SizedBox(height: 24),
-            _buildBodyMetricsInput(),
+            _buildBodyMetricsInput(ref.watch(armSpanViewModelProvider)),
             const SizedBox(height: 16),
             _buildMeasureButton(context,
                 double.tryParse(_heightController.text) ?? 0.0) // 🔥 측정 버튼 추가
@@ -178,12 +195,14 @@ class _ProfileScreenEditState extends ConsumerState<ProfileScreenEdit> {
   }
 
   /// 🔹 **키 & 팔길이 입력 UI**
-  Widget _buildBodyMetricsInput() {
+  Widget _buildBodyMetricsInput(AsyncValue<ArmSpanResult> armSpanState) {
     return Row(
       children: [
         Expanded(child: _buildNumberTextField("키 (cm)", _heightController)),
         const SizedBox(width: 16),
-        Expanded(child: _buildNumberTextField("팔길이 (cm)", _armSpanController)),
+        Expanded(
+            child: _buildNumberTextField(
+                "팔길이 (cm)", _armSpanController)), // 🔥 직접 입력 가능
       ],
     );
   }
@@ -237,10 +256,13 @@ class _ProfileScreenEditState extends ConsumerState<ProfileScreenEdit> {
           },
         ),
       ),
-    );
+    ).then((_) {
+      if (mounted) {
+        setState(() {});
+      }
+    });
   }
 
-  /// 🔥 서버에 이미지 전송 & 팔길이 응답 받기
   Future<void> _sendImageToServer(String imagePath) async {
     final double? height = double.tryParse(_heightController.text);
     if (height == null) {
@@ -251,18 +273,21 @@ class _ProfileScreenEditState extends ConsumerState<ProfileScreenEdit> {
     }
 
     try {
-      // 서버 요청 (height 값과 함께 이미지 전송)
       await ref
           .read(armSpanViewModelProvider.notifier)
           .measureArmSpan(imagePath, height);
 
-      // ✅ 성공하면 UI 업데이트
-      final result = ref.read(armSpanViewModelProvider).value;
-      if (result != null) {
+      // ✅ UI 강제 업데이트 (이전 값이 남아있을 수 있음)
+      Future.delayed(const Duration(milliseconds: 300), () {
+        debugPrint(
+            "📌 [DEBUG] 팔길이 값 UI 업데이트: ${ref.read(armSpanViewModelProvider).value?.armSpan}");
         setState(() {
-          _armSpanController.text = result.armSpan.toString();
+          final result = ref.read(armSpanViewModelProvider).value;
+          if (result != null) {
+            _armSpanController.text = result.armSpan.toString();
+          }
         });
-      }
+      });
     } catch (e) {
       debugPrint("❌ 팔길이 측정 실패: $e");
       ScaffoldMessenger.of(context).showSnackBar(
