@@ -34,7 +34,7 @@ class AlbumRepository {
       logger.d("응답 상태 코드: ${response.statusCode}");
       logger.d("응답 데이터: ${response.data}");
       return response;
-    } catch (e, stack) {
+    } catch (e) {
       if (e is DioException && e.response != null) {
         logger.e("에러 응답 데이터: ${e.response?.data}");
       }

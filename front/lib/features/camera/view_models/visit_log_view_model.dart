@@ -2,11 +2,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:kkulkkulk/features/camera/data/models/visit_log_model.dart';
 import 'package:kkulkkulk/features/camera/data/repositories/visit_log_repository.dart';
 import 'package:logger/logger.dart';
+import 'package:kkulkkulk/common/storage/storage.dart';
+import 'package:jwt_decoder/jwt_decoder.dart';
 
 final logger = Logger();
-
-/// 선택된 홀드를 관리하는 Provider
-final selectedHoldProvider = StateProvider<Hold?>((ref) => null);
 
 final visitLogViewModelProvider =
     StateNotifierProvider<VisitLogViewModel, AsyncValue<VisitLogResponse?>>(
@@ -27,8 +26,15 @@ class VisitLogViewModel extends StateNotifier<AsyncValue<VisitLogResponse?>> {
       const longitude = 128.967147745;
       logger.d("현재 위치 확인: latitude=$latitude, longitude=$longitude");
 
-      // TODO: userId는 실제 로그인된 사용자 ID로 변경 필요
-      const userId = 1;
+      // 토큰에서 userId 가져오기
+      final token = await Storage.getToken();
+      if (token == null) {
+        throw Exception('로그인이 필요합니다.');
+      }
+
+      final decodedToken = JwtDecoder.decode(token.replaceAll("Bearer ", ''));
+      final userId = decodedToken['id'] as int;
+      logger.d("토큰에서 가져온 userId: $userId");
 
       final response = await _repository.createVisitLog(
         userId: userId,
@@ -44,6 +50,7 @@ class VisitLogViewModel extends StateNotifier<AsyncValue<VisitLogResponse?>> {
         "gymName=${response.name}",
       );
     } catch (e, stack) {
+      logger.e("방문 일지 조회 실패: $e");
       state = AsyncValue.error(e, stack);
     }
   }
