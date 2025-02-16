@@ -66,6 +66,5 @@ public class ClimbingRecordServiceImpl implements ClimbingRecordService {
                 .ifPresent(cache -> cache.put(cacheKey, updatedRecords));
 
         return Optional.of(newClimbingRecord);
-
-    };
+    }
 }
