@@ -24,115 +24,99 @@ class SuccessFailureDialog extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return Dialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(
-              Icons.emoji_events_rounded,
-              size: 60,
-              color: Colors.amber,
-            ),
-            const SizedBox(height: 16),
-            const Text(
-              '등반 결과',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
+    return Center(
+      child: Material(
+        color: Colors.transparent,
+        child: Container(
+          width: 300,
+          padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: const [
+              BoxShadow(
+                color: Colors.black26,
+                blurRadius: 10,
+                offset: Offset(0, 4),
+              )
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const CircleAvatar(
+                radius: 60,
+                backgroundImage: AssetImage('assets/character/level3.png'),
+                backgroundColor: Colors.transparent,
               ),
-            ),
-            const SizedBox(height: 8),
-            const Text(
-              '이번 등반을 성공하셨나요?',
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.grey,
+              const SizedBox(height: 16),
+              const Text(
+                '등반 결과',
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            ),
-            const SizedBox(height: 24),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                _buildButton(
-                  context: context,
-                  ref: ref,
-                  isSuccess: true,
-                  icon: Icons.check_circle_outline,
-                  label: '성공',
-                  color: Colors.green,
-                ),
-                _buildButton(
-                  context: context,
-                  ref: ref,
-                  isSuccess: false,
-                  icon: Icons.cancel_outlined,
-                  label: '실패',
-                  color: Colors.red,
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text(
-                '취소',
+              const SizedBox(height: 8),
+              const Text(
+                '이번 등반을 성공하셨나요?',
+                textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 16,
                   color: Colors.grey,
                 ),
               ),
-            ),
-          ],
+              const SizedBox(height: 24),
+              Row(
+                children: [
+                  Expanded(child: _buildDialogButton(context, ref, true)),
+                  const SizedBox(width: 12),
+                  Expanded(child: _buildDialogButton(context, ref, false)),
+                ],
+              ),
+              const SizedBox(height: 12),
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text(
+                  '취소',
+                  style: TextStyle(fontSize: 16, color: Colors.grey),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildButton({
-    required BuildContext context,
-    required WidgetRef ref,
-    required bool isSuccess,
-    required IconData icon,
-    required String label,
-    required Color color,
-  }) {
-    return ElevatedButton(
+  Widget _buildDialogButton(
+      BuildContext context, WidgetRef ref, bool isSuccess) {
+    final Color color = isSuccess ? Colors.green : Colors.red;
+    return OutlinedButton(
       onPressed: () async {
         await _handleResult(context, ref, isSuccess);
       },
-      style: ElevatedButton.styleFrom(
-        backgroundColor: color.withOpacity(0.1),
-        foregroundColor: color,
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+      style: OutlinedButton.styleFrom(
+        side: BorderSide(color: color, width: 2),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(15),
-          side: BorderSide(color: color),
+          borderRadius: BorderRadius.circular(30),
         ),
+        padding: const EdgeInsets.symmetric(vertical: 14),
       ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 28),
-          const SizedBox(height: 4),
-          Text(
-            label,
-            style: const TextStyle(fontSize: 16),
-          ),
-        ],
+      child: Text(
+        isSuccess ? '성공' : '실패',
+        style:
+            TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: color),
       ),
     );
   }
 
   Future<void> _handleResult(
       BuildContext context, WidgetRef ref, bool isSuccess) async {
+    Navigator.pop(context);
+
     try {
       final selectedHold = ref.read(selectedHoldProvider);
-
       if (selectedHold == null) {
         throw Exception('선택된 홀드 정보가 없습니다.');
       }
@@ -151,15 +135,20 @@ class SuccessFailureDialog extends ConsumerWidget {
           );
 
       if (context.mounted) {
-        Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(isSuccess ? '성공으로 기록되었습니다!' : '실패로 기록되었습니다.')),
+          SnackBar(
+            content: Text(
+              isSuccess ? '성공으로 기록되었습니다!' : '실패로 기록되었습니다.',
+            ),
+          ),
         );
       }
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('업로드에 실패했습니다. 다시 시도해주세요.')),
+          const SnackBar(
+            content: Text('업로드에 실패했습니다. 다시 시도해주세요.'),
+          ),
         );
       }
     }
