@@ -16,7 +16,6 @@ class ProfileRepository {
         '/api/user/profile',
         options: Options(headers: _authHeaders),
       );
-
       debugPrint('✅ [ProfileRepository] API 응답 받음: ${response.data}');
 
       final status = response.data['status'];
