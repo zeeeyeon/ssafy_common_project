@@ -1,6 +1,9 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:kkulkkulk/common/jwt/jwt_token_provider.dart';
+import 'package:kkulkkulk/common/storage/storage.dart';
+import 'package:kkulkkulk/features/auth/data/models/translate_social_to_user_model.dart';
 import 'package:kkulkkulk/features/auth/data/repositories/auth_repository.dart';
 
 class OauthSignUpViewModel extends ChangeNotifier {
@@ -13,23 +16,22 @@ class OauthSignUpViewModel extends ChangeNotifier {
   final TextEditingController nicknameController = TextEditingController();
 
   bool isLoading = false;
-  
+
   String errorMessage = '';
   String successMessage = '';
 
   // 비밀번호 유효성 검사
   String? validatePassword(String? value) {
-  if (value == null || value.isEmpty) {
-    return '비밀번호를 입력해주세요';
-  }
-  // 비밀번호 형식 체크: 대소문자, 숫자, 특수문자 조합 (8 ~ 128자)
+    if (value == null || value.isEmpty) {
+      return '비밀번호를 입력해주세요';
+    }
+    // 비밀번호 형식 체크: 대소문자, 숫자, 특수문자 조합 (8 ~ 128자)
     final passwordRegExp = RegExp(r'^(?=.*[a-zA-Z])(?=.*\d|(?=.*\W)).{8,128}$');
     if (!passwordRegExp.hasMatch(value)) {
       return '대소문자, 숫자, 특수문자 조합으로 8 ~ 128자리여야 합니다.';
     }
     return null;
   }
-
 
   // 비밀번호 확인 유효성 검사
   String? validateCheckPassword(String? value) {
@@ -75,12 +77,17 @@ class OauthSignUpViewModel extends ChangeNotifier {
   // 유효성 검사 함수
   bool validateInputs() {
     final passwordError = validatePassword(passwordController.text);
-    final checkPasswordError = validateCheckPassword(checkPasswordController.text);
+    final checkPasswordError =
+        validateCheckPassword(checkPasswordController.text);
     final usernameError = validateUsername(usernameController.text);
     final phoneError = validatePhone(phoneController.text);
     final nicknameError = validateNickname(nicknameController.text);
 
-    if (passwordError != null || checkPasswordError != null || usernameError != null || phoneError != null || nicknameError != null) {
+    if (passwordError != null ||
+        checkPasswordError != null ||
+        usernameError != null ||
+        phoneError != null ||
+        nicknameError != null) {
       return false;
     }
     return true;
@@ -93,30 +100,81 @@ class OauthSignUpViewModel extends ChangeNotifier {
       isLoading = true;
       notifyListeners();
 
-      final Response response = await _authRepository.duplicatedNickname(nickname);
+      final Response response =
+          await _authRepository.duplicatedNickname(nickname);
 
-      if(response.statusCode == 200) {
-        if(response.data['header']['httpStatus'] == 400) {
+      if (response.statusCode == 200) {
+        if (response.data['header']['httpStatus'] == 400) {
           print('닉네임 중복');
           errorMessage = '이미 존재하는 닉네임입니다';
           notifyListeners();
           return false;
-        }else if(response.data['header']['httpStatus'] == 200) {
+        } else if (response.data['header']['httpStatus'] == 200) {
           print('사용가능한 닉네임');
           successMessage = '사용가능한 닉네임입니다';
           notifyListeners();
           return true;
         }
       }
-
     } catch (e) {
       return false;
     }
     return false;
   }
 
+  // 일반 로그인
+  Future<bool> login(BuildContext context, WidgetRef ref) async {
+    bool flag = false;
+    final String password = passwordController.text;
+    final String userName = usernameController.text;
+    final String phone = phoneController.text;
+    final String nickname = nicknameController.text;
+
+    final accessToken = ref.watch(accessTokenProvider);
+
+    final TranslateSocialToUserModel translateSocialToUserModel =
+        TranslateSocialToUserModel(
+            accessToken: accessToken ?? "",
+            password: password,
+            username: userName,
+            phone: phone,
+            nickname: nickname);
+    try {
+      isLoading = true;
+      notifyListeners();
+      // print('email: $email password: $password');
+      final Response response = await _authRepository
+          .translateSocialToUser(translateSocialToUserModel);
+      // print('response: $response');
+      if (response.statusCode == 200) {
+        final String? token = response.headers.value('authorization');
+
+        if (token != null) {
+          // Bearer 접두어 제거
+          final String actualToken = token.replaceFirst('Bearer ', '');
+          // print('actualToken: $actualToken');
+
+          await Storage.saveToken(token);
+          final String? checkToken = await Storage.getToken();
+          print('checkToken => $checkToken');
+          // 토큰을 업데이트
+          ref.read(jwtTokenProvider.notifier).state = actualToken;
+
+          successMessage = '로그인 성공';
+          flag = true;
+          return flag;
+        }
+      }
+    } catch (e) {
+      errorMessage = '로그인 실패';
+      print(e);
+      return flag;
+    }
+    return flag;
+  }
 }
 
-final OauthSignUpViewModelProvider = ChangeNotifierProvider<OauthSignUpViewModel>((ref) {
+final OauthSignUpViewModelProvider =
+    ChangeNotifierProvider<OauthSignUpViewModel>((ref) {
   return OauthSignUpViewModel();
 });

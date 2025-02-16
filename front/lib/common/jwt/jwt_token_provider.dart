@@ -8,7 +8,7 @@ final jwtTokenProvider = StateProvider<String?>((ref) => null);
 final isTokenExpiredProvider = Provider<bool>((ref) {
   final token = ref.watch(jwtTokenProvider);
   if (token == null) return true;
-  return false;  // 토큰 만료 여부 확인 로직 추가 가능
+  return false; // 토큰 만료 여부 확인 로직 추가 가능
 });
 
 // 토큰 디코딩 하는 Provider
@@ -23,3 +23,5 @@ final decodedTokenProvider = Provider<Map<String, dynamic>?>((ref) {
     return null;
   }
 });
+
+final accessTokenProvider = StateProvider<String?>((ref) => null);

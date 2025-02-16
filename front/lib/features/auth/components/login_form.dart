@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:kakao_flutter_sdk/kakao_flutter_sdk_talk.dart';
 import 'package:kkulkkulk/common/jwt/jwt_token_provider.dart';
 import 'package:kkulkkulk/features/auth/components/text_button_form.dart';
 import 'package:kkulkkulk/features/auth/components/text_form.dart';
+import 'package:kkulkkulk/features/auth/screens/oauth_register_screen.dart';
 import 'package:kkulkkulk/features/auth/view_models/log_in_view_model.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class LoginForm extends ConsumerWidget {
   final _formKey = GlobalKey<FormState>();
@@ -104,9 +107,20 @@ class LoginForm extends ConsumerWidget {
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
-              onPressed: () {
-                print("kakao");
-                // kakaoLogin();
+              onPressed: () async {
+                print("카카오 로그인 시작");
+                final result = await UserApi.instance.loginWithKakaoAccount();
+                final accessToken = result.accessToken;
+                print("Access Token: $accessToken");
+
+                ref.read(accessTokenProvider.notifier).state = accessToken;
+
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const OauthRegisterScreen(),
+                  ),
+                );
               },
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
