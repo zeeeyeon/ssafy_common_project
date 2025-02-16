@@ -17,7 +17,6 @@ import 'package:kkulkkulk/features/splash/screens/splash_screen.dart';
 import 'package:kkulkkulk/features/statistics/screens/statistics_screen.dart';
 import 'package:kkulkkulk/features/auth/screens/login_screen.dart';
 import 'package:kkulkkulk/features/auth/screens/register_screen.dart';
-import 'package:kkulkkulk/features/calendar/view_models/calendar_view_model.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _shellNavigatorKey = GlobalKey<NavigatorState>();

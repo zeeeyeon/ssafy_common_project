@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 import 'package:kkulkkulk/common/widgets/layout/custom_app_bar.dart';
+import 'package:go_router/go_router.dart';
 
 class VideoPlayerScreen extends StatefulWidget {
   final String videoUrl;
@@ -53,6 +54,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
       appBar: CustomAppBar(
         title: widget.selectedDate,
         showBackButton: true,
+        onBackPressed: () => context.go('/album'),
       ),
       body: Stack(
         children: [
