@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:kakao_flutter_sdk/kakao_flutter_sdk_template.dart';
 import 'package:kkulkkulk/common/notification/notification.dart';
 import 'package:kkulkkulk/common/routes/app_router.dart';
 
 void main() async {
   // Flutter 바인딩 초기화
   WidgetsFlutterBinding.ensureInitialized();
+  KakaoSdk.init(
+    nativeAppKey: '761065d5d5737f3ecefe88292f2df125',
+  );
   await NotificationService().initialize();
   runApp(
     const ProviderScope(

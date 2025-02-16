@@ -13,20 +13,19 @@ class UserOauthSignupModel {
 
   Map<String, dynamic> toJson() {
     return {
-      'password' : password,
-      'username' : username,
-      'phone' : phone,
-      'nickname:' : nickname,
+      'password': password,
+      'username': username,
+      'phone': phone,
+      'nickname:': nickname,
     };
   }
 
-  factory UserOauthSignupModel.fromJson(Map<String, dynamic> json){
+  factory UserOauthSignupModel.fromJson(Map<String, dynamic> json) {
     return UserOauthSignupModel(
-        password: json['password'],
-        username: json['username'],
-        phone: json['phone'],
-        nickname: json['nickname'],
+      password: json['password'],
+      username: json['username'],
+      phone: json['phone'],
+      nickname: json['nickname'],
     );
   }
 }
-

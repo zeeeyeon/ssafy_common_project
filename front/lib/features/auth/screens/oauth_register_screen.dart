@@ -9,7 +9,7 @@ class OauthRegisterScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: const CustomAppBar(
-        title: '구글 로그인 회원 전환',
+        title: '카카오 로그인 회원 전환',
         showBackButton: false,
       ),
       body: Padding(
@@ -22,5 +22,4 @@ class OauthRegisterScreen extends StatelessWidget {
       ),
     );
   }
-
 }
