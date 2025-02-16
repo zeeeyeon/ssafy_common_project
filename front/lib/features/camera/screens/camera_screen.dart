@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:google_mlkit_pose_detection/google_mlkit_pose_detection.dart';
 import 'package:kkulkkulk/features/camera/providers/camera_providers.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -44,7 +45,7 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
   CameraController? _controller;
   bool _isInitialized = false;
   int _cameraIndex = -1;
-  final bool _isFrontCamera = false;
+  bool _isFrontCamera = false;
 
   // 녹화 관련 변수
   bool _isRecording = false;
@@ -170,25 +171,33 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
   Future<void> _initializeCamera() async {
     try {
       final cameras = await availableCameras();
-      // _isFrontCamera 플래그 기준으로 카메라 선택
-      if (_isFrontCamera) {
-        _cameraIndex = cameras.indexWhere(
-            (camera) => camera.lensDirection == CameraLensDirection.front);
-        if (_cameraIndex == -1) _cameraIndex = 0;
+
+      // 현재 카메라의 방향을 확인
+      final currentDirection = _controller?.description.lensDirection;
+
+      if (currentDirection != null) {
+        // 현재 사용 중인 카메라와 같은 방향의 카메라를 찾음
+        _cameraIndex = cameras
+            .indexWhere((camera) => camera.lensDirection == currentDirection);
       } else {
+        // 처음 초기화하는 경우 _isFrontCamera 값에 따라 카메라 설정
         _cameraIndex = cameras.indexWhere((camera) =>
-                camera.lensDirection == CameraLensDirection.back &&
-                camera.sensorOrientation == 270 // 후면 카메라 조건 (필요에 따라 수정)
-            );
-        if (_cameraIndex == -1) {
-          _cameraIndex = cameras.indexWhere(
-              (camera) => camera.lensDirection == CameraLensDirection.back);
-        }
+            camera.lensDirection ==
+            (_isFrontCamera
+                ? CameraLensDirection.front
+                : CameraLensDirection.back));
       }
+
+      // 유효한 카메라 인덱스를 찾지 못한 경우 기본값 설정
+      if (_cameraIndex == -1) {
+        _cameraIndex = 0;
+        _isFrontCamera = cameras[0].lensDirection == CameraLensDirection.front;
+      }
+
+      logger.d('카메라 초기화 - 방향: ${_isFrontCamera ? "전면" : "후면"}');
 
       // 선택한 카메라로 컨트롤러 초기화 진행
       await _initializeCameraController(cameras[_cameraIndex]);
-      logger.d('카메라 초기화 완료 (모드: ${_isFrontCamera ? "전면" : "후면"})');
 
       if (mounted) {
         setState(() {
@@ -456,11 +465,13 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
         return "박수를 쳐서 색상을 선택하세요";
       } else if (selectedHold == null) {
         return "오른손을 들어주세요. 색상 선택이 시작됩니다";
+      } else if (selectedHold != null) {
+        return "만세 자세를 취하면 녹화가 시작됩니다";
       }
+
       if (_isRecording) {
         return ""; // 녹화 중에는 가이드 텍스트 표시하지 않음
       }
-      return "만세 자세로 녹화를 시작하세요";
     }
     return "화면을 터치하여 녹화를 시작/종료할 수 있습니다";
   }
@@ -626,6 +637,11 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
 
   Future<void> _handleRecordingComplete(XFile video, bool isSuccess) async {
     try {
+      // 이미지 스트림 중지
+      if (_controller?.value.isStreamingImages ?? false) {
+        await _controller?.stopImageStream();
+      }
+
       final selectedHold = ref.read(selectedHoldProvider);
       if (selectedHold == null) {
         throw Exception('선택된 홀드 정보가 없습니다.');
@@ -650,18 +666,68 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
       } else {
         await _speak('업로드에 실패했습니다. 다시 시도해주세요.');
       }
+
+      // 상태 초기화 및 카메라 재시작
+      await _resetCaptureState(shouldRestartCamera: true);
     } catch (e) {
       logger.e('비디오 업로드 중 오류 발생: $e');
       await _speak('업로드에 실패했습니다. 다시 시도해주세요.');
     }
   }
 
+  Future<void> _resetCaptureState({bool shouldRestartCamera = false}) async {
+    if (!mounted) return;
+
+    try {
+      // 이미지 스트림 중지
+      if (_controller?.value.isStreamingImages ?? false) {
+        await _controller?.stopImageStream();
+      }
+
+      // 기존 카메라 컨트롤러 해제
+      if (_controller != null) {
+        await _controller!.dispose();
+        _controller = null;
+      }
+
+      setState(() {
+        _isRecording = false;
+        _isWaitingForResult = false;
+        _lastRecordedVideo = null;
+        _isProcessingFrame = false;
+        selectedHold = null;
+        _isSelectingColor = false;
+        _currentColorIndex = -1;
+        _currentColor = null;
+      });
+
+      // Provider 상태 초기화
+      ref.read(selectedHoldProvider.notifier).state = null;
+      ref.read(poseViewModelProvider.notifier).resetState();
+      ref.read(videoViewModelProvider.notifier).resetState();
+
+      // 타이머 취소
+      _colorSelectionTimer?.cancel();
+
+      // 카메라 재시작이 필요한 경우에만 실행
+      if (shouldRestartCamera && mounted) {
+        await Future.delayed(const Duration(seconds: 1));
+        await _initializeCamera();
+        logger.d('카메라 및 이미지 스트림 재초기화 완료');
+      }
+    } catch (e) {
+      logger.e('상태 초기화 중 오류 발생: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('상태 초기화 중 오류가 발생했습니다: $e')),
+        );
+      }
+    }
+  }
+
   // ============= 자동/수동 모드 전환 =============
   Future<void> _toggleMode() async {
     try {
-      // 현재 상태 저장
-      final wasAutoMode = _isAutoMode;
-
       setState(() {
         _isAutoMode = !_isAutoMode;
         if (_isAutoMode) {
@@ -701,6 +767,9 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
                     _isProcessingFrame = false;
                   });
                 }
+              }).catchError((error) {
+                logger.e('프레임 처리 중 오류: $error');
+                _isProcessingFrame = false;
               });
             }
           });
@@ -803,105 +872,101 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
     try {
       final poses = await _poseDetector!.processImage(
         image,
-        _isFrontCamera,
+        _isFrontCamera, // 현재 카메라 방향 전달
         controller: _controller,
       );
 
       if (poses.isEmpty) {
+        // 포즈가 감지되지 않을 때 상태 초기화
+        ref.read(poseViewModelProvider.notifier).resetState();
         return;
       }
 
       final poseViewModel = ref.read(poseViewModelProvider.notifier);
       final pose = poses.first;
 
-      // O/X 포즈 인식 중일 때 (녹화 종료 후)
+      // 현재 상태에 따른 포즈 인식 처리
       if (_isWaitingForResult && _lastRecordedVideo != null) {
-        final isOXPose = poseViewModel.checkOXPose(pose);
-        logger.d('O/X 포즈 감지 시도 - 결과: $isOXPose');
-        logger.d('현재 포즈 상태: ${pose.landmarks}'); // 포즈 데이터 로깅 추가
-
-        if (isOXPose) {
-          final result = poseViewModel.getLastDetectedResult();
-          logger.d('감지된 O/X 결과: $result'); // 결과 로깅 추가
-
-          if (result != null) {
-            // 이미지 스트림 중지
-            if (_controller?.value.isStreamingImages ?? false) {
-              await _controller?.stopImageStream();
-            }
-
-            await _handleRecordingComplete(_lastRecordedVideo!, result);
-            if (mounted) {
-              setState(() {
-                _isWaitingForResult = false;
-                _lastRecordedVideo = null;
-                _isProcessingFrame = false;
-              });
-              _resetCaptureState();
-            }
-            logger.d('녹화 재시작');
-            _initializeCamera();
-          }
-        }
-        return; // O/X 인식 중에는 다른 포즈 인식하지 않음
-      }
-
-      // 색상 선택 모드일 때
-      if (_isSelectingColor && !_isRecording) {
-        if (poseViewModel.checkClapPose(pose)) {
-          logger.d('박수 감지됨: 색상 선택 시도');
-          if (_currentColorIndex >= 0 && _currentColor != null) {
-            logger.d('현재 선택된 색상: $_currentColor, 인덱스: $_currentColorIndex');
-            _handleColorConfirm();
-          } else {
-            logger.e('색상 선택 실패: 유효하지 않은 색상 정보');
-          }
-        }
-        return; // 색상 선택 모드에서는 다른 포즈 인식하지 않음
-      }
-
-      // 일반 자동 모드일 때 (녹화 중이 아니고, 색상 선택 모드가 아닐 때)
-      if (!_isRecording && !_isSelectingColor) {
-        final selectedHold = ref.read(selectedHoldProvider);
-
-        if (selectedHold != null) {
-          // 색상이 선택된 상태에서는 만세 자세만 인식
-          if (poseViewModel.checkRaisedHandsPose(pose)) {
-            logger.d('만세 자세 감지: 녹화 시작 시도');
-            if (mounted) {
-              await _startRecording();
-            }
-          }
-        } else {
-          // 색상이 선택되지 않은 상태에서만 오른손 들기 인식
-          if (poseViewModel.checkColorSelectPose(pose)) {
-            logger.d('오른손 들기 감지: 색상 선택 모드 시작');
-            if (mounted) {
-              _startColorSelection();
-            }
-          }
-        }
+        await _processOXPose(pose, poseViewModel);
+      } else if (_isSelectingColor && !_isRecording) {
+        await _processColorSelectionPose(pose, poseViewModel);
+      } else if (!_isRecording && !_isSelectingColor) {
+        await _processNormalPose(pose, poseViewModel);
       }
     } catch (e) {
       logger.e('프레임 처리 중 오류 발생: $e');
+      // 에러 발생 시에도 상태 초기화
+      ref.read(poseViewModelProvider.notifier).resetState();
     }
   }
 
-  Future<void> _announceCurrentColor() async {
-    final visitLogState = ref.read(visitLogViewModelProvider);
-    if (visitLogState.value?.holds.isEmpty ?? true) return;
+  // 포즈 처리를 위한 헬퍼 메서드들
+  Future<void> _processOXPose(Pose pose, PoseViewModel poseViewModel) async {
+    final isOXPose = poseViewModel.checkOXPose(pose);
+    logger.d('O/X 포즈 감지 시도 - 결과: $isOXPose');
 
-    final currentHold = visitLogState.value!.holds[_currentColorIndex];
-    ref.read(selectedHoldProvider.notifier).state = currentHold;
-    setState(() {
-      _currentColor = currentHold.color;
-    });
+    if (isOXPose) {
+      final result = poseViewModel.getLastDetectedResult();
+      logger.d('감지된 O/X 결과: $result');
 
-    await _speak('${currentHold.color} ${currentHold.level}');
-    logger.d('선택된 홀드: color=${currentHold.color}, holdId=${currentHold.id}');
+      if (result != null) {
+        await _handleOXPoseDetected(result);
+      }
+    }
   }
 
-  void _startColorSelection() async {
+  Future<void> _processColorSelectionPose(
+      Pose pose, PoseViewModel poseViewModel) async {
+    if (poseViewModel.checkClapPose(pose)) {
+      logger.d('박수 감지됨: 색상 선택 시도');
+      if (_currentColorIndex >= 0 && _currentColor != null) {
+        _handleColorConfirm();
+      }
+    }
+  }
+
+  Future<void> _processNormalPose(
+      Pose pose, PoseViewModel poseViewModel) async {
+    final selectedHold = ref.read(selectedHoldProvider);
+
+    if (selectedHold != null) {
+      if (poseViewModel.checkRaisedHandsPose(pose)) {
+        logger.d('만세 자세 감지: 녹화 시작 시도');
+        if (mounted) {
+          await _startRecording();
+        }
+      }
+    } else {
+      if (poseViewModel.checkColorSelectPose(pose)) {
+        logger.d('오른손 들기 감지: 색상 선택 시작');
+        if (mounted && !_isSelectingColor) {
+          await _speak(TTSMessages.colorSelecting);
+          _startColorSelection(); // 색상 선택 로직 시작
+        }
+      }
+    }
+  }
+
+  Future<void> _handleOXPoseDetected(bool isSuccess) async {
+    // 이미지 스트림 중지
+    if (_controller?.value.isStreamingImages ?? false) {
+      await _controller?.stopImageStream();
+    }
+
+    await _handleRecordingComplete(_lastRecordedVideo!, isSuccess);
+    if (mounted) {
+      setState(() {
+        _isWaitingForResult = false;
+        _lastRecordedVideo = null;
+        _isProcessingFrame = false;
+      });
+      _resetCaptureState();
+    }
+    logger.d('녹화 재시작');
+    _initializeCamera();
+  }
+
+  Future<void> _startColorSelection() async {
     if (_isSelectingColor) return;
 
     final visitLogState = ref.read(visitLogViewModelProvider);
@@ -912,7 +977,22 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
       return;
     }
 
-    // 이미지 스트림이 멈춰있다면 재시작
+    // 이전 타이머 취소
+    _colorSelectionTimer?.cancel();
+
+    if (mounted) {
+      // 색상 선택 모드 시작 및 첫 번째 색상 설정
+      setState(() {
+        _isSelectingColor = true;
+        _currentColorIndex = 0;
+        _currentColor = visitLogState.value!.holds[0].color;
+      });
+
+      // 현재 선택된 색상 안내
+      await _announceCurrentColor();
+    }
+
+    // 이미지 스트림 시작
     if (_controller != null &&
         !_controller!.value.isStreamingImages &&
         mounted) {
@@ -933,19 +1013,6 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
       });
     }
 
-    setState(() {
-      _isSelectingColor = true;
-      _currentColorIndex = 0;
-      _currentColor = visitLogState.value!.holds[0].color;
-    });
-
-    logger.d('색상 선택 모드 시작: _isSelectingColor=$_isSelectingColor');
-    await _announceCurrentColor();
-    await _speak(TTSMessages.colorSelecting);
-
-    // 타이머 시작 전 기존 타이머 취소
-    _colorSelectionTimer?.cancel();
-
     // 색상 순환 타이머 시작
     _colorSelectionTimer =
         Timer.periodic(const Duration(seconds: 2), (timer) async {
@@ -954,21 +1021,50 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
         return;
       }
 
-      final visitLogState = ref.read(visitLogViewModelProvider);
-      if (visitLogState.value == null || visitLogState.value!.holds.isEmpty) {
+      final currentVisitLogState = ref.read(visitLogViewModelProvider);
+      if (currentVisitLogState.value == null ||
+          currentVisitLogState.value!.holds.isEmpty) {
         timer.cancel();
         return;
       }
 
-      setState(() {
-        _currentColorIndex =
-            (_currentColorIndex + 1) % visitLogState.value!.holds.length;
-        _currentColor = visitLogState.value!.holds[_currentColorIndex].color;
-      });
+      // 현재 진행 중인 TTS가 완료될 때까지 대기
+      await flutterTts.awaitSpeakCompletion(true);
 
-      logger.d('색상 변경: $_currentColor, 인덱스: $_currentColorIndex');
-      await _announceCurrentColor();
+      if (mounted && _isSelectingColor) {
+        final nextIndex =
+            (_currentColorIndex + 1) % currentVisitLogState.value!.holds.length;
+
+        setState(() {
+          _currentColorIndex = nextIndex;
+          _currentColor = currentVisitLogState.value!.holds[nextIndex].color;
+        });
+
+        logger.d('색상 변경: $_currentColor, 인덱스: $_currentColorIndex');
+        await _announceCurrentColor();
+      }
     });
+  }
+
+  Future<void> _announceCurrentColor() async {
+    if (!mounted || !_isSelectingColor) return;
+
+    final visitLogState = ref.read(visitLogViewModelProvider);
+    if (visitLogState.value?.holds.isEmpty ?? true) return;
+
+    final currentHold = visitLogState.value!.holds[_currentColorIndex];
+
+    // 현재 색상 정보 업데이트
+    if (mounted) {
+      setState(() {
+        ref.read(selectedHoldProvider.notifier).state = currentHold;
+        _currentColor = currentHold.color;
+      });
+    }
+
+    // 색상 안내
+    await _speak('${currentHold.color} ${currentHold.level}');
+    logger.d('현재 선택된 홀드: color=${currentHold.color}, holdId=${currentHold.id}');
   }
 
   void _handleColorConfirm() async {
@@ -977,51 +1073,29 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
     final visitLogState = ref.read(visitLogViewModelProvider);
     if (visitLogState.value?.holds.isEmpty ?? true) return;
 
+    // 현재 선택된 색상 정보 저장
     final selectedHold = visitLogState.value!.holds[_currentColorIndex];
     logger.d('색상 선택 확정: ${selectedHold.color} (holdId: ${selectedHold.id})');
 
-    // 타이머 취소
+    // 타이머 취소 및 선택 모드 종료
     _colorSelectionTimer?.cancel();
 
-    // 이미지 스트림 유지 (중지하지 않음)
-    setState(() {
-      _isSelectingColor = false;
-      ref.read(selectedHoldProvider.notifier).state = selectedHold;
-      _currentColor = selectedHold.color;
-    });
+    // 이전 TTS 중지
+    await flutterTts.stop();
 
-    // TTS 안내
+    // 상태 업데이트
+    if (mounted) {
+      setState(() {
+        _isSelectingColor = false;
+        ref.read(selectedHoldProvider.notifier).state = selectedHold;
+        _currentColor = selectedHold.color;
+      });
+    }
+
+    // 선택 완료 안내 및 다음 단계 안내
     await _speak('${selectedHold.color} ${selectedHold.level} 선택되었습니다');
     await Future.delayed(const Duration(milliseconds: 500));
     await _speak(TTSMessages.readyToRecord);
-  }
-
-  void _resetCaptureState() {
-    if (!mounted) return;
-
-    setState(() {
-      _lastRecordedVideo = null;
-      _isWaitingForResult = false;
-      _isProcessingFrame = false;
-      selectedHold = null;
-      _isSelectingColor = false;
-      _currentColorIndex = -1;
-      _currentColor = null;
-    });
-
-    // Provider 상태 초기화
-    ref.read(selectedHoldProvider.notifier).state = null;
-    ref.read(poseViewModelProvider.notifier).resetState();
-    ref.read(videoViewModelProvider.notifier).resetState();
-
-    // 타이머는 무조건 취소 (새 촬영 시 새 타이머 시작)
-    _colorSelectionTimer?.cancel();
-
-    // TTS 중지는 상황에 따라 선택적 실행
-    if (!_isAutoMode) {
-      // 수동 모드일 때만 TTS 중지
-      flutterTts.stop();
-    }
   }
 
   // 녹화 시간 설정 다이얼로그
@@ -1151,17 +1225,36 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
   }
 
   Future<void> _toggleCamera() async {
-    if (_controller != null) {
-      await _controller!.dispose();
-      _controller = null;
+    try {
+      if (_controller != null) {
+        await _controller!.dispose();
+        _controller = null;
+      }
+
+      final cameras = await availableCameras();
+      // 현재 방향의 반대 방향 카메라 찾기
+      final newDirection =
+          _isFrontCamera ? CameraLensDirection.back : CameraLensDirection.front;
+
+      _cameraIndex =
+          cameras.indexWhere((camera) => camera.lensDirection == newDirection);
+
+      if (_cameraIndex == -1) {
+        _cameraIndex = 0;
+      }
+
+      // _isFrontCamera 값 업데이트
+      _isFrontCamera =
+          cameras[_cameraIndex].lensDirection == CameraLensDirection.front;
+
+      logger.d('카메라 전환 - 새로운 방향: ${_isFrontCamera ? "전면" : "후면"}');
+
+      // 새로운 컨트롤러 생성 전 300ms 대기
+      await Future.delayed(const Duration(milliseconds: 300));
+      await _initializeCameraController(cameras[_cameraIndex]);
+    } catch (e) {
+      logger.e('카메라 전환 중 오류 발생: $e');
     }
-
-    final cameras = await availableCameras();
-    _cameraIndex = (_cameraIndex + 1) % cameras.length;
-
-    // 새로운 컨트롤러 생성 전 300ms 대기
-    await Future.delayed(const Duration(milliseconds: 300));
-    await _initializeCameraController(cameras[_cameraIndex]);
   }
 
   void _showPoseGuide() {
@@ -1244,22 +1337,5 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
         ],
       ),
     );
-  }
-
-  Future<void> _onVideoUploadCompleted() async {
-    setState(() {
-      _isRecording = false;
-      _isAutoMode = true;
-    });
-
-    // 5초 딜레이: 업로드 완료 후 5초 동안 대기합니다.
-    await Future.delayed(const Duration(seconds: 5));
-
-    // 5초 이후에 카메라 컨트롤러를 재초기화하여 이미지 스트림을 재시작합니다.
-    _initializeCamera().then((_) {
-      logger.d('비디오 업로드 후 5초 뒤 카메라 재초기화 및 이미지 스트림 재시작 완료');
-    }).catchError((e) {
-      logger.e('비디오 업로드 후 카메라 재초기화 오류: $e');
-    });
   }
 }
