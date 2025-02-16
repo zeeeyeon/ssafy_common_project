@@ -15,9 +15,9 @@ import 'package:geolocator/geolocator.dart';
 import 'package:kkulkkulk/features/motionai/utils/pose_detector.dart'; // CustomPoseDetector
 import 'package:kkulkkulk/features/motionai/view_models/pose_view_model.dart';
 import 'package:flutter_tts/flutter_tts.dart';
-import '../widgets/camera_controls.dart';
-import '../widgets/recording_indicator.dart';
-import '../widgets/success_failure_dialog.dart';
+import '../component/camera_controls.dart';
+import '../component/recording_indicator.dart';
+import '../component/success_failure_dialog.dart';
 import 'package:kkulkkulk/features/camera/data/models/hold_model.dart';
 import 'package:kkulkkulk/features/camera/view_models/video_view_model.dart';
 import 'dart:math' as math;
@@ -320,15 +320,28 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
                     right: 0,
                     child: Container(
                       margin: const EdgeInsets.symmetric(horizontal: 16),
-                      padding: const EdgeInsets.all(8),
+                      padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
                         color: Colors.black54,
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      child: Text(
-                        _getGuideText(),
-                        style: const TextStyle(color: Colors.white),
-                        textAlign: TextAlign.center,
+                      child: Column(
+                        children: [
+                          Text(
+                            _isAutoMode ? '자동 모드 가이드' : '수동 모드 가이드',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            _getGuideText(),
+                            style: const TextStyle(color: Colors.white),
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
                       ),
                     ),
                   ),
@@ -375,7 +388,7 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
                   ),
                 ),
                 Positioned(
-                  top: MediaQuery.of(context).padding.top + 120,
+                  top: MediaQuery.of(context).padding.top + 200,
                   left: 0,
                   right: 0,
                   child: _buildColorDisplay(),
@@ -457,6 +470,8 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
   }
 
   String _getGuideText() {
+    final selectedHold = ref.watch(selectedHoldProvider);
+
     if (_isWaitingForResult) {
       return "성공은 O 모양, 실패는 X 모양을 취해주세요";
     }
@@ -465,12 +480,8 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
         return "박수를 쳐서 색상을 선택하세요";
       } else if (selectedHold == null) {
         return "오른손을 들어주세요. 색상 선택이 시작됩니다";
-      } else if (selectedHold != null) {
+      } else {
         return "만세 자세를 취하면 녹화가 시작됩니다";
-      }
-
-      if (_isRecording) {
-        return ""; // 녹화 중에는 가이드 텍스트 표시하지 않음
       }
     }
     return "화면을 터치하여 녹화를 시작/종료할 수 있습니다";
@@ -714,6 +725,10 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
         await Future.delayed(const Duration(seconds: 1));
         await _initializeCamera();
         logger.d('카메라 및 이미지 스트림 재초기화 완료');
+      }
+
+      if (_isAutoMode && mounted) {
+        await _speak(TTSMessages.autoModeStart);
       }
     } catch (e) {
       logger.e('상태 초기화 중 오류 발생: $e');
@@ -960,10 +975,8 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
         _lastRecordedVideo = null;
         _isProcessingFrame = false;
       });
-      _resetCaptureState();
     }
     logger.d('녹화 재시작');
-    _initializeCamera();
   }
 
   Future<void> _startColorSelection() async {
@@ -1183,40 +1196,6 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
               ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildGestureGuide() {
-    return Positioned(
-      bottom: 120, // 하단 여백 조정
-      left: 0,
-      right: 0,
-      child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 16),
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.black54,
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Column(
-          children: [
-            Text(
-              _isAutoMode ? '자동 모드 가이드' : '수동 모드 가이드',
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              _getGuideText(),
-              style: const TextStyle(color: Colors.white),
-              textAlign: TextAlign.center,
             ),
           ],
         ),
