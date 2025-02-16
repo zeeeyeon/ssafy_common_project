@@ -545,7 +545,8 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
 
   // 녹화 시작 버튼이 눌렸을 때 호출되는 함수
   void _onRecordPressed() async {
-    if (selectedHold == null) {
+    final hold = ref.read(selectedHoldProvider);
+    if (hold == null) {
       // 색상이 선택되지 않았으면 녹화 시작하지 않고 안내 메시지 표시
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('녹화를 시작하려면 색상을 선택해주세요.')),
@@ -1115,51 +1116,72 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
   void _showRecordingSettingsDialog() {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('녹화 시간 설정'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.remove),
-                  onPressed: _maxRecordingSeconds <= 10
-                      ? null
-                      : () {
-                          setState(() {
-                            _maxRecordingSeconds =
-                                math.max(10, _maxRecordingSeconds - 10);
+      builder: (context) {
+        // 다이얼로그 상태로 사용할 임시 변수를 부모 상태의 _maxRecordingSeconds 값으로 초기화.
+        int tempMaxRecordingSeconds = _maxRecordingSeconds;
+        // 초 값을 분과 초로 변환하는 헬퍼 함수
+        String formatTime(int seconds) {
+          final minutes = seconds ~/ 60;
+          final remainSeconds = seconds % 60;
+          if (minutes > 0) {
+            return '$minutes분 $remainSeconds초';
+          }
+          return '$seconds초';
+        }
+
+        return StatefulBuilder(
+          builder: (context, setStateDialog) {
+            return AlertDialog(
+              title: const Text('녹화 시간 설정'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.remove),
+                        onPressed: tempMaxRecordingSeconds <= 10
+                            ? null
+                            : () {
+                                setStateDialog(() {
+                                  tempMaxRecordingSeconds = math.max(
+                                      10, tempMaxRecordingSeconds - 10);
+                                });
+                              },
+                      ),
+                      Text(
+                        formatTime(tempMaxRecordingSeconds),
+                        style: const TextStyle(fontSize: 20),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.add),
+                        onPressed: () {
+                          setStateDialog(() {
+                            tempMaxRecordingSeconds += 10;
                           });
                         },
-                ),
-                Text(
-                  '$_maxRecordingSeconds초',
-                  style: const TextStyle(fontSize: 20),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.add),
-                  onPressed: _maxRecordingSeconds >= 120
-                      ? null
-                      : () {
-                          setState(() {
-                            _maxRecordingSeconds =
-                                math.min(120, _maxRecordingSeconds + 10);
-                          });
-                        },
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    // 다이얼로그에서 확인을 누르면 부모 상태에도 반영.
+                    setState(() {
+                      _maxRecordingSeconds = tempMaxRecordingSeconds;
+                    });
+                    Navigator.pop(context);
+                  },
+                  child: const Text('확인'),
                 ),
               ],
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('확인'),
-          ),
-        ],
-      ),
+            );
+          },
+        );
+      },
     );
   }
 
