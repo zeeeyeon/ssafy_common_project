@@ -1,4 +1,9 @@
 import 'package:dio/dio.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:logger/logger.dart';
+import '../storage/storage.dart';
+
+final logger = Logger();
 
 class DioClient {
   static final DioClient _instance = DioClient._internal();
@@ -17,6 +22,8 @@ class DioClient {
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
+          'Authorization':
+              'Bearer eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0MDFAbmF2ZXIuY29tIiwiaWF0IjoxNzM5NTAzNjUwLCJleHAiOjE3NDAxMDg0NTAsImlkIjoxLCJ1c2VybmFtZSI6IuyGoeuPme2YhCJ9.D-1tbAweNhstB4nq_dVFG-KJ1djbVphknYKtSyDZx3tJb5oF5BDqqM6whac_o9XuZiDhdiA_INa5mziUY5t7Dg',
         },
       ),
     );
@@ -24,19 +31,26 @@ class DioClient {
     // 인터셉터 설정
     dio.interceptors.add(
       InterceptorsWrapper(
-        onRequest: (options, handler) {
-          // 요청 전 처리
+        onRequest: (options, handler) async {
+          // 요청 전에 토큰을 가져와서 헤더에 추가
+          String? token = await Storage.getToken();
+
+          if (token != null) {
+            options.headers['Authorization'] = token; // Bearer 토큰 추가
+          }
+
           return handler.next(options);
         },
         onResponse: (response, handler) {
-          // 응답 처리
           return handler.next(response);
         },
         onError: (error, handler) {
-          // 에러 처리
           return handler.next(error);
         },
       ),
     );
   }
 }
+
+// Provider 정의
+final dioClientProvider = Provider<DioClient>((ref) => DioClient());

@@ -14,7 +14,6 @@ class ProfileRepository {
     try {
       final response = await _dioClient.dio.get(
         '/api/user/profile',
-        options: Options(headers: _authHeaders),
       );
       debugPrint('✅ [ProfileRepository] API 응답 받음: ${response.data}');
 
@@ -37,7 +36,6 @@ class ProfileRepository {
       final response = await _dioClient.dio.put(
         '/api/user/profile',
         data: updatedProfile.toJson(),
-        options: Options(headers: _authHeaders),
       );
 
       debugPrint('✅ [ProfileRepository] 프로필 업데이트 완료: ${response.statusCode}');
@@ -46,10 +44,4 @@ class ProfileRepository {
       throw Exception('Failed to update profile: $e');
     }
   }
-
-  /// ✅ 공통 인증 헤더 (Bearer Token)
-  Map<String, String> get _authHeaders => {
-        'Authorization':
-            'Bearer eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0MDFAbmF2ZXIuY29tIiwiaWF0IjoxNzM5NTAzNjUwLCJleHAiOjE3NDAxMDg0NTAsImlkIjoxLCJ1c2VybmFtZSI6IuyGoeuPme2YhCJ9.D-1tbAweNhstB4nq_dVFG-KJ1djbVphknYKtSyDZx3tJb5oF5BDqqM6whac_o9XuZiDhdiA_INa5mziUY5t7Dg',
-      };
 }

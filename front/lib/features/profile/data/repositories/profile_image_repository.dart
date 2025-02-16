@@ -58,10 +58,6 @@ class ProfileImageRepository {
         data: formData,
         options: Options(
           contentType: "multipart/form-data", // ✅ Content-Type 명확히 지정
-          headers: {
-            "Authorization":
-                "Bearer eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0MDFAbmF2ZXIuY29tIiwiaWF0IjoxNzM5MzYwNDI0LCJleHAiOjE3Mzk5NjUyMjQsImlkIjoxLCJ1c2VybmFtZSI6IuyGoeuPme2YhCJ9.bN8vmlKgjpNnPDKI-g7oZWkUrYXYzBhycLS1AKs7sc4pWS3-S7hppvvjdazZ2Jr5IiPVunepqJQJlagLZuWSLw", // ✅ 실제 토큰으로 변경
-          },
         ),
       );
 
