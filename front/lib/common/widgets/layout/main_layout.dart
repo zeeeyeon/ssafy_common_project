@@ -11,49 +11,64 @@ class MainLayout extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: null,
-      body: child,
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: _calculateSelectedIndex(context),
-        onDestinationSelected: (index) => _onTap(context, index),
-        backgroundColor: Colors.white,
-        elevation: 0,
-        height: 60,
-        labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
-        indicatorColor: Colors.transparent,
-        destinations: [
-          _buildNavDestination(
-            context,
-            Icons.emoji_events,
-            '챌린지',
-            0,
-          ),
-          _buildNavDestination(
-            context,
-            Icons.place,
-            '장소',
-            1,
-          ),
-          _buildNavDestination(
-            context,
-            Icons.home,
-            '홈',
-            2,
-          ),
-          _buildNavDestination(
-            context,
-            Icons.bar_chart,
-            '통계',
-            3,
-          ),
-          _buildNavDestination(
-            context,
-            Icons.person,
-            '프로필',
-            4,
-          ),
-        ],
+    return Theme(
+      data: Theme.of(context).copyWith(
+        navigationBarTheme: NavigationBarThemeData(
+          labelTextStyle: WidgetStateProperty.resolveWith<TextStyle>((states) {
+            final isSelected = states.contains(WidgetState.selected);
+            return TextStyle(
+              color: isSelected
+                  ? const Color.fromARGB(255, 248, 139, 5)
+                  : Colors.grey,
+              fontSize: 12,
+            );
+          }),
+        ),
+      ),
+      child: Scaffold(
+        appBar: null,
+        body: child,
+        bottomNavigationBar: NavigationBar(
+          selectedIndex: _calculateSelectedIndex(context),
+          onDestinationSelected: (index) => _onTap(context, index),
+          backgroundColor: Colors.white,
+          elevation: 0,
+          height: 60,
+          labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+          indicatorColor: Colors.transparent,
+          destinations: [
+            _buildNavDestination(
+              context,
+              Icons.emoji_events,
+              '챌린지',
+              0,
+            ),
+            _buildNavDestination(
+              context,
+              Icons.place,
+              '장소',
+              1,
+            ),
+            _buildNavDestination(
+              context,
+              Icons.home,
+              '홈',
+              2,
+            ),
+            _buildNavDestination(
+              context,
+              Icons.bar_chart,
+              '통계',
+              3,
+            ),
+            _buildNavDestination(
+              context,
+              Icons.person,
+              '프로필',
+              4,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -68,7 +83,8 @@ class MainLayout extends StatelessWidget {
     return NavigationDestination(
       icon: Icon(
         icon,
-        color: isSelected ? Colors.blue : Colors.grey,
+        color:
+            isSelected ? const Color.fromARGB(255, 248, 139, 5) : Colors.grey,
       ),
       label: label,
     );

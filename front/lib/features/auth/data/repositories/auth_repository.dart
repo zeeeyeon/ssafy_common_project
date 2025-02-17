@@ -20,7 +20,7 @@ class AuthRepository {
         ),
       );
       return response;
-    } catch(e) {
+    } catch (e) {
       print(e);
       rethrow;
     }
@@ -42,7 +42,8 @@ class AuthRepository {
   }
 
   // 소셜 사용자에서 일반 사요자로 전환
-  Future<Response> translateSocialToUser(TranslateSocialToUserModel translateSocialToUserModel) async {
+  Future<Response> translateSocialToUser(
+      TranslateSocialToUserModel translateSocialToUserModel) async {
     try {
       final response = await _dio.post(
         '/api/user/social/kakao/complete-signup',
@@ -54,17 +55,16 @@ class AuthRepository {
       rethrow;
     }
   }
-  
 
   // 이메일 중복 확인
   Future<Response> duplicatedEmail(String email) async {
     try {
       final response = await _dio.get(
         '/api/user/email-check',
-        queryParameters: {'email' : email},
+        queryParameters: {'email': email},
       );
       return response;
-    } catch(e) {
+    } catch (e) {
       print(e);
       rethrow;
     }
@@ -75,10 +75,10 @@ class AuthRepository {
     try {
       final response = await _dio.get(
         '/api/user/nickname-check',
-        queryParameters: {'nickname' : nickname},
+        queryParameters: {'nickname': nickname},
       );
       return response;
-    } catch(e) {
+    } catch (e) {
       rethrow;
     }
   }
@@ -87,11 +87,11 @@ class AuthRepository {
   Future<Response> signup(UserSignupModel userSignupModel) async {
     try {
       final response = await _dio.post(
-        '/api/user/sign-up',
+        '/api/user/signup',
         data: userSignupModel.toJson(),
       );
       return response;
-    } catch(e) {
+    } catch (e) {
       print(e);
       rethrow;
     }

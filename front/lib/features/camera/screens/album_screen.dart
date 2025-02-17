@@ -66,6 +66,24 @@ class _AlbumScreenState extends ConsumerState<AlbumScreen>
       initialDate: selectedDate,
       firstDate: DateTime(2000),
       lastDate: DateTime.now(),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: const ColorScheme.light(
+              primary: Color.fromARGB(255, 248, 139, 5), // 선택된 날짜 배경색
+              onPrimary: Colors.white, // 선택된 날짜의 텍스트 색상
+              onSurface: Colors.black, // 달력의 텍스트 색상
+              secondary: Colors.black, // 취소/확인 버튼 색상
+            ),
+            textButtonTheme: TextButtonThemeData(
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.black, // 버튼 텍스트 색상
+              ),
+            ),
+          ),
+          child: child!,
+        );
+      },
     );
 
     if (picked != null && picked != selectedDate) {
@@ -121,11 +139,13 @@ class _AlbumScreenState extends ConsumerState<AlbumScreen>
           showBackButton: true,
           leading: IconButton(
             icon: const Icon(Icons.arrow_back),
+            color: Colors.white,
             onPressed: _navigateToCalendar,
           ),
           actions: [
             IconButton(
               icon: const Icon(Icons.camera_alt_rounded),
+              color: Colors.white,
               iconSize: 30,
               onPressed: () {
                 context.push('/camera');
@@ -141,6 +161,8 @@ class _AlbumScreenState extends ConsumerState<AlbumScreen>
                 Tab(text: '성공'),
                 Tab(text: '실패'),
               ],
+              labelColor: const Color.fromARGB(255, 248, 139, 5),
+              indicatorColor: const Color.fromARGB(255, 248, 139, 5),
             ),
             Padding(
               padding: const EdgeInsets.all(16.0),

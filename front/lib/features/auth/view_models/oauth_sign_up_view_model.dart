@@ -96,6 +96,7 @@ class OauthSignUpViewModel extends ChangeNotifier {
   // 닉네임 중복 확인
   Future<bool> duplicatedNickname() async {
     final String nickname = nicknameController.text;
+    print("입력한 닉네임: $nickname");
     try {
       isLoading = true;
       notifyListeners();
@@ -103,15 +104,20 @@ class OauthSignUpViewModel extends ChangeNotifier {
       final Response response =
           await _authRepository.duplicatedNickname(nickname);
 
+      // print(response.statusCode);
+      print('response : $response');
+      print(response.data['status']['code']);
+      print(response.statusCode);
+
       if (response.statusCode == 200) {
-        if (response.data['header']['httpStatus'] == 400) {
+        if (response.data['status']['code'] == 400) {
           print('닉네임 중복');
-          errorMessage = '이미 존재하는 닉네임입니다';
+          errorMessage = response.data['status']['message'];
           notifyListeners();
           return false;
-        } else if (response.data['header']['httpStatus'] == 200) {
+        } else if (response.data['status']['code'] == 200) {
           print('사용가능한 닉네임');
-          successMessage = '사용가능한 닉네임입니다';
+          successMessage = response.data['status']['message'];
           notifyListeners();
           return true;
         }

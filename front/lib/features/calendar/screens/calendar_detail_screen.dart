@@ -195,13 +195,15 @@ class CalendarDetailScreenState extends ConsumerState<CalendarDetailScreen> {
                 width: double.infinity,
                 padding: const EdgeInsets.all(12.0),
                 decoration: BoxDecoration(
-                  color: Colors.blue[100],
+                  color: Colors.grey[400],
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
                   _climbGroundName ?? '클라이밍장 이름',
                   style: const TextStyle(
-                      fontSize: 20, fontWeight: FontWeight.bold),
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white),
                   textAlign: TextAlign.center,
                 ),
               ),
@@ -220,7 +222,7 @@ class CalendarDetailScreenState extends ConsumerState<CalendarDetailScreen> {
             const Text('완등률',
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
             const SizedBox(height: 4),
-            _buildProgressBar(clearRate, Colors.green),
+            _buildProgressBar(clearRate, const Color.fromARGB(255, 0, 123, 49)),
             const SizedBox(height: 20),
             const Text('클라이밍장 난이도',
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
@@ -368,7 +370,7 @@ class CalendarDetailScreenState extends ConsumerState<CalendarDetailScreen> {
       width: double.infinity,
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: const Color.fromRGBO(33, 150, 243, 1.0),
+        color: const Color.fromARGB(255, 248, 139, 5),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Text(

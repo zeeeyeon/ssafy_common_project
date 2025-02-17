@@ -24,11 +24,11 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
         title,
         style: const TextStyle(
           fontSize: 25,
-          color: Colors.black,
+          color: Colors.white,
           fontWeight: FontWeight.bold,
         ),
       ),
-      backgroundColor: Colors.white,
+      backgroundColor: const Color.fromARGB(255, 248, 139, 5),
       elevation: 0,
       centerTitle: true,
 
@@ -38,7 +38,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
               ? IconButton(
                   icon: const Icon(
                     Icons.arrow_back_ios,
-                    color: Colors.black,
+                    color: Colors.white,
                   ),
                   onPressed: () {
                     if (onBackPressed != null) {
