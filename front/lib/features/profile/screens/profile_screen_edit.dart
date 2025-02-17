@@ -185,6 +185,16 @@ class _ProfileScreenEditState extends ConsumerState<ProfileScreenEdit> {
               formatButtonVisible: false,
               titleCentered: true,
             ),
+            calendarStyle: const CalendarStyle(
+              selectedDecoration: BoxDecoration(
+                color: Color.fromARGB(255, 242, 200, 148),
+                shape: BoxShape.circle,
+              ),
+              todayDecoration: BoxDecoration(
+                color: Color.fromARGB(255, 248, 139, 5),
+                shape: BoxShape.circle,
+              ),
+            ),
           ),
           crossFadeState: _isCalendarVisible
               ? CrossFadeState.showSecond

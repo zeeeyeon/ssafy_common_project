@@ -178,9 +178,9 @@ class ProfileScreen extends ConsumerWidget {
         Text(
           userProfile.tierText,
           style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: Color.fromARGB(255, 248, 139, 5)),
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
         ),
       ],
     );
