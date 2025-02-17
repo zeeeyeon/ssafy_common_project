@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:kkulkkulk/common/gps/gps.dart';
 import 'package:kkulkkulk/features/camera/data/models/visit_log_model.dart';
 import 'package:kkulkkulk/features/camera/data/repositories/visit_log_repository.dart';
 import 'package:logger/logger.dart';
@@ -22,8 +23,13 @@ class VisitLogViewModel extends StateNotifier<AsyncValue<VisitLogResponse?>> {
 
     state = const AsyncValue.loading();
     try {
-      const latitude = 35.108829783;
-      const longitude = 128.967147745;
+      // 기존 코드의 위치 요청 부분을 다음과 같이 수정할 수 있습니다.
+      final position = await determinePosition();
+      if (position == null) {
+        throw Exception('위치 권한이 거부되었거나 위치 서비스를 사용할 수 없습니다.');
+      }
+      final latitude = position.latitude;
+      final longitude = position.longitude;
       logger.d("현재 위치 확인: latitude=$latitude, longitude=$longitude");
 
       // 토큰에서 userId 가져오기
