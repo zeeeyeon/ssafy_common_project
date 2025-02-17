@@ -7,6 +7,7 @@ import 'profile_screen_edit.dart';
 import 'dart:io';
 import 'profile_image_picker.dart';
 import 'package:kkulkkulk/features/profile/view_models/profile_image_view_model.dart';
+import 'package:kkulkkulk/common/dialogs/logout_dialog.dart';
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
@@ -17,7 +18,20 @@ class ProfileScreen extends ConsumerWidget {
     final profileState = ref.watch(profileProvider);
 
     return Scaffold(
-      appBar: const CustomAppBar(title: 'My Page'),
+      appBar: CustomAppBar(
+        title: 'My Page',
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+            onPressed: () {
+              showLogoutDialog(context, () {
+                print("로그아웃 실행!");
+                // 로그아웃 기능 추가 가능 (예: AuthService.logout())
+              });
+            },
+          ),
+        ],
+      ),
       body: profileState.when(
         data: (userProfile) {
           debugPrint("🔥 UI에 표시될 프로필 데이터: ${userProfile.toJson()}");
