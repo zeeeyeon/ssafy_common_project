@@ -90,7 +90,7 @@ class _ClimbingGymStatisticsScreenState
                   children: [
                     Expanded(
                       child: _buildStatCard('총 방문 횟수', '${stats.totalVisited}회',
-                          Colors.blueAccent),
+                          const Color.fromARGB(255, 248, 139, 5)),
                     ),
                   ],
                 ),
@@ -98,13 +98,13 @@ class _ClimbingGymStatisticsScreenState
                 Row(
                   children: [
                     Expanded(
-                      child: _buildStatCard(
-                          '달성율', '${stats.successRate}%', Colors.blueAccent),
+                      child: _buildStatCard('달성율', '${stats.successRate}%',
+                          const Color.fromARGB(255, 248, 139, 5)),
                     ),
                     const SizedBox(width: 8),
                     Expanded(
-                      child: _buildStatCard(
-                          '시도 횟수', '${stats.tryCount}회', Colors.blueAccent),
+                      child: _buildStatCard('시도 횟수', '${stats.tryCount}회',
+                          const Color.fromARGB(255, 248, 139, 5)),
                     ),
                   ],
                 ),

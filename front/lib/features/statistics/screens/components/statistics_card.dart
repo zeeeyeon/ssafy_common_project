@@ -12,7 +12,7 @@ class StatisticsCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color.fromARGB(255, 80, 118, 232),
+        color: const Color.fromARGB(255, 248, 139, 5),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(

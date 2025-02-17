@@ -19,7 +19,7 @@ class ProfileScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: CustomAppBar(
-        title: 'My Page',
+        title: 'My',
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),
@@ -92,7 +92,7 @@ class ProfileScreen extends ConsumerWidget {
                     padding: const EdgeInsets.all(6),
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: Colors.blueAccent,
+                      color: const Color.fromARGB(255, 248, 139, 5),
                       border: Border.all(color: Colors.white, width: 2),
                     ),
                     child: const Icon(Icons.add, color: Colors.white, size: 20),
@@ -133,7 +133,7 @@ class ProfileScreen extends ConsumerWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.blueAccent,
+        color: const Color.fromARGB(255, 248, 139, 5),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
@@ -180,7 +180,7 @@ class ProfileScreen extends ConsumerWidget {
           style: const TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
-              color: Colors.blueAccent),
+              color: Color.fromARGB(255, 248, 139, 5)),
         ),
       ],
     );
@@ -191,7 +191,7 @@ class ProfileScreen extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.blueAccent,
+        color: const Color.fromARGB(255, 248, 139, 5),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
