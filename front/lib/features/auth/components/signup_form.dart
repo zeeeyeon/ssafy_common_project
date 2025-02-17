@@ -15,7 +15,8 @@ class SignupForm extends ConsumerWidget {
     // 이메일 중복 확인 처리
     void duplicatedEmail() async {
       // 이메일 유효성 검사
-      final emailValidationMessage = signUpViewModel.validateEmail(signUpViewModel.emailController.text);
+      final emailValidationMessage =
+          signUpViewModel.validateEmail(signUpViewModel.emailController.text);
 
       if (emailValidationMessage == null) {
         // 이메일 형식이 유효한 경우, 중복 체크 진행
@@ -43,11 +44,11 @@ class SignupForm extends ConsumerWidget {
       }
     }
 
-
     // 닉네임 중복 확인 처리
     void duplicatedNickname() async {
       // 닉네임 유효성 검사
-      final nicknameValidationMessage = signUpViewModel.validateNickname(signUpViewModel.nicknameController.text);
+      final nicknameValidationMessage = signUpViewModel
+          .validateNickname(signUpViewModel.nicknameController.text);
 
       if (nicknameValidationMessage == null) {
         // 닉네임 형식이 유효한 경우, 중복 체크 진행
@@ -85,6 +86,12 @@ class SignupForm extends ConsumerWidget {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('회원가입 성공')),
           );
+          signUpViewModel.emailController.clear();
+          signUpViewModel.passwordController.clear();
+          signUpViewModel.checkPasswordController.clear();
+          signUpViewModel.usernameController.clear();
+          signUpViewModel.phoneController.clear();
+          signUpViewModel.nicknameController.clear();
           // 회원가입 후 로그인 페이지로 이동
           context.go('/login');
         } catch (e) {
@@ -110,16 +117,16 @@ class SignupForm extends ConsumerWidget {
               Row(
                 children: [
                   Flexible(
-                    flex: 8, 
+                    flex: 8,
                     child: TextForm(
                       'Email',
                       signUpViewModel.emailController,
                       validator: signUpViewModel.validateEmail,
                     ),
                   ),
-                  SizedBox(width: 10),  // 간격을 두기 위해 SizedBox 추가
+                  SizedBox(width: 10), // 간격을 두기 위해 SizedBox 추가
                   Flexible(
-                    flex: 2, 
+                    flex: 2,
                     child: TextButtonForm(
                       '중복확인',
                       duplicatedEmail,
@@ -157,7 +164,7 @@ class SignupForm extends ConsumerWidget {
               Row(
                 children: [
                   Flexible(
-                    flex: 8,  
+                    flex: 8,
                     child: TextForm(
                       '닉네임',
                       signUpViewModel.nicknameController,
@@ -166,7 +173,7 @@ class SignupForm extends ConsumerWidget {
                   ),
                   SizedBox(width: 10),
                   Flexible(
-                    flex: 2,  // 9:1 비율로 크기 조정
+                    flex: 2, // 9:1 비율로 크기 조정
                     child: TextButtonForm(
                       '중복확인',
                       duplicatedNickname,
@@ -185,5 +192,4 @@ class SignupForm extends ConsumerWidget {
       ),
     );
   }
-  
 }

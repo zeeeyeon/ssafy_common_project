@@ -60,6 +60,8 @@ class LoginForm extends ConsumerWidget {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('환영합니다 $username 님')),
           );
+          logInViewModel.emailController.clear();
+          logInViewModel.passwordController.clear();
           context.go('/calendar');
         } else if (!flag) {
           ScaffoldMessenger.of(context).showSnackBar(
