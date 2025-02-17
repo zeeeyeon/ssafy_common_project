@@ -9,9 +9,12 @@ import 'package:kkulkkulk/features/auth/screens/oauth_register_screen.dart';
 import 'package:kkulkkulk/features/auth/view_models/log_in_view_model.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:logger/logger.dart';
 
 class LoginForm extends ConsumerWidget {
   final _formKey = GlobalKey<FormState>();
+
+  LoginForm({super.key});
   // final AuthRepository _authRepository = AuthRepository();
 
   void _signup(BuildContext context) {
@@ -33,7 +36,7 @@ class LoginForm extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final logInViewModel = ref.watch(logInViewModelProvider);
-
+    final logger = Logger();
     void logIn() async {
       print('로그인 시작');
       try {
@@ -60,12 +63,12 @@ class LoginForm extends ConsumerWidget {
           context.go('/calendar');
         } else if (!flag) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('로그인 실패')),
+            const SnackBar(content: Text('로그인 실패')),
           );
         }
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('로그인 에러 발생')),
+          const SnackBar(content: Text('로그인 에러 발생')),
         );
       }
     }
@@ -80,19 +83,19 @@ class LoginForm extends ConsumerWidget {
             'Email',
             logInViewModel.emailController,
           ),
-          SizedBox(height: 15),
+          const SizedBox(height: 15),
           TextForm(
             'Password',
             logInViewModel.passwordController,
             isPassword: true,
           ),
-          SizedBox(height: 15),
+          const SizedBox(height: 15),
           TextButtonForm(
             '로그인',
             logIn,
           ),
-          SizedBox(height: 15),
-          Text(
+          const SizedBox(height: 15),
+          const Text(
             '계정이 없으신가요?',
             style: TextStyle(
               color: Color(0xFF2C3540),
@@ -103,17 +106,23 @@ class LoginForm extends ConsumerWidget {
             '회원가입',
             () => _signup(context),
           ),
-          SizedBox(height: 30),
+          const SizedBox(height: 30),
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
               onPressed: () async {
-                print("카카오 로그인 시작");
+                logger.i("카카오 로그인 시작");
                 final result = await UserApi.instance.loginWithKakaoAccount();
                 final accessToken = result.accessToken;
-                print("Access Token: $accessToken");
 
+                logger.i("Access Token: $accessToken");
                 ref.read(accessTokenProvider.notifier).state = accessToken;
+
+                if (accessToken.isEmpty) {
+                  logger.i("Access Token이 없습니다.");
+                } else {
+                  logger.i("Access Token이 있습니다.");
+                }
 
                 Navigator.push(
                   context,
@@ -122,6 +131,11 @@ class LoginForm extends ConsumerWidget {
                   ),
                 );
               },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFFFEE00),
+                foregroundColor: Colors.black,
+                padding: const EdgeInsets.symmetric(vertical: 15),
+              ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
@@ -131,8 +145,8 @@ class LoginForm extends ConsumerWidget {
                     width: 24,
                     height: 24,
                   ),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 8.0), // 이미지와 텍스트 간격 조정
+                  const Padding(
+                    padding: EdgeInsets.only(left: 8.0), // 이미지와 텍스트 간격 조정
                     child: Text(
                       '카카오 로그인',
                       style: TextStyle(
@@ -141,11 +155,6 @@ class LoginForm extends ConsumerWidget {
                     ),
                   ),
                 ],
-              ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Color(0xFFFFEE00),
-                foregroundColor: Colors.black,
-                padding: EdgeInsets.symmetric(vertical: 15),
               ),
             ),
           ),

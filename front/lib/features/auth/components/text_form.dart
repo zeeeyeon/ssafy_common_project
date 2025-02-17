@@ -26,36 +26,36 @@ class TextForm extends StatelessWidget {
           autovalidateMode: AutovalidateMode.onUserInteraction, // 자동 유효성 검사
           decoration: InputDecoration(
             labelText: '$text 입력',
-            labelStyle: TextStyle(
-              color: Color(0xFF8A9EA6),
+            labelStyle: const TextStyle(
+              color: Color.fromARGB(255, 135, 135, 135),
               fontWeight: FontWeight.bold,
             ),
             hintText: '$text 입력해주세요',
-            hintStyle: TextStyle(
-              color: Color(0xFF8A9EA6),
+            hintStyle: const TextStyle(
+              color: Color.fromARGB(255, 135, 135, 135),
               fontWeight: FontWeight.bold,
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(20),
-              borderSide: BorderSide(
-                color: Color(0xFF8A9EA6),
+              borderSide: const BorderSide(
+                color: Color.fromARGB(255, 0, 0, 0),
               ),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(20),
-              borderSide: BorderSide(
-                color: Color(0xFF8A9EA6),
+              borderSide: const BorderSide(
+                color: Color.fromARGB(255, 248, 132, 16),
               ),
             ),
             errorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(20),
-              borderSide: BorderSide(
+              borderSide: const BorderSide(
                 color: Colors.red, // 에러 시 빨간색으로 변경
               ),
             ),
             focusedErrorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(20),
-              borderSide: BorderSide(
+              borderSide: const BorderSide(
                 color: Colors.red, // 포커스 시 에러 빨간색
               ),
             ),

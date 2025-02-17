@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class TextButtonForm extends StatelessWidget {
   final String text;
   final VoidCallback onPressed;
-  const TextButtonForm(this.text, this.onPressed);
+  const TextButtonForm(this.text, this.onPressed, {super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -12,23 +12,22 @@ class TextButtonForm extends StatelessWidget {
       height: 48.0,
       child: TextButton(
         onPressed: onPressed,
+        style: TextButton.styleFrom(
+          backgroundColor: const Color.fromARGB(255, 248, 132, 16),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          padding: const EdgeInsets.symmetric(vertical: 8),
+        ),
         child: Text(
           text,
-          style: TextStyle(
+          style: const TextStyle(
             fontWeight: FontWeight.bold,
             color: Colors.white,
             fontSize: 16,
             overflow: TextOverflow.ellipsis,
           ),
         ),
-        style: TextButton.styleFrom(
-          backgroundColor: Color(0xFF8A9EA6),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),  
-          ),
-          padding: EdgeInsets.symmetric(vertical: 8), 
-        ),
-        
       ),
     );
   }

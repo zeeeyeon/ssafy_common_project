@@ -86,6 +86,7 @@ class CalendarScreenState extends ConsumerState<CalendarScreen> {
         showBackButton: false,
         leading: IconButton(
           icon: const Icon(Icons.calendar_today),
+          color: Colors.white,
           onPressed: () {
             _refreshIfCalendarScreen(); // 캘린더 아이콘 클릭 시 새로고침
             selectDate(context);
@@ -150,8 +151,9 @@ class CalendarScreenState extends ConsumerState<CalendarScreen> {
       ),
       // FloatingActionButton을 누르면 하단에서 올라오는 custom dialog를 호출
       floatingActionButton: FloatingActionButton(
-        child: const Icon(Icons.add),
+        backgroundColor: const Color.fromARGB(255, 248, 139, 5),
         onPressed: () => _showCustomDialog(context),
+        child: const Icon(Icons.add, color: Colors.white),
       ),
     );
   }
@@ -192,10 +194,11 @@ class CalendarScreenState extends ConsumerState<CalendarScreen> {
         padding: const EdgeInsets.symmetric(vertical: 4.0),
         decoration: BoxDecoration(
           color: hasRecord
-              ? const Color.fromARGB(255, 255, 255, 255)
+              ? const Color.fromARGB(255, 248, 255, 255)
               : null, // ✅ 배경색 변경
           border: isToday
-              ? Border.all(color: Colors.blue, width: 2)
+              ? Border.all(
+                  color: const Color.fromARGB(255, 248, 139, 5), width: 2)
               : Border.all(color: Colors.grey[300]!, width: 0.5),
           borderRadius: BorderRadius.circular(8),
         ),
@@ -302,7 +305,9 @@ class CalendarScreenState extends ConsumerState<CalendarScreen> {
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: Colors.blue.withOpacity(0.4), width: 2),
+            border: Border.all(
+                color: const Color.fromARGB(255, 219, 120, 0).withOpacity(0.4),
+                width: 2),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -311,7 +316,7 @@ class CalendarScreenState extends ConsumerState<CalendarScreen> {
                 context,
                 '카메라',
                 Icons.camera_alt,
-                Colors.blue,
+                const Color.fromARGB(255, 248, 139, 5),
                 () {
                   context.push('/camera');
                 },
@@ -321,7 +326,7 @@ class CalendarScreenState extends ConsumerState<CalendarScreen> {
                 context,
                 '앨범',
                 Icons.photo_album,
-                Colors.blue,
+                const Color.fromARGB(255, 248, 139, 5),
                 () {
                   context.push('/album');
                 },
