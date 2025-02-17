@@ -12,9 +12,9 @@ Color getColorFromName(String colorName) {
     case 'GREEN':
       return Colors.green;
     case 'BLUE':
-      return const Color.fromARGB(255, 4, 83, 148);
+      return Colors.blue;
     case 'SODOMY':
-      return const Color.fromARGB(255, 43, 1, 114);
+      return const Color.fromARGB(255, 12, 3, 114);
     case 'PURPLE':
       return Colors.purple;
     case 'BROWN':
@@ -28,7 +28,7 @@ Color getColorFromName(String colorName) {
     case 'WHITE':
       return Colors.white;
     case 'SKYBLUE':
-      return const Color.fromARGB(255, 130, 192, 220);
+      return Colors.lightBlueAccent;
     case 'LIGHT_GREEN':
       return Colors.lightGreen;
     default:
