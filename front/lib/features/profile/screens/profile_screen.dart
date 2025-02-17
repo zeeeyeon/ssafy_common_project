@@ -7,6 +7,7 @@ import 'profile_screen_edit.dart';
 import 'dart:io';
 import 'profile_image_picker.dart';
 import 'package:kkulkkulk/features/profile/view_models/profile_image_view_model.dart';
+import 'package:kkulkkulk/common/dialogs/logout_dialog.dart';
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
@@ -17,7 +18,20 @@ class ProfileScreen extends ConsumerWidget {
     final profileState = ref.watch(profileProvider);
 
     return Scaffold(
-      appBar: const CustomAppBar(title: 'My Page'),
+      appBar: CustomAppBar(
+        title: 'My',
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+            onPressed: () {
+              showLogoutDialog(context, () {
+                print("로그아웃 실행!");
+                // 로그아웃 기능 추가 가능 (예: AuthService.logout())
+              });
+            },
+          ),
+        ],
+      ),
       body: profileState.when(
         data: (userProfile) {
           debugPrint("🔥 UI에 표시될 프로필 데이터: ${userProfile.toJson()}");
@@ -78,7 +92,7 @@ class ProfileScreen extends ConsumerWidget {
                     padding: const EdgeInsets.all(6),
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: Colors.blueAccent,
+                      color: const Color.fromARGB(255, 248, 139, 5),
                       border: Border.all(color: Colors.white, width: 2),
                     ),
                     child: const Icon(Icons.add, color: Colors.white, size: 20),
@@ -119,7 +133,7 @@ class ProfileScreen extends ConsumerWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.blueAccent,
+        color: const Color.fromARGB(255, 248, 139, 5),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
@@ -164,9 +178,9 @@ class ProfileScreen extends ConsumerWidget {
         Text(
           userProfile.tierText,
           style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: Colors.blueAccent),
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
         ),
       ],
     );
@@ -177,7 +191,7 @@ class ProfileScreen extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.blueAccent,
+        color: const Color.fromARGB(255, 248, 139, 5),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
