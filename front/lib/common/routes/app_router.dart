@@ -25,6 +25,7 @@ final _shellNavigatorKey = GlobalKey<NavigatorState>();
 final selectedTabIndexProvider = StateProvider<int>((ref) => 0);
 
 final router = GoRouter(
+  debugLogDiagnostics: true,
   navigatorKey: _rootNavigatorKey,
   initialLocation: '/',
   // redirect: (BuildContext context, GoRouterState state) {

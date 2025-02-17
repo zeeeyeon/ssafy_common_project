@@ -58,10 +58,11 @@ class _SplashScreenState extends State<SplashScreen>
       await _controller.forward();
       await Future.delayed(const Duration(milliseconds: 500));
       if (mounted) {
-        if(token == null) {
+        if (token == null) {
           context.push('/login');
-        }else {
-          final decodedToken = JwtDecoder.decode(token.replaceAll("Bearer", ''));
+        } else {
+          final decodedToken =
+              JwtDecoder.decode(token.replaceAll("Bearer", ''));
           context.push('/calendar');
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('환영합니다 ${decodedToken['username']} 님')),

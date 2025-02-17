@@ -11,6 +11,7 @@ class LoginScreen extends StatelessWidget {
       appBar: const CustomAppBar(
         title: '로그인',
         showBackButton: false,
+        leading: null,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
