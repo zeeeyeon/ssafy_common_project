@@ -13,10 +13,21 @@ class LogInViewModel extends ChangeNotifier {
   final TextEditingController passwordController = TextEditingController();
 
   bool isLoading = false;
-  
+
   String errorMessage = '';
   String successMessage = '';
   String? username = '';
+
+  // 상태 초기화 함수
+  void reset() {
+    emailController.clear();
+    passwordController.clear();
+    isLoading = false;
+    errorMessage = '';
+    successMessage = '';
+    username = '';
+    notifyListeners();
+  }
 
   // 일반 로그인
   Future<bool> login(BuildContext context, WidgetRef ref) async {
@@ -62,6 +73,13 @@ class LogInViewModel extends ChangeNotifier {
     return flag;
   }
 
+  @override
+  void dispose() {
+    // 텍스트 필드 초기화
+    emailController.dispose();
+    passwordController.dispose();
+    super.dispose();
+  }
 }
 
 final logInViewModelProvider = ChangeNotifierProvider<LogInViewModel>((ref) {

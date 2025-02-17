@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:kkulkkulk/common/storage/storage.dart';
 import 'package:kkulkkulk/common/widgets/layout/custom_app_bar.dart';
 import 'package:kkulkkulk/features/profile/view_models/profile_view_model.dart';
 import 'package:kkulkkulk/features/profile/data/models/profile_model.dart';
@@ -22,10 +24,13 @@ class ProfileScreen extends ConsumerWidget {
         title: 'My',
         actions: [
           IconButton(
-            icon: const Icon(Icons.logout),
+            icon: const Icon(Icons.logout, color: Colors.white),
             onPressed: () {
               showLogoutDialog(context, () {
                 print("로그아웃 실행!");
+                Storage.removeToken();
+                context.push('/login');
+                print(Storage.getToken());
                 // 로그아웃 기능 추가 가능 (예: AuthService.logout())
               });
             },
@@ -167,18 +172,15 @@ class ProfileScreen extends ConsumerWidget {
     return Column(
       children: [
         const Text("나의 클라이밍 티어",
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-        const SizedBox(height: 12),
+            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
         SizedBox(
           width: 200,
-          height: 200,
           child: Image.asset(userProfile.tierImage, fit: BoxFit.cover),
         ),
-        const SizedBox(height: 8),
         Text(
           userProfile.tierText,
           style: const TextStyle(
-            fontSize: 18,
+            fontSize: 20,
             fontWeight: FontWeight.bold,
           ),
         ),

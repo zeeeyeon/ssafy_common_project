@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:kkulkkulk/common/storage/storage.dart';
 
 void showLogoutDialog(BuildContext context, VoidCallback onLogout) {
   showDialog(
@@ -54,7 +56,8 @@ void showLogoutDialog(BuildContext context, VoidCallback onLogout) {
                     padding: const EdgeInsets.symmetric(vertical: 12),
                     textStyle: const TextStyle(fontSize: 16),
                   ),
-                  child: const Text("취소", style: TextStyle(color: Colors.blue)),
+                  child:
+                      const Text("취소", style: TextStyle(color: Colors.black)),
                 ),
               ],
             ),
