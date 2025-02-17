@@ -22,6 +22,8 @@ class DioClient {
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
+          'Authorization':
+              'Bearer eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0MDFAbmF2ZXIuY29tIiwiaWF0IjoxNzM5NTAzNjUwLCJleHAiOjE3NDAxMDg0NTAsImlkIjoxLCJ1c2VybmFtZSI6IuyGoeuPme2YhCJ9.D-1tbAweNhstB4nq_dVFG-KJ1djbVphknYKtSyDZx3tJb5oF5BDqqM6whac_o9XuZiDhdiA_INa5mziUY5t7Dg',
         },
       ),
     );
