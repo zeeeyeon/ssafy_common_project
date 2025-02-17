@@ -8,10 +8,19 @@ class LoginScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const CustomAppBar(
-        title: '로그인',
-        showBackButton: false,
-        leading: null,
+      appBar: AppBar(
+        title: Text(
+          '로그인',
+          style: const TextStyle(
+            fontSize: 25,
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        centerTitle: true,
+        leading: Container(),
+        backgroundColor: const Color.fromARGB(255, 248, 139, 5),
+        elevation: 0,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
