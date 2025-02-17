@@ -6,6 +6,7 @@ import 'package:kkulkkulk/common/jwt/jwt_token_provider.dart';
 import 'package:kkulkkulk/features/auth/components/text_button_form.dart';
 import 'package:kkulkkulk/features/auth/components/text_form.dart';
 import 'package:kkulkkulk/features/auth/view_models/oauth_sign_up_view_model.dart';
+import 'package:kkulkkulk/features/auth/view_models/sign_up_view_model.dart';
 
 class OauthSignupForm extends ConsumerWidget {
   final _formKey = GlobalKey<FormState>();
@@ -68,6 +69,11 @@ class OauthSignupForm extends ConsumerWidget {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text('환영합니다 $username 님')),
             );
+            oauthSignUpViewModel.passwordController.clear();
+            oauthSignUpViewModel.checkPasswordController.clear();
+            oauthSignUpViewModel.phoneController.clear();
+            oauthSignUpViewModel.nicknameController.clear();
+            oauthSignUpViewModel.usernameController.clear();
             context.go('/calendar');
           } else if (!flag) {
             ScaffoldMessenger.of(context).showSnackBar(
