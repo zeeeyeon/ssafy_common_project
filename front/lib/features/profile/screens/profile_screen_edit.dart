@@ -6,6 +6,7 @@ import 'package:kkulkkulk/features/profile/view_models/arm_span_view_model.dart'
 import 'package:table_calendar/table_calendar.dart';
 import 'camera_screen.dart';
 import 'package:kkulkkulk/features/profile/data/models/arm_span_model.dart'; // ✅ 추가
+import 'package:kkulkkulk/common/widgets/layout/custom_app_bar.dart';
 
 class ProfileScreenEdit extends ConsumerStatefulWidget {
   const ProfileScreenEdit({super.key});
@@ -85,7 +86,7 @@ class _ProfileScreenEditState extends ConsumerState<ProfileScreenEdit> {
     });
 
     return Scaffold(
-      appBar: AppBar(title: const Text('프로필 수정'), centerTitle: true),
+      appBar: const CustomAppBar(title: '프로필 수정'),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -107,7 +108,7 @@ class _ProfileScreenEditState extends ConsumerState<ProfileScreenEdit> {
         child: ElevatedButton(
           onPressed: _saveProfile,
           style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.blueAccent,
+              backgroundColor: const Color.fromARGB(255, 248, 139, 5),
               padding: const EdgeInsets.all(16)),
           child: const Text('저장',
               style: TextStyle(fontSize: 18, color: Colors.white)),
@@ -183,6 +184,16 @@ class _ProfileScreenEditState extends ConsumerState<ProfileScreenEdit> {
             headerStyle: const HeaderStyle(
               formatButtonVisible: false,
               titleCentered: true,
+            ),
+            calendarStyle: const CalendarStyle(
+              selectedDecoration: BoxDecoration(
+                color: Color.fromARGB(255, 242, 200, 148),
+                shape: BoxShape.circle,
+              ),
+              todayDecoration: BoxDecoration(
+                color: Color.fromARGB(255, 248, 139, 5),
+                shape: BoxShape.circle,
+              ),
             ),
           ),
           crossFadeState: _isCalendarVisible
