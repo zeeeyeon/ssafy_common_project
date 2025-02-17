@@ -41,7 +41,7 @@ void showLogoutDialog(BuildContext context, VoidCallback onLogout) {
                         fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                   child: const Text(
-                    "예. 지금 로그아웃",
+                    "로그아웃",
                     style: TextStyle(color: Colors.black), // 인스타그램 로그아웃 색상 적용
                   ),
                 ),
@@ -54,8 +54,7 @@ void showLogoutDialog(BuildContext context, VoidCallback onLogout) {
                     padding: const EdgeInsets.symmetric(vertical: 12),
                     textStyle: const TextStyle(fontSize: 16),
                   ),
-                  child: const Text("아니요. 계속하기",
-                      style: TextStyle(color: Colors.blue)),
+                  child: const Text("취소", style: TextStyle(color: Colors.blue)),
                 ),
               ],
             ),
