@@ -5,18 +5,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:google_mlkit_pose_detection/google_mlkit_pose_detection.dart';
 import 'package:kkulkkulk/features/camera/providers/camera_providers.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:kkulkkulk/common/utils/color_converter.dart';
 import 'package:kkulkkulk/features/camera/view_models/visit_log_view_model.dart';
 import 'package:logger/logger.dart';
 import 'package:go_router/go_router.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:kkulkkulk/features/motionai/utils/pose_detector.dart'; // CustomPoseDetector
 import 'package:kkulkkulk/features/motionai/view_models/pose_view_model.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import '../component/camera_controls.dart';
-import '../component/recording_indicator.dart';
 import '../component/success_failure_dialog.dart';
 import 'package:kkulkkulk/features/camera/data/models/hold_model.dart';
 import 'package:kkulkkulk/features/camera/view_models/video_view_model.dart';
@@ -113,8 +110,48 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
   }
 
   Future<void> _checkVisitLog() async {
-    // 방문 로그(클라이밍장 정보) 불러오기
-    await ref.read(visitLogViewModelProvider.notifier).fetchVisitLog();
+    try {
+      await ref.read(visitLogViewModelProvider.notifier).fetchVisitLog();
+
+      final visitLogState = ref.read(visitLogViewModelProvider);
+
+      // AsyncError 상태 체크 추가
+      if (visitLogState is AsyncError ||
+          (visitLogState is AsyncData && visitLogState.value == null)) {
+        if (!mounted) return;
+
+        // 화면 닫기
+        context.pop();
+
+        // 메시지 표시
+        Future.delayed(const Duration(milliseconds: 100), () {
+          if (!mounted) return;
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('방문 기록이 없습니다. 근처 클라이밍장을 먼저 방문해 주세요.'),
+              duration: Duration(seconds: 2),
+            ),
+          );
+        });
+        return;
+      }
+    } catch (e) {
+      logger.e('방문 기록 확인 중 오류 발생: $e');
+      if (!mounted) return;
+
+      // 화면 닫기
+      context.pop();
+
+      Future.delayed(const Duration(milliseconds: 100), () {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('방문 기록을 확인하는 중 오류가 발생했습니다.'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      });
+    }
   }
 
   Future<void> _initPoseDetector() async {

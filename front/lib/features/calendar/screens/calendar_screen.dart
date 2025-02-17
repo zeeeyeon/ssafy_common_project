@@ -194,7 +194,8 @@ class CalendarScreenState extends ConsumerState<CalendarScreen> {
         padding: const EdgeInsets.symmetric(vertical: 4.0),
         decoration: BoxDecoration(
           color: hasRecord
-              ? const Color.fromARGB(255, 248, 255, 255)
+              ? const Color.fromARGB(255, 248, 139, 5)
+                  .withOpacity(_getOpacityFromAttempts(dailyAttempts))
               : null, // ✅ 배경색 변경
           border: isToday
               ? Border.all(
@@ -238,6 +239,24 @@ class CalendarScreenState extends ConsumerState<CalendarScreen> {
       firstDate: DateTime(2000),
       lastDate: DateTime(2100),
       locale: const Locale('ko', ''),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: const ColorScheme.light(
+              primary: Color.fromARGB(255, 248, 139, 5), // 선택된 날짜 배경색
+              onPrimary: Colors.white, // 선택된 날짜 텍스트 색상
+              onSurface: Colors.black, // 달력 텍스트 색상
+              secondary: Colors.black, // 취소/확인 버튼 색상
+            ),
+            textButtonTheme: TextButtonThemeData(
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.black, // 버튼 텍스트 색상
+              ),
+            ),
+          ),
+          child: child!,
+        );
+      },
     );
     if (picked != null) {
       setState(() {
@@ -271,6 +290,17 @@ class CalendarScreenState extends ConsumerState<CalendarScreen> {
       return 'assets/character/stone1.png'; // 1단계
     }
     return ''; // 기록이 없을 경우 빈 값
+  }
+
+  double _getOpacityFromAttempts(int attempts) {
+    if (attempts >= 20) {
+      return 0.9;
+    } else if (attempts >= 10) {
+      return 0.5;
+    } else if (attempts > 0) {
+      return 0.2;
+    }
+    return 0.0;
   }
 
   int _getDailyAttemptCount(DateTime date, List<CalendarModel>? calendarData) {
