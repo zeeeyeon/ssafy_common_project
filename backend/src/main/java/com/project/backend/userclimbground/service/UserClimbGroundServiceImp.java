@@ -18,8 +18,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.temporal.ChronoField;
+import java.time.temporal.WeekFields;
 import java.util.*;
 
 @Service
@@ -48,8 +52,9 @@ public class UserClimbGroundServiceImp implements UserClimbGroundService{
     // 주별 통계 조회
     @Override
     public  ClimbRecordResponseDTO getUserClimbRecordWeek(Long userId ,LocalDate date){
+        Map<String, LocalDateTime> weekRange = getWeekDateRange(date);
 
-        List<UserClimbGround> userClimbGrounds = userClimbGroundRepository.findClimbRecordsByUserIdAndWeek(userId,date.getYear(),date.get(ChronoField.ALIGNED_WEEK_OF_MONTH) );
+        List<UserClimbGround> userClimbGrounds = userClimbGroundRepository.findClimbRecordsByUserIdAndWeek(userId,weekRange.get("startDate"),weekRange.get("endDate") );
         return makeClimbRecordResponseDTO(userClimbGrounds);
     }
 
@@ -233,5 +238,18 @@ public class UserClimbGroundServiceImp implements UserClimbGroundService{
             return detailResponseDTO;
         }
         throw new CustomException(ResponseCode.NOT_UNLOCK_CLIMB);
+    }
+
+    public static Map<String, LocalDateTime> getWeekDateRange(LocalDate date) {
+        LocalDate start = date
+                .with(WeekFields.of(Locale.getDefault()).weekOfYear(), date.get(WeekFields.of(Locale.getDefault()).weekOfYear()))
+                .with(DayOfWeek.MONDAY); // 해당 주의 월요일
+
+        LocalDate end = start.plusDays(6); // 해당 주의 일요일
+
+        return Map.of(
+                "startDate", start.atStartOfDay(),
+                "endDate", end.atTime(LocalTime.MAX)
+        );
     }
 }
