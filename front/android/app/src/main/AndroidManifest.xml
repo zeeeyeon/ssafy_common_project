@@ -18,9 +18,9 @@
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" android:maxSdkVersion="32" />
     <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
     <application
-        android:label="front_flutter"
+        android:label="끌락끌락"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@mipmap/krkr_launcher"
         android:requestLegacyExternalStorage="true"
         android:preserveLegacyExternalStorage="true">
         
