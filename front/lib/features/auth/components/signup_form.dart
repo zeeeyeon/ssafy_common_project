@@ -28,7 +28,8 @@ class SignupForm extends ConsumerWidget {
             );
           } else {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(signUpViewModel.errorMessage)),
+              // SnackBar(content: Text(signUpViewModel.errorMessage)),
+              SnackBar(content: Text('해당 이메일은 시용할 수 없습니다.')),
             );
           }
         } catch (e) {
@@ -60,7 +61,8 @@ class SignupForm extends ConsumerWidget {
             );
           } else {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(signUpViewModel.errorMessage)),
+              // SnackBar(content: Text(signUpViewModel.errorMessage)),
+              SnackBar(content: Text("닉네임 중복")),
             );
           }
         } catch (e) {

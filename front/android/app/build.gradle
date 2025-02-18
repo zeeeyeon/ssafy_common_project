@@ -30,6 +30,15 @@ android {
         targetSdk = 33
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+        def dotenv = new Properties()
+        def dotenvFile = rootProject.file('.env')
+
+        if (dotenvFile.exists()) {
+            dotenv.load(new FileInputStream(dotenvFile))
+        }
+
+        // manifestPlaceholders["KAKAO_NATIVE_APP_KEY"] = dotenv.getProperty("KAKAO_NATIVE_APP_KEY", "")
+        manifestPlaceholders["KAKAO_NATIVE_APP_KEY"] = project.hasProperty("KAKAO_NATIVE_APP_KEY") ? KAKAO_NATIVE_APP_KEY : ""
     }
 
     buildTypes {

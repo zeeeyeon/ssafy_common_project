@@ -295,9 +295,9 @@ class PoseViewModel extends StateNotifier<bool> {
       final rightMagnitude = math.sqrt(math.pow(rightArmVector['x']!, 2) +
           math.pow(rightArmVector['y']!, 2));
       final angle = math.acos(dotProduct / (leftMagnitude * rightMagnitude));
-      final armsCrossing = (leftWrist.x - rightWrist.x).abs() < 0.2 &&
-          (leftWrist.y - rightWrist.y).abs() < 0.2;
-      const xPoseAngleThreshold = 0.3;
+      final armsCrossing = (leftWrist.x - rightWrist.x).abs() < 0.35 &&
+          (leftWrist.y - rightWrist.y).abs() < 0.35;
+      const xPoseAngleThreshold = 0.5;
       final isXPose =
           (angle - 1.57).abs() < xPoseAngleThreshold && armsCrossing;
 
@@ -314,7 +314,7 @@ class PoseViewModel extends StateNotifier<bool> {
         _lastDetectedResult = null;
       }
 
-      return _consecutiveOXPoseFrames >= 5;
+      return _consecutiveOXPoseFrames >= 3;
     } catch (e) {
       logger.e('O/X 포즈 체크 중 오류 발생: $e');
       return false;

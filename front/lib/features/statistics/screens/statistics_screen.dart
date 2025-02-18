@@ -25,6 +25,14 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen>
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
     _loadData(periods[0]);
+
+    // 탭 변경 리스너 추가 (탭 클릭 + 스와이프 감지)
+    _tabController.addListener(() {
+      if (!_tabController.indexIsChanging) {
+        // 사용자가 직접 변경할 때만 실행
+        _loadData(periods[_tabController.index]);
+      }
+    });
   }
 
   void _loadData(String period) {

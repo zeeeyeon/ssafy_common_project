@@ -121,9 +121,14 @@ class SignUpViewModel extends ChangeNotifier{
         }else if(response.data['status']['code'] == 200) {
           print('사용가능한 이메일입니다');
           successMessage = response.data['status']['message'];
+          // successMessage = "해당 이메일은 사용가능합니다.";
           notifyListeners();
           return true;
         }
+      }else {
+        print("못찾음ㄴㄴㄴㄴㄴㄴㄴㄴㄴ");
+        errorMessage = '이메일 중복입니다.';
+        return false;
       }
 
     } catch (e) {
