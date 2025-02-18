@@ -41,6 +41,7 @@ class _ChallengeFormState extends State<ChallengeForm> {
     });
     try {
       Position position = await determinePosition();
+      print('lat(위도) : ${position.latitude} / log(경도) : ${position.longitude}');
       ChallengeResponseModel nearByPlace =
           await _challengeRepository.nearChallenge(
         NearChallengeModel(

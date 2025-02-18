@@ -114,24 +114,47 @@ class LoginForm extends ConsumerWidget {
             child: ElevatedButton(
               onPressed: () async {
                 logger.i("카카오 로그인 시작");
-                final result = await UserApi.instance.loginWithKakaoAccount();
-                final accessToken = result.accessToken;
 
-                logger.i("Access Token: $accessToken");
-                ref.read(accessTokenProvider.notifier).state = accessToken;
-
-                if (accessToken.isEmpty) {
-                  logger.i("Access Token이 없습니다.");
+                try {
+                OAuthToken result = await UserApi.instance.loginWithKakaoAccount();
+                
+                // 타입 확인 후, 적절한 처리
+                if (result is OAuthToken) {
+                  final token = result;
+                  logger.i("카카오계정으로 로그인 성공 ${token.accessToken}");
+                  
+                  final accessToken = token.accessToken;  
+                  logger.i("Access Token: $accessToken");
+                  
+                  ref.read(accessTokenProvider.notifier).state = accessToken;
+                  
+                  if (accessToken.isEmpty) {
+                    logger.i("Access Token이 없습니다.");
+                  } else {
+                    logger.i("Access Token이 있습니다.");
+                  }
+                  
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const OauthRegisterScreen(),
+                    ),
+                  );
                 } else {
-                  logger.i("Access Token이 있습니다.");
+                  logger.e("예상치 못한 반환값: $result");
                 }
+              } catch (e) {
+                logger.e("카카오 로그인 실패: $e");
+              }
 
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const OauthRegisterScreen(),
-                  ),
-                );
+                
+
+                
+                
+
+                
+
+                
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFFFFEE00),

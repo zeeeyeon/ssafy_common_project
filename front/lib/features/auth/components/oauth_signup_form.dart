@@ -32,7 +32,8 @@ class OauthSignupForm extends ConsumerWidget {
             );
           } else {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(oauthSignUpViewModel.errorMessage)),
+              // SnackBar(content: Text(oauthSignUpViewModel.errorMessage)),
+              SnackBar(content: Text('닉네임 중복')),
             );
           }
         } catch (e) {

@@ -107,6 +107,7 @@ class ChallengeRepository {
         "latitude": nearChallengeModel.latitude,
         "longitude": nearChallengeModel.longitude,
       });
+      print(response);
       return ChallengeResponseModel.fromJson(response.data['content']);
     } catch (e) {
       rethrow;
