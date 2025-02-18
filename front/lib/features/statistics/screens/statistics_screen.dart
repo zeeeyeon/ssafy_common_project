@@ -55,16 +55,17 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen>
     return Scaffold(
       appBar: AppBar(
         title: TabBar(
-          controller: _tabController,
-          onTap: (index) {
-            _loadData(periods[index]);
-          },
-          tabs: const [
-            Tab(text: '주간'),
-            Tab(text: '월간'),
-            Tab(text: '연간'),
-          ],
-        ),
+            controller: _tabController,
+            onTap: (index) {
+              _loadData(periods[index]);
+            },
+            tabs: const [
+              Tab(text: '주간'),
+              Tab(text: '월간'),
+              Tab(text: '연간'),
+            ],
+            labelColor: const Color.fromARGB(255, 248, 139, 5),
+            indicatorColor: const Color.fromARGB(255, 248, 139, 5)),
       ),
       body: Column(
         children: [
@@ -216,7 +217,7 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen>
             padding: const EdgeInsets.all(16.0),
             child: Column(
               children: [
-                const SizedBox(height: 10),
+                const SizedBox(height: 0),
                 StatisticsHeader(
                   period: period,
                   selectedDate: selectedDate,
