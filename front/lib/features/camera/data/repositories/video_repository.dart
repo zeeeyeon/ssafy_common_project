@@ -19,6 +19,7 @@ class VideoRepository {
     required int userDateId,
     required int holdId,
     required bool isSuccess,
+    void Function(int sentBytes, int totalBytes)? onSendProgress,
   }) async {
     try {
       final videoBytes = await videoFile.readAsBytes();
@@ -29,7 +30,6 @@ class VideoRepository {
       );
 
       final formData = FormData.fromMap({
-        'userId': 1,
         'holdId': holdId,
         'userDateId': userDateId,
         'isSuccess': isSuccess,
@@ -44,6 +44,7 @@ class VideoRepository {
             'Content-Type': 'multipart/form-data',
           },
         ),
+        onSendProgress: onSendProgress,
       );
 
       if (response.statusCode == 201) {

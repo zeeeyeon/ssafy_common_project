@@ -711,7 +711,7 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
               );
 
       if (result) {
-        await _speak(isSuccess ? '성공으로 기록되었습니다.' : '실패로 기록되었습니다.');
+        await _speak('비디오 업로드가 완료되었습니다.');
       } else {
         await _speak('업로드에 실패했습니다. 다시 시도해주세요.');
       }
@@ -963,6 +963,9 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
       logger.d('감지된 O/X 결과: $result');
 
       if (result != null) {
+        // o,x 감지 후 바로 음성 출력
+        await _speak(result ? '성공으로 기록되었습니다.' : '실패로 기록되었습니다.');
+
         await _handleOXPoseDetected(result);
       }
     }

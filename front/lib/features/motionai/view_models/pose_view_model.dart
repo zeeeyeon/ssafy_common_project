@@ -25,69 +25,11 @@ final poseViewModelProvider = StateNotifierProvider<PoseViewModel, bool>((ref) {
 
 class PoseViewModel extends StateNotifier<bool> {
   PoseViewModel() : super(false);
-  int _consecutiveStartPoseFrames = 0;
   int _consecutiveOXPoseFrames = 0;
   int _consecutiveColorSelectFrames = 0;
-  int _consecutiveConfirmFrames = 0;
   bool? _lastDetectedResult; // true: O(성공), false: X(실패)
   static const int requiredConsecutiveFrames = 10;
   static int consecutiveClapFrames = 0; // 연속 박수 프레임 카운트
-
-  bool checkStartPose(Pose pose) {
-    try {
-      final leftShoulder = pose.landmarks[PoseLandmarkType.leftShoulder];
-      final leftElbow = pose.landmarks[PoseLandmarkType.leftElbow];
-      final leftWrist = pose.landmarks[PoseLandmarkType.leftWrist];
-      final rightShoulder = pose.landmarks[PoseLandmarkType.rightShoulder];
-      final rightElbow = pose.landmarks[PoseLandmarkType.rightElbow];
-      final rightWrist = pose.landmarks[PoseLandmarkType.rightWrist];
-
-      if (leftShoulder == null ||
-          leftElbow == null ||
-          leftWrist == null ||
-          rightShoulder == null ||
-          rightElbow == null ||
-          rightWrist == null) {
-        _consecutiveStartPoseFrames = 0;
-        return false;
-      }
-
-      // 양손을 들어올리는 포즈 체크 (녹화 시작)
-      final leftArmAngle =
-          AngleCalculator.calculateAngle(leftShoulder, leftElbow, leftWrist);
-      final rightArmAngle =
-          AngleCalculator.calculateAngle(rightShoulder, rightElbow, rightWrist);
-
-      // 디버깅을 위한 로그 추가
-      logger.d('왼쪽 팔 각도: $leftArmAngle');
-      logger.d('오른쪽 팔 각도: $rightArmAngle');
-      logger.d('왼쪽 손목 Y: ${leftWrist.y}, 왼쪽 어깨 Y: ${leftShoulder.y}');
-      logger.d('오른쪽 손목 Y: ${rightWrist.y}, 오른쪽 어깨 Y: ${rightShoulder.y}');
-
-      // 조건 완화: 각도를 130도로 낮추고, 연속 프레임 수를 5로 줄임
-      final isStartPose = leftArmAngle >= 130 &&
-          rightArmAngle >= 130 &&
-          leftWrist.y < leftShoulder.y &&
-          rightWrist.y < rightShoulder.y;
-
-      if (isStartPose) {
-        _consecutiveStartPoseFrames++;
-        logger.d('연속 프레임 수: $_consecutiveStartPoseFrames');
-        if (_consecutiveStartPoseFrames >= 5) {
-          // 10에서 5로 줄임
-          state = true;
-          return true;
-        }
-      } else {
-        _consecutiveStartPoseFrames = 0;
-      }
-
-      return false;
-    } catch (e) {
-      logger.e('시작 포즈 체크 중 오류 발생: $e');
-      return false;
-    }
-  }
 
   bool checkColorSelectPose(Pose pose) {
     try {
@@ -129,45 +71,6 @@ class PoseViewModel extends StateNotifier<bool> {
     }
   }
 
-  bool checkConfirmPose(Pose pose) {
-    try {
-      final leftShoulder = pose.landmarks[PoseLandmarkType.leftShoulder];
-      final leftElbow = pose.landmarks[PoseLandmarkType.leftElbow];
-      final leftWrist = pose.landmarks[PoseLandmarkType.leftWrist];
-
-      if (leftShoulder == null || leftElbow == null || leftWrist == null) {
-        _consecutiveConfirmFrames = 0;
-        return false;
-      }
-
-      // 왼팔을 들어올리는 포즈 체크 (색상 선택 확정)
-      final leftArmAngle =
-          AngleCalculator.calculateAngle(leftShoulder, leftElbow, leftWrist);
-
-      // 디버깅을 위한 로그 추가
-      logger.d('왼쪽 팔 각도: $leftArmAngle');
-      logger.d('왼쪽 손목 Y: ${leftWrist.y}, 왼쪽 어깨 Y: ${leftShoulder.y}');
-
-      // 왼팔을 130도 이상 들어올린 자세
-      final isConfirmPose = leftArmAngle >= 130 && leftWrist.y < leftShoulder.y;
-
-      if (isConfirmPose) {
-        _consecutiveConfirmFrames++;
-        logger.d('연속 프레임 수 (확정): $_consecutiveConfirmFrames');
-        if (_consecutiveConfirmFrames >= 5) {
-          return true;
-        }
-      } else {
-        _consecutiveConfirmFrames = 0;
-      }
-
-      return false;
-    } catch (e) {
-      logger.e('확정 포즈 체크 중 오류 발생: $e');
-      return false;
-    }
-  }
-
   bool checkClapPose(Pose pose) {
     try {
       final leftWrist = pose.landmarks[PoseLandmarkType.leftWrist];
@@ -180,8 +83,8 @@ class PoseViewModel extends StateNotifier<bool> {
       }
 
       // 양손이 서로 가까이 있는지 확인 (정규화된 좌표 기준 15% 이내)
-      final handsClose = (rightWrist.x - leftWrist.x).abs() < 0.15 && // 15% 이내
-          (rightWrist.y - leftWrist.y).abs() < 0.15; // 15% 이내
+      final handsClose = (rightWrist.x - leftWrist.x).abs() < 0.05 && // 15% 이내
+          (rightWrist.y - leftWrist.y).abs() < 0.05; // 15% 이내
 
       logger.d(
           '손 간격 (정규화된 값) - X: ${(rightWrist.x - leftWrist.x).abs()}, Y: ${(rightWrist.y - leftWrist.y).abs()}');
@@ -189,8 +92,8 @@ class PoseViewModel extends StateNotifier<bool> {
       if (handsClose) {
         consecutiveClapFrames++;
         logger.d('박수 포즈 감지! 연속 프레임: $consecutiveClapFrames');
-        if (consecutiveClapFrames >= 1) {
-          // 1프레임으로 유지 (즉각 반응)
+        if (consecutiveClapFrames >= 2) {
+          // 2프레임으로 유지 (즉각 반응)
           logger.d('박수 인식 성공!');
           consecutiveClapFrames = 0;
           return true;
@@ -273,8 +176,8 @@ class PoseViewModel extends StateNotifier<bool> {
       }
 
       // O 포즈 조건
-      final handsAboveHead =
-          leftWrist!.y < head!.y - 0.1 && rightWrist!.y < head.y - 0.1;
+      final handsAboveHead = leftWrist!.y < leftShoulder!.y - 0.15 &&
+          rightWrist!.y < rightShoulder!.y - 0.15;
       final handsClose = (leftWrist.x - rightWrist!.x).abs() < 0.25 &&
           (leftWrist.y - rightWrist.y).abs() < 0.25;
       final isOPose = handsAboveHead && handsClose;
@@ -295,9 +198,9 @@ class PoseViewModel extends StateNotifier<bool> {
       final rightMagnitude = math.sqrt(math.pow(rightArmVector['x']!, 2) +
           math.pow(rightArmVector['y']!, 2));
       final angle = math.acos(dotProduct / (leftMagnitude * rightMagnitude));
-      final armsCrossing = (leftWrist.x - rightWrist.x).abs() < 0.35 &&
-          (leftWrist.y - rightWrist.y).abs() < 0.35;
-      const xPoseAngleThreshold = 0.5;
+      final armsCrossing = (leftWrist.x - rightWrist.x).abs() < 0.45 &&
+          (leftWrist.y - rightWrist.y).abs() < 0.45;
+      const xPoseAngleThreshold = 0.8;
       final isXPose =
           (angle - 1.57).abs() < xPoseAngleThreshold && armsCrossing;
 
@@ -329,10 +232,8 @@ class PoseViewModel extends StateNotifier<bool> {
   @override
   void resetState() {
     state = false;
-    _consecutiveStartPoseFrames = 0;
     _consecutiveOXPoseFrames = 0;
     _consecutiveColorSelectFrames = 0;
-    _consecutiveConfirmFrames = 0;
     _lastDetectedResult = null;
   }
 }

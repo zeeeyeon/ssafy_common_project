@@ -44,6 +44,10 @@ class VideoViewModel extends StateNotifier<AsyncValue<VideoResponse?>> {
         isSuccess: isSuccess,
         userDateId: userDateId,
         holdId: holdId,
+        onSendProgress: (int sentBytes, int totalBytes) {
+          final progress = sentBytes / totalBytes;
+          logger.d('업로드 진행률: ${(progress * 100).toStringAsFixed(2)}%');
+        },
       );
 
       state = AsyncValue.data(response);
