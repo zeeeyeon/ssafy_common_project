@@ -27,6 +27,7 @@ public class ConvertRequestDto {
                 .username(username)
                 .phone(phone)
                 .nickname(nickname)
+                .startDate(LocalDateTime.now())
                 .createDate(LocalDateTime.now())
                 .updateDate(LocalDateTime.now())
                 .build();
