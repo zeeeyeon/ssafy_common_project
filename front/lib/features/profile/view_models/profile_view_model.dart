@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/foundation.dart'; // debugPrint 사용
 import 'package:kkulkkulk/features/profile/data/models/profile_model.dart';
@@ -6,9 +7,16 @@ import 'package:kkulkkulk/common/network/dio_client.dart';
 
 class ProfileViewModel extends StateNotifier<AsyncValue<UserProfile>> {
   final ProfileRepository _repository;
+  final CancelToken _cancelToken = CancelToken();
 
   ProfileViewModel(this._repository) : super(const AsyncValue.loading()) {
     fetchUserProfile(); // ✅ 생성자에서 자동 실행!
+  }
+
+  @override
+  void dispose() {
+    _cancelToken.cancel("ProfileViewModel disposed");
+    super.dispose();
   }
 
   /// ✅ 사용자 프로필 가져오기
@@ -19,6 +27,7 @@ class ProfileViewModel extends StateNotifier<AsyncValue<UserProfile>> {
       debugPrint("✅ [ProfileViewModel] 프로필 데이터 수신: ${profile.toJson()}");
       state = AsyncValue.data(profile);
     } catch (e, stackTrace) {
+      if (_cancelToken.isCancelled) return;
       debugPrint("❌ [ProfileViewModel] 프로필 데이터 로딩 실패: $e");
       state = AsyncValue.error(e, stackTrace);
     }
@@ -49,7 +58,7 @@ final profileRepositoryProvider = Provider<ProfileRepository>(
 );
 
 /// ✅ ProfileViewModel Provider
-final profileProvider =
-    StateNotifierProvider<ProfileViewModel, AsyncValue<UserProfile>>(
+final profileProvider = StateNotifierProvider.autoDispose<ProfileViewModel,
+    AsyncValue<UserProfile>>(
   (ref) => ProfileViewModel(ref.watch(profileRepositoryProvider)),
 );

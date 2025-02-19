@@ -5,8 +5,10 @@ import 'package:kkulkkulk/common/jwt/jwt_token_provider.dart';
 import 'package:kkulkkulk/common/storage/storage.dart';
 import 'package:kkulkkulk/features/auth/data/models/translate_social_to_user_model.dart';
 import 'package:kkulkkulk/features/auth/data/repositories/auth_repository.dart';
+import 'package:logger/logger.dart';
 
 class OauthSignUpViewModel extends ChangeNotifier {
+  Logger logger = Logger();
   final AuthRepository _authRepository = AuthRepository();
 
   final TextEditingController passwordController = TextEditingController();
@@ -137,6 +139,7 @@ class OauthSignUpViewModel extends ChangeNotifier {
     final String nickname = nicknameController.text;
 
     final accessToken = ref.watch(accessTokenProvider);
+    
 
     final TranslateSocialToUserModel translateSocialToUserModel =
         TranslateSocialToUserModel(
@@ -165,7 +168,7 @@ class OauthSignUpViewModel extends ChangeNotifier {
           print('checkToken => $checkToken');
           // 토큰을 업데이트
           ref.read(jwtTokenProvider.notifier).state = actualToken;
-
+          ref.read(accessTokenProvider.notifier).state = null;
           successMessage = '로그인 성공';
           flag = true;
           return flag;

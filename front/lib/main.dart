@@ -9,7 +9,7 @@ import 'package:kkulkkulk/common/routes/app_router.dart';
 void main() async {
   // Flutter 바인딩 초기화
   WidgetsFlutterBinding.ensureInitialized();
-  await dotenv.load();
+  await dotenv.load(fileName: ".env");
   // String kakaoNativeAppKey = dotenv.env['KAKAO_NATIVE_APP_KEY'] ?? '';
   print('kakaoNativeAppKey: ${dotenv.get('KAKAO_NATIVE_APP_KEY')}');
   KakaoSdk.init(
