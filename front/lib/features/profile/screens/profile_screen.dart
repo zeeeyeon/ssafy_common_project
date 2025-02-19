@@ -24,7 +24,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     super.initState();
     // 화면에 들어갈 때마다 프로필 정보를 새로 요청
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(profileProvider.notifier).refreshProfile();
+      ref.refresh(profileProvider);
     });
   }
 
