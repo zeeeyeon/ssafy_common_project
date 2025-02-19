@@ -9,6 +9,8 @@ import com.project.backend.record.entity.ClimbingRecord;
 import com.project.backend.record.repository.ClimbingRecordRepository;
 import com.project.backend.user.entity.User;
 import com.project.backend.user.repository.jpa.UserRepository;
+import com.project.backend.user.service.impl.UserServiceImpl;
+import com.project.backend.userclimbground.entity.UserClimbGroundMedalEnum;
 import com.project.backend.userdate.dto.response.MonthlyClimbingRecordResponse;
 import com.project.backend.userdate.entity.UserDate;
 import com.project.backend.userdate.repository.UserDateRepository;
@@ -35,6 +37,7 @@ public class ClimbingRecordServiceImpl implements ClimbingRecordService {
     private final ClimbingRecordRepository climbingRecordRepository;
     private final CacheManager redisCacheManager;
     private final UserDateService userDateService;
+    private final UserServiceImpl userService;
 
     @Override
     @Transactional
@@ -52,6 +55,11 @@ public class ClimbingRecordServiceImpl implements ClimbingRecordService {
         newClimbingRecord.setUser(user);
         newClimbingRecord.setUserDate(userDate);
         climbingRecordRepository.save(newClimbingRecord);
+
+        UserClimbGroundMedalEnum userClimbGroundMedalEnum = userService.updateMedalPerClimbGround(userId, userDate.getUserClimbGround().getClimbGround().getId());
+
+        log.debug("메달 없데이트: " + userClimbGroundMedalEnum);
+        log.debug(String.valueOf(ZoneId.systemDefault()));
 
         log.debug("Climbing record saved: " + newClimbingRecord.getCreatedAt());
         log.debug(String.valueOf(ZoneId.systemDefault()));
