@@ -71,7 +71,7 @@ public class UserController {
   @GetMapping("/profile")
   public ResponseEntity<?> findUserProfile(@AuthenticationPrincipal CustomUserDetails userDetails) {
     Long userId = userDetails.getUser().getId();
-    User user = userService.userProfileFindById(userId);
+    User user = userService.findUserProfileById(userId);
     UserProfileResponseDto responseDto = new UserProfileResponseDto(user);
     return new ResponseEntity<>(Response.create(ResponseCode.GET_USER_PROFILE, responseDto), GET_USER_PROFILE.getHttpStatus());
   }

@@ -103,8 +103,9 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
-  public User userProfileFindById(Long id) {
-    return userRepository.findById(id).orElseThrow(() -> new CustomException(ResponseCode.NOT_FOUND_USER));
+  public User findUserProfileById(Long id) {
+    User user = updateUserTier(id);
+    return userRepository.findById(user.getId()).orElseThrow(() -> new CustomException(ResponseCode.NOT_FOUND_USER));
   }
 
   @Override
