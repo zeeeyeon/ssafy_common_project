@@ -38,7 +38,7 @@ android {
         }
 
         // manifestPlaceholders["KAKAO_NATIVE_APP_KEY"] = dotenv.getProperty("KAKAO_NATIVE_APP_KEY", "")
-        manifestPlaceholders["KAKAO_NATIVE_APP_KEY"] = project.hasProperty("KAKAO_NATIVE_APP_KEY") ? KAKAO_NATIVE_APP_KEY : ""
+        manifestPlaceholders["KAKAO_NATIVE_APP_KEY"] = project.hasProperty("KAKAO_NATIVE_APP_KEY") ? project.KAKAO_NATIVE_APP_KEY : ""
     }
 
     buildTypes {

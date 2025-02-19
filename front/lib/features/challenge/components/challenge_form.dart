@@ -53,9 +53,12 @@ class _ChallengeFormState extends State<ChallengeForm> {
       });
 
       print('API 응답: $nearByPlace');
-      NotificationService()
+      if(nearByPlace.distance <= 0.5) {
+        NotificationService()
           .showPushAlarm('끌락끌락 챌린지 감지!!!', '끌락끌락 챌린지 해당 클라이밍장이 주변에 있습니다.');
-      print('showPushAlarm 호출됨!');
+          print('showPushAlarm 호출됨!');
+      }
+      
     } catch (e) {
       setState(() {
         isLoading = false;
