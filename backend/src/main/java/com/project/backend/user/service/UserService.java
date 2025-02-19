@@ -21,7 +21,7 @@ public interface UserService {
   public Optional<User> checkEmailDuplication(String email);
   public Optional<User> checkNicknameDuplication(String nickname);
   // 사용자 ID로 사용자 프로필 조회
-  public User userProfileFindById(Long id);
+  public User findUserProfileById(Long id);
   // 사용자 ID로 사용자 프로필 갱신
   public void updateUserProfileById(Long id, UserInfoRequestDto requestDto);
   // 사용자 ID로 사용자 이미지 갱신
