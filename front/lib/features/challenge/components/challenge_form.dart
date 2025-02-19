@@ -253,7 +253,7 @@ class _ChallengeFormState extends State<ChallengeForm> {
           },
         ),
         // nearPlace가 null이 아니면 해당 정보를 표시
-        if (nearPlace != null)
+        if (nearPlace != null && nearPlace!.distance <= 0.5)
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 10),
             child: Card(
