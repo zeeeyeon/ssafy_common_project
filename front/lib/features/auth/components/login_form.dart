@@ -15,6 +15,7 @@ import 'package:kkulkkulk/features/auth/screens/oauth_register_screen.dart';
 import 'package:kkulkkulk/features/auth/view_models/log_in_view_model.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:kkulkkulk/features/profile/view_models/profile_view_model.dart';
 import 'package:logger/logger.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -60,6 +61,8 @@ class LoginForm extends ConsumerWidget {
               username = null;
             }
           }
+
+          ref.invalidate(profileProvider);
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('환영합니다 $username 님')),
           );

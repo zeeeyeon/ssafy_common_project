@@ -451,12 +451,20 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
               ),
               Row(
                 children: [
-                  IconButton(
-                    icon: Icon(_isAutoMode
-                        ? Icons.motion_photos_auto
-                        : Icons.touch_app),
-                    color: Colors.white,
+                  TextButton.icon(
                     onPressed: _toggleMode,
+                    icon: Icon(
+                      _isAutoMode ? Icons.motion_photos_auto : Icons.touch_app,
+                      color: Colors.white,
+                    ),
+                    label: Text(
+                      _isAutoMode ? '자동' : '수동',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ),
                   IconButton(
                     icon: const Icon(Icons.info_outline),
