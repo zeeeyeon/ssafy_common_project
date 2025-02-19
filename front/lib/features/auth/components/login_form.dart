@@ -14,6 +14,8 @@ import 'package:logger/logger.dart';
 class LoginForm extends ConsumerWidget {
   final _formKey = GlobalKey<FormState>();
 
+  // final viewModel = MainViewModel(KakaoLogin());
+
   LoginForm({super.key});
   // final AuthRepository _authRepository = AuthRepository();
 
@@ -109,80 +111,73 @@ class LoginForm extends ConsumerWidget {
             () => _signup(context),
           ),
           const SizedBox(height: 30),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: () async {
-                logger.i("카카오 로그인 시작");
-
-                try {
-                OAuthToken result = await UserApi.instance.loginWithKakaoAccount();
+          // SizedBox(
+          //   width: double.infinity,
+          //   child: ElevatedButton(
+          //     onPressed: () async {
+          //       logger.i("카카오 로그인 시작");
+          //       logger.i(await UserApi.instance.loginWithKakaoAccount());
                 
-                // 타입 확인 후, 적절한 처리
-                if (result is OAuthToken) {
-                  final token = result;
-                  logger.i("카카오계정으로 로그인 성공 ${token.accessToken}");
+
+          //       try {
+          //       OAuthToken result = await UserApi.instance.loginWithKakaoAccount();
+                
+          //       // 타입 확인 후, 적절한 처리
+          //       if (result is OAuthToken) {
+          //         final token = result;
+          //         logger.i("카카오계정으로 로그인 성공 ${token.accessToken}");
                   
-                  final accessToken = token.accessToken;  
-                  logger.i("Access Token: $accessToken");
+          //         final accessToken = token.accessToken;  
+          //         logger.i("Access Token: $accessToken");
                   
-                  ref.read(accessTokenProvider.notifier).state = accessToken;
+          //         ref.read(accessTokenProvider.notifier).state = accessToken;
                   
-                  if (accessToken.isEmpty) {
-                    logger.i("Access Token이 없습니다.");
-                  } else {
-                    logger.i("Access Token이 있습니다.");
-                  }
+          //         if (accessToken.isEmpty) {
+          //           logger.i("Access Token이 없습니다.");
+          //         } else {
+          //           logger.i("Access Token이 있습니다.");
+          //         }
                   
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const OauthRegisterScreen(),
-                    ),
-                  );
-                } else {
-                  logger.e("예상치 못한 반환값: $result");
-                }
-              } catch (e) {
-                logger.e("카카오 로그인 실패: $e");
-              }
-
-                
-
-                
-                
-
-                
-
-                
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFFFEE00),
-                foregroundColor: Colors.black,
-                padding: const EdgeInsets.symmetric(vertical: 15),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Image.asset(
-                    'assets/oauth/kakao_logo.png',
-                    width: 24,
-                    height: 24,
-                  ),
-                  const Padding(
-                    padding: EdgeInsets.only(left: 8.0), // 이미지와 텍스트 간격 조정
-                    child: Text(
-                      '카카오 로그인',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
+          //         Navigator.push(
+          //           context,
+          //           MaterialPageRoute(
+          //             builder: (context) => const OauthRegisterScreen(),
+          //           ),
+          //         );
+          //       } else {
+          //         logger.e("예상치 못한 반환값: $result");
+          //       }
+          //     } catch (e) {
+          //       logger.e("카카오 로그인 실패: $e");
+          //     }
+          //     },
+          //     style: ElevatedButton.styleFrom(
+          //       backgroundColor: const Color(0xFFFFEE00),
+          //       foregroundColor: Colors.black,
+          //       padding: const EdgeInsets.symmetric(vertical: 15),
+          //     ),
+          //     child: Row(
+          //       mainAxisAlignment: MainAxisAlignment.center,
+          //       crossAxisAlignment: CrossAxisAlignment.center,
+          //       children: [
+          //         Image.asset(
+          //           'assets/oauth/kakao_logo.png',
+          //           width: 24,
+          //           height: 24,
+          //         ),
+          //         const Padding(
+          //           padding: EdgeInsets.only(left: 8.0), // 이미지와 텍스트 간격 조정
+          //           child: Text(
+          //             '카카오 로그인',
+          //             style: TextStyle(
+          //               fontWeight: FontWeight.bold,
+          //             ),
+          //           ),
+          //         ),
+          //       ],
+          //     ),
+          //   ),
+          // ),
         ],
       ),
     );
