@@ -87,6 +87,7 @@ public class UserServiceImpl implements UserService {
     findUser.setUsername(convertRequestDto.getUsername());
     findUser.setPhone(convertRequestDto.getPhone());
     findUser.setNickname(convertRequestDto.getNickname());
+    findUser.setStartDate(LocalDateTime.now());
     findUser.setUpdateDate(LocalDateTime.now());
 
     return userRepository.save(findUser);
