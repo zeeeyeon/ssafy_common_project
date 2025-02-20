@@ -2,7 +2,7 @@ name: kkulkkulk
 description: 운동 기록 앱
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
-publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+publish_to: "none" # Remove this line if you wish to publish to pub.dev
 
 # The following defines the version and build number for your application.
 # A version number is three numbers separated by dots, like 1.2.43
@@ -19,7 +19,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 version: 1.0.0+1
 
 environment:
-  sdk: '>=3.0.0 <4.0.0'
+  sdk: ">=3.0.0 <4.0.0"
 
 # Dependencies specify other packages that your package needs in order to work.
 # To automatically upgrade your package dependencies to the latest versions
@@ -27,20 +27,75 @@ environment:
 # dependencies can be manually updated by changing the version numbers below to
 # the latest version available on pub.dev. To see which dependencies have newer
 # versions available, run `flutter pub outdated`.
+
+# flutter_native_splash 설정 추가
+# flutter_native_splash:
+#   color: "#F88B05"  # 흰색 배경만 표시
+#   android: true
+#   ios: true
+
+#   android_12:
+#     color: "#F88B05"  # Android 12 이상에서도 흰색 배경만 표시
+#     icon_background_color: "#F88B05"
+
+#   android_gravity: center
+#   ios_content_mode: center
+#   fullscreen: true
+
+flutter_native_splash:
+  color: "#ffffff" # 흰색 배경만 표시
+  android: true
+  ios: true
+
+  android_12:
+    color: "#ffffff" # Android 12 이상에서도 흰색 배경만 표시
+    icon_background_color: "#ffffff"
+
+  android_gravity: center
+  ios_content_mode: center
+  fullscreen: true
+
 dependencies:
   flutter:
     sdk: flutter
-  # google_fonts: ^6.1.0  # 제거
-
-  # The following adds the Cupertino Icons font to your application.
-  # Use with the CupertinoIcons class for iOS style icons.
+  flutter_localizations:
+    sdk: flutter
   cupertino_icons: ^1.0.2
-  dio: ^5.4.0
+  dio: ^5.7.0
   flutter_riverpod: ^2.4.9
-  riverpod_annotation: ^2.3.3
-  json_annotation: ^4.8.1
-  freezed_annotation: ^2.4.1
+  equatable: ^2.0.5
   go_router: ^13.0.1
+  sign_button: ^2.0.6
+  pretty_animated_buttons: ^0.0.2
+  jwt_decoder: ^2.0.1
+  shared_preferences: ^2.5.1
+  geolocator: ^13.0.2
+  logger: ^2.5.0
+  big_decimal: ^0.5.0
+  font_awesome_flutter: ^10.8.0
+  url_launcher: ^6.3.1
+  intl: ^0.19.0
+  camera: ^0.10.5+9
+  video_player: ^2.8.1
+  image_picker: ^1.1.2
+  path_provider: ^2.1.5
+  saver_gallery: ^3.0.2
+  permission_handler: ^11.3.1
+  flutter_colorpicker: ^1.1.0
+  fc_native_video_thumbnail: ^0.17.2
+  video_compress: ^3.1.3
+  flutter_3d_objects: ^1.0.2+1
+  flutter_local_notifications: ^18.0.1
+  kakao_flutter_sdk: ^1.9.6
+  google_mlkit_pose_detection: ^0.13.0
+  google_mlkit_commons: ^0.9.0
+  flutter_tts: ^4.2.2
+  table_calendar: ^3.1.3
+  flutter_native_splash: ^2.4.4
+  flutter_dotenv: ^5.2.1
+  kakao_flutter_sdk_auth: ^1.9.6
+  app_links: ^6.4.0
+  webview_flutter: ^4.9.0
 
 dev_dependencies:
   flutter_test:
@@ -52,10 +107,7 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^2.0.0
-  build_runner: ^2.4.7
   riverpod_generator: ^2.3.9
-  json_serializable: ^6.7.1
-  freezed: ^2.4.6
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -66,6 +118,19 @@ flutter:
 
   assets:
     - assets/fonts/
+    - assets/oauth/
+    - assets/challenge/GOLD.png
+    - assets/challenge/SILVER.png
+    - assets/challenge/BRONZE.png
+    - assets/challenge/NONE.png
+    - assets/modeling/
+    - assets/rock/
+    - assets/character/
+    - assets/images/
+    - assets/images/tier/
+    - assets/images/default_profile.png
+    - assets/splash/
+    - .env
 
   fonts:
     - family: Pretendard
