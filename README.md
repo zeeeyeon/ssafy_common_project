@@ -17,7 +17,7 @@
 
 <h1>오르는 즐거움! 끌락끌락</h1>
 
-<img src="./readme_assets/rockrock.gif">
+<img src="./exec/readme_assets/stone3.png">
 </center>
 <pre background-color="#dbdbdb">
 - 클라이밍을 취미로 즐길 수 있는 앱
