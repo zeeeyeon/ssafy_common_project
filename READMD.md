@@ -3,23 +3,113 @@
 >
 > ## 👥[팀원 소개](#-팀원-소개-및-역할-분담)
 >
-> ## 🤝[협업 방식](#-협업-방식)
->
-> ## 📚[프로젝트 진행 상황 관리](#-프로젝트-진행-상황-관리)
+> ## 🤝[협업 및 프로젝트 진행 상황 관리 방식](#-협업-및-프로젝트-진행-상황-관리-방식)
 >
 > ## 🔍[브랜치 전략](#-브랜치-전략)
 >
 > ## ✔[컨벤션](#-컨벤션)
 
 ## ✨ 프로젝트 소개
+<div>
+
+
+<center>
+
+<h1>오르는 즐거움! 끌락끌락</h1>
+
+<img src="./readme_assets/rockrock.gif">
+</center>
+<pre background-color="#dbdbdb">
+- 클라이밍을 취미로 즐길 수 있는 앱
+- 클라이밍 종목 유형 중 볼더링 종목에 초점을 맞추어 서비스 구현
+- 자신의 클라이밍 영상을 촬영하여 SNS 에 업로드 하여 기록하는 클라이밍족의 문화에 착안하여, 송진가루를 손에 묻혀 진행하는 점에서 본인의 휴대전화가 더럽혀질 수 있다는 점을 기반으로 모션 인식을 통한 기록 자동화, 윙스펜 AI 기술을 활용한 팔길이 측정, 클라이밍장 3D 모델링 기술 등을 해당 앱에 녹여냈습니다.
+</pre>
+</div>
 
 ## 👥 팀원 소개 및 역할 분담
+<center>
+<table >
+    <thead>
+        <tr>
+            <th align="center"><span>도경록(팀장) - FE</span></th>
+            <th align="center"><span>김한민 - FE</span></th>
+            <th align="center"><span>도경원 - FE</span></th>
+        </tr>
+    </thead>
+    <tbody>
+        <td align="center">
+            <a href="https://github.com/seowooNote">
+                <img src="./readme_assets/도경록.png" width="150" height="150" />
+            </a>
+        </td>
+        <td align="center">
+            <a href="https://github.com/Han3707">
+                <img src="./readme_assets/김한민.png" width="150" height="150" />
+            </a>
+        </td>
+        <td align="center">
+            <a href="https://github.com/Dohgyoungwon">
+                <img src="./readme_assets/도경원.png" width="150" height="150" />
+            </a>
+        </td>
+    </tbody>
+</table>
+<table >
+    <thead>
+        <tr>
+            <th align="center"><span>송동현 - BE</span></th>
+            <th align="center"><span>이지연 - BE</span></th>
+            <th align="center"><span>정영한 - BE</span></th>
+        </tr>
+    </thead>
+    <tbody>
+        <td align="center">
+            <a href="https://github.com/dh0728">
+                <img src="./readme_assets/송동현.png" width="150" height="150" />
+            </a>
+        </td>
+        <td align="center">
+            <a href="https://github.com/zeeeyeon">
+                <img src="./readme_assets/이지연.png" width="150" height="150" />
+            </a>
+        </td>
+        <td align="center">
+            <a href="https://github.com/ynghan">
+                <img src="./readme_assets/정영한.png" width="150" height="150" />
+            </a>
+        </td>
+    </tbody>
+</table>
+</center>
+<span>해당 프로필 사진을 클릭하면 해당 팀원의 깃허브로 이동합니다.</span>
 
-## 🤝 협업 방식
-
-## 📚 프로젝트 진행 상황 관리
+## 🤝 협업 및 프로젝트 진행 상황 관리 방식
+<center>
+    <img src="./readme_assets/jira.png" />
+</center>
+<center>
+    <img src="./readme_assets/jirabacklog.png" />
+</center>
+<br />
+<pre>
+매일 스크럼 회의를 진행하며, Jira를 통한 1주 단위의 스프린트를 진행해서 팀원들의 각자 업무 분담 및 현황 파악을 용이하게 하는 동시에 스프린트 종료 시 회고하는 시간을 가졌습니다.
+</pre>
+<br />
+<center>
+    <a href="https://utopian-talos-003.notion.site/Team-9243f7449ccb45b0b97c041e3ba60c81?pvs=4">
+        <img src="./readme_assets/notion.png">
+    </a>
+</center>
+<br />
+<pre>
+프로젝트를 진행하면서 필요한 명세서 및 기록들을 Notion 탬플릿을 활용하여 공유하였습니다.
+</pre>
+<span>Notion 이미지 클릭시 해당 노션 페이지로 이동합니다.</span>
 
 ## 🔍 브랜치 전략
+
+<h1>Git Flow</h1>
+<img src="./readme_assets/gitflow.png" />
 
 ## ✔ 컨벤션
 
@@ -33,7 +123,7 @@
 <pre background-color="#dbdbdb">
 <p>
 
-1. 커밋 유형 지정
+🧾 1. 커밋 유형 지정
     - 커밋 유형은 영어 대문자로 작성하기
     - 커밋 유형
     - Feat : 새로운 기능 추가
