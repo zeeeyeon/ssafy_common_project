@@ -1,11 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:kakao_flutter_sdk/kakao_flutter_sdk_template.dart';
+import 'package:kkulkkulk/common/notification/notification.dart';
 import 'package:kkulkkulk/common/routes/app_router.dart';
 
-void main() {
-  // Flutter 바인딩 초기화 추가
+void main() async {
+  // Flutter 바인딩 초기화
   WidgetsFlutterBinding.ensureInitialized();
-
+  await dotenv.load(fileName: ".env");
+  // String kakaoNativeAppKey = dotenv.env['KAKAO_NATIVE_APP_KEY'] ?? '';
+  print('kakaoNativeAppKey: ${dotenv.get('KAKAO_NATIVE_APP_KEY')}');
+  KakaoSdk.init(
+    nativeAppKey: dotenv.get('KAKAO_NATIVE_APP_KEY'),
+  );
+  await NotificationService().initialize();
   runApp(
     const ProviderScope(
       child: MyApp(),
@@ -19,22 +29,30 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
-      title: '끌락끌락',
+      routerConfig: router,
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [
+        Locale('ko', ''), // 한국어
+        Locale('en', ''), // 영어
+      ],
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
         useMaterial3: true,
         fontFamily: 'Pretendard',
       ),
-      routerConfig: router,
-      // 스플래시 화면 전에 보여질 화면 설정
       builder: (context, child) {
         return Scaffold(
           body: Container(
-            color: Colors.white, // 흰색 배경으로 설정
+            color: Colors.white,
             child: child,
           ),
         );
       },
+      debugShowCheckedModeBanner: false,
     );
   }
 }
