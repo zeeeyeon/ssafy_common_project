@@ -39,17 +39,17 @@
     <tbody>
         <td align="center">
             <a href="https://github.com/seowooNote">
-                <img src="./readme_assets/도경록.png" width="150" height="150" />
+                <img src="./exec/readme_assets/도경록.png" width="150" height="150" />
             </a>
         </td>
         <td align="center">
             <a href="https://github.com/Han3707">
-                <img src="./readme_assets/김한민.png" width="150" height="150" />
+                <img src="./exec/readme_assets/김한민.png" width="150" height="150" />
             </a>
         </td>
         <td align="center">
             <a href="https://github.com/Dohgyoungwon">
-                <img src="./readme_assets/도경원.png" width="150" height="150" />
+                <img src="./exec/readme_assets/도경원.png" width="150" height="150" />
             </a>
         </td>
     </tbody>
@@ -65,17 +65,17 @@
     <tbody>
         <td align="center">
             <a href="https://github.com/dh0728">
-                <img src="./readme_assets/송동현.png" width="150" height="150" />
+                <img src="./exec/readme_assets/송동현.png" width="150" height="150" />
             </a>
         </td>
         <td align="center">
             <a href="https://github.com/zeeeyeon">
-                <img src="./readme_assets/이지연.png" width="150" height="150" />
+                <img src="./exec/readme_assets/이지연.png" width="150" height="150" />
             </a>
         </td>
         <td align="center">
             <a href="https://github.com/ynghan">
-                <img src="./readme_assets/정영한.png" width="150" height="150" />
+                <img src="./exec/readme_assets/정영한.png" width="150" height="150" />
             </a>
         </td>
     </tbody>
@@ -85,10 +85,10 @@
 
 ## 🤝 협업 및 프로젝트 진행 상황 관리 방식
 <center>
-    <img src="./readme_assets/jira.png" />
+    <img src="./exec/readme_assets/jira.png" />
 </center>
 <center>
-    <img src="./readme_assets/jirabacklog.png" />
+    <img src="./exec/readme_assets/jirabacklog.png" />
 </center>
 <br />
 <pre>
@@ -97,7 +97,7 @@
 <br />
 <center>
     <a href="https://utopian-talos-003.notion.site/Team-9243f7449ccb45b0b97c041e3ba60c81?pvs=4">
-        <img src="./readme_assets/notion.png">
+        <img src="./exec/readme_assets/notion.png">
     </a>
 </center>
 <br />
@@ -109,7 +109,7 @@
 ## 🔍 브랜치 전략
 
 <h1>Git Flow</h1>
-<img src="./readme_assets/gitflow.png" />
+<img src="./exec/readme_assets/gitflow.png" />
 
 ## ✔ 컨벤션
 
