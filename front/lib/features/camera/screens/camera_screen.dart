@@ -553,6 +553,7 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
     if (!await _canStartRecording()) return;
 
     try {
+      await flutterTts.stop(); // 기존 TTS 중지
       // 녹화 시작 전 이미지 스트림 중지
       if (_controller!.value.isStreamingImages) {
         await _controller!.stopImageStream();
