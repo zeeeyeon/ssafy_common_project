@@ -1,0 +1,13 @@
+INSERT INTO climbing.info (info_id, created_at, updated_at, info) VALUES (1, '2025-02-11 17:02:26', null, '예약');
+INSERT INTO climbing.info (info_id, created_at, updated_at, info) VALUES (2, '2025-02-11 17:02:26', null, '무선 인터넷');
+INSERT INTO climbing.info (info_id, created_at, updated_at, info) VALUES (3, '2025-02-11 17:02:26', null, '남/녀 화장실 구분');
+INSERT INTO climbing.info (info_id, created_at, updated_at, info) VALUES (4, '2025-02-11 17:02:26', null, '주차');
+INSERT INTO climbing.info (info_id, created_at, updated_at, info) VALUES (5, '2025-02-11 17:02:26', null, '단체 이용 가능');
+INSERT INTO climbing.info (info_id, created_at, updated_at, info) VALUES (6, '2025-02-11 17:02:26', null, '대기공간');
+INSERT INTO climbing.info (info_id, created_at, updated_at, info) VALUES (7, '2025-02-11 17:02:26', null, '간편결제');
+INSERT INTO climbing.info (info_id, created_at, updated_at, info) VALUES (8, '2025-02-11 17:02:26', null, '반려동물 동반');
+INSERT INTO climbing.info (info_id, created_at, updated_at, info) VALUES (9, '2025-02-11 17:02:26', null, '유아시설 (놀이방)');
+INSERT INTO climbing.info (info_id, created_at, updated_at, info) VALUES (10, '2025-02-11 17:02:26', null, '방문접수/출장');
+INSERT INTO climbing.info (info_id, created_at, updated_at, info) VALUES (11, '2025-02-11 17:02:26', null, '노키즈존');
+INSERT INTO climbing.info (info_id, created_at, updated_at, info) VALUES (12, '2025-02-11 17:02:26', null, '장애인 편의시설');
+INSERT INTO climbing.info (info_id, created_at, updated_at, info) VALUES (13, '2025-02-11 17:02:26', null, '발렛파킹');
