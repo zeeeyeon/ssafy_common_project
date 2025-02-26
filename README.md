@@ -1,7 +1,21 @@
 # 🔖 목차
 > ## ✨[프로젝트 소개](#-프로젝트-소개)
 >
+> ## 💡[기획 배경](#-기획-배경)
+>
+> ## 👫[대상](#-대상)
+> 
+> ## 🎉[기대 효과](#-기대-효과)
+>
+> ## 🔉[주요 기능](#-주요-기능)
+>
+> ## 🔧[기술 스택](#-기술-스택)
+>
 > ## 👥[팀원 소개](#-팀원-소개-및-역할-분담)
+>
+> ## 📁[프로젝트 산출물](#-프로젝트-산출물)
+>
+> ## <a href="https://github.com/dh0728/ssafy_common_2/blob/master/README.md#%EF%B8%8F-%EC%84%9C%EB%B9%84%EC%8A%A4-%ED%99%94%EB%A9%B4-1">🖼️ 서비스 화면</a>
 >
 > ## 🤝[협업 및 프로젝트 진행 상황 관리 방식](#-협업-및-프로젝트-진행-상황-관리-방식)
 >
@@ -11,22 +25,60 @@
 
 ## ✨ 프로젝트 소개
 <div>
-
-
 <center>
 
 <h1>오르는 즐거움! 끌락끌락</h1>
 
-<img src="./exec/readme_assets/stone3.png">
+<img src="./exec/readme_assets/rockrock.gif">
 </center>
 <pre background-color="#dbdbdb">
-- 클라이밍을 취미로 즐길 수 있는 앱
-- 클라이밍 종목 유형 중 볼더링 종목에 초점을 맞추어 서비스 구현
-- 자신의 클라이밍 영상을 촬영하여 SNS 에 업로드 하여 기록하는 클라이밍족의 문화에 착안하여, 송진가루를 손에 묻혀 진행하는 점에서 본인의 휴대전화가 더럽혀질 수 있다는 점을 기반으로 모션 인식을 통한 기록 자동화, 윙스펜 AI 기술을 활용한 팔길이 측정, 클라이밍장 3D 모델링 기술 등을 해당 앱에 녹여냈습니다.
+<p>
+<h2>클라이밍을 취미로 즐길 수 있는 앱</h2>
+<h3>
+'클라이밍 종목 유형 중 볼더링 종목에 초점을 맞추어 서비스 구현'</br>
+자신의 클라이밍 영상을 촬영하여 SNS 에 업로드 하여 기록하는 클라이밍족의 문화에 착안하여, 송진가루를 손에 묻혀 진행하는 점에서 본인의 휴대전화가 더럽혀질 수 있다는 점을 기반으로 모션 인식을 통한 기록 자동화, 윙스펜 AI 기술을 활용한 팔길이 측정, 클라이밍장 3D 모델링 기술 등을 해당 앱에 녹여냈습니다.
+</h3>
+</p>
 </pre>
 </div>
 
-## 👥 팀원 소개 및 역할 분담
+## 💡 기획 배경
+- 클라이밍을 취미로 하는 사람들을 위해
+- 더 편하게 클라이밍을 즐길 수 있도록
+
+## 👫 대상
+- 평소 클라이밍을 즐겨하는 사람
+- 자신의 클라이밍 기록을 기록하는 사람
+- 자신의 기록 및 성장을 눈으로 확인하고 싶은 사람
+ 
+## 🎉 기대 효과
+- 클라이밍장 정보를 더 쉽게 조회 
+- 기록 저장을 자동으로 보기 쉽게
+- 영상 쵤영을 더 쉽고 간편하게
+
+## 🔉 주요 기능
+📏 이미지를 통한 윙스팬 측정
+
+🎬 모션인식 + 기록 자동화
+
+🌠 클라이밍장 볼더 3D 이미지 제공
+
+✏️ 캘린더 + 통계를 통한 기록 관리
+
+## 🔧 기술 스택
+### 백엔드
+<img src="https://img.shields.io/badge/java-007396?style=for-the-badge&logo=OpenJDK&logoColor=white"> <img src="https://img.shields.io/badge/springboot-6DB33F?style=for-the-badge&logo=springboot&logoColor=white"> <img src="https://img.shields.io/badge/MySQL-4479A1?style=for-the-badge&logo=MySQL&logoColor=white"> <img src="https://img.shields.io/badge/Redis-DC382D?style=for-the-badge&logo=Redis&logoColor=white"> <img src="https://img.shields.io/badge/Amazon%20S3-569A31?style=for-the-badge&logo=Amazon%20S3&logoColor=white"> <img src="https://img.shields.io/badge/Flask-000000?style=for-the-badge&logo=Flask&logoColor=white">
+
+### 프론트엔드
+<img src="https://img.shields.io/badge/Flutter-02569B?style=for-the-badge&logo=Flutter&logoColor=white"> <img src="https://img.shields.io/badge/Android-3DDC84?style=for-the-badge&logo=Android&logoColor=white">  <img src="https://img.shields.io/badge/Firebase-DD2C00?style=for-the-badge&logo=Firebase&logoColor=white">
+
+### 인프라
+<img src="https://img.shields.io/badge/nginx-%23009639.svg?style=for-the-badge&logo=nginx&logoColor=white"> <img src="https://img.shields.io/badge/docker-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white"> <img src="https://img.shields.io/badge/Amazon%20EC2-FF9900?style=for-the-badge&logo=Amazon%20EC2&logoColor=white"> <img src="https://img.shields.io/badge/Jenkins-D24939?style=for-the-badge&logo=Jenkins&logoColor=white">
+
+### 커뮤니케이션
+ <img src="https://img.shields.io/badge/Jira-0052CC?style=for-the-badge&logo=Jira&logoColor=white"> <img src="https://img.shields.io/badge/Git-F05032?style=for-the-badge&logo=Git&logoColor=white"> <img src="https://img.shields.io/badge/GitLab-FC6D26?style=for-the-badge&logo=GitLab&logoColor=white"> <img src="https://img.shields.io/badge/Notion-000000?style=for-the-badge&logo=Notion&logoColor=white">
+
+## 👥 팀원 소개
 <center>
 <table >
     <thead>
@@ -83,6 +135,150 @@
 </center>
 <span>해당 프로필 사진을 클릭하면 해당 팀원의 깃허브로 이동합니다.</span>
 
+## 📁 프로젝트 산출물 
+<details>
+  <summary>
+    <big>와이어 프레임</big>
+  </summary>
+
+
+### 🔒 1. 로그인
+
+#### 1.1 로그인
+<img src="./exec/readme_assets/프레임_로그인.jpg" width=34%>
+
+<img src="./exec/readme_assets/프레임_회원가입.jpg" width=34%>
+
+
+### 📅 캘린더
+
+<img src="./exec/readme_assets/프레임_캘린더.jpg" width=34%>
+
+<img src="./exec/readme_assets/프레임_캘린더_상세.jpg" width=34%>
+
+### 😆 마이페이지
+
+<img src="./exec/readme_assets/프레임_마이.jpg" width=34%>
+
+<img src="./exec/readme_assets/프레임_마이_윙스팬.jpg" width=34%>
+
+### 🔎 클라이밍 조회
+
+<img src="./exec/readme_assets/프레임_클라이밍_조회.jpg" width=34%>
+
+<img src="./exec/readme_assets/프레임_클라이밍_상세.jpg" width=34%>
+
+<img src="./exec/readme_assets/프레임_클라이밍_3d.jpg" width=34%>
+
+### 🎸 챌린지
+
+<img src="./exec/readme_assets/프레임_챌린지.png" width=34%>
+
+<img src="./exec/readme_assets/프레임_챌린지2.png" width=34%>
+
+<img src="./exec/readme_assets/프레임_챌린지3.png" width=34%>
+
+
+### 📽️ 영상
+
+<img src="./exec/readme_assets/프레임_영상1.jpg" width=34%>
+
+### 🎞️ 앨범
+
+<img src="./exec/readme_assets/프레임_앨범.jpg" width=34%>
+
+### 📊 통계
+
+<img src="./exec/readme_assets/프레임_통계3.jpg" width=34%>
+
+<img src="./exec/readme_assets/프레임_통계2.jpg" width=34%>
+
+<img src="./exec/readme_assets/프레임_통계1.jpg" width=34%>
+
+</details>
+<details>
+  <summary>
+  <big>ERD</big>
+  </summary>
+  <img src="./exec/readme_assets/erd.png" >
+</details>
+<details>
+  <summary>
+  <big>API 명세서</big>
+  </summary>
+  <img src="./exec/readme_assets/api1.png">
+  <br>
+ 
+  <img src="./exec/readme_assets/api2.png">
+  <br>
+  
+  <img src="./exec/readme_assets/api3.png">
+  <br>
+  <img src="./exec/readme_assets/api4.png">
+  <br>
+ 
+  <img src="./exec/readme_assets/api5.png">
+  <br>
+  
+  <img src="./exec/readme_assets/api6.png">
+  <br>
+  
+  <img src="./exec/readme_assets/api7.png">
+</details>
+<details>
+  <summary>
+  <big>아키텍처</big>
+  </summary>
+  <img src="./exec/readme_assets/aki.png">
+</details>
+
+
+## 🖼️ 서비스 화면
+
+### 📌 1. 로그인
+- 일반 로그인
+<img src="./exec/readme_assets/일반로그인.gif">
+
+- 소셜 로그인(카카오)
+<img src="./exec/readme_assets/소셜.gif" width=34% >
+
+
+### 📌 2. 캘린더
+- 날짜별 클라이밍 기록을 확인 할 수 있습니다.
+<img src="./exec/readme_assets/캘린더.gif"  width=34%>
+
+### 📌 3. 마이페이지
+- 개인 정보 수정 및 리치를 측정할 수 있습니다.
+
+<img src="./exec/readme_assets/윙스팬.gif" width=34%>
+
+### 📌 4. 클라이밍장 조회
+- 클라이밍장 상세 정보를 조회 할 수 있습니다.
+
+<img src="./exec/readme_assets/클라이.gif"  width=34%>
+
+### 📌 5. 클라이밍장 해금
+- 클라이밍장에 일정거리 이내에 있을시 클라이밍장이 해금됩니다.
+
+<img src="./exec/readme_assets/챌린지.gif" width=34%>
+
+### 📌 6. 영상
+- 모션인식을 통해 터치없이도 영상을 촬영하고 저장할 수 있습니다.
+- 음성 안내에 따라 색상선택 및 촬영을 시작합니다. 
+- 오른손 들기 : 자동촬영시작
+- 박수 : 색상 선택
+- 두손들기 : 촬영 시작
+- O or X : 성공, 실패 선택
+
+<img src="./exec/readme_assets/영상1.gif"  width=34%>
+
+<img src="./exec/readme_assets/영상2.gif"  width=34%>
+
+### 📌 7. 통계
+- 년, 월, 주별로 기록 통계를 확인할 수 있습니다.
+  
+<img src="./exec/readme_assets/통계.gif" width=34%>
+
 ## 🤝 협업 및 프로젝트 진행 상황 관리 방식
 <center>
     <img src="./exec/readme_assets/jira.png" />
@@ -92,7 +288,9 @@
 </center>
 <br />
 <pre>
+<p>
 매일 스크럼 회의를 진행하며, Jira를 통한 1주 단위의 스프린트를 진행해서 팀원들의 각자 업무 분담 및 현황 파악을 용이하게 하는 동시에 스프린트 종료 시 회고하는 시간을 가졌습니다.
+</p>
 </pre>
 <br />
 <center>
